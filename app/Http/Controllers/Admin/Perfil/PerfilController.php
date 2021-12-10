@@ -7,6 +7,7 @@ use App\Models\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class PerfilController extends Controller
 {
@@ -21,18 +22,19 @@ class PerfilController extends Controller
 
     public function editarUsuario(Request $request){
 
-        if (!Auth::check()) {return ['success' => 2];}
+        $regla = array(
+            'password' => 'required',
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){return ['success' => 0];}
 
         $usuario = auth()->user();
 
-        if (Hash::check($request->passactual, $usuario->password)) {
+        Usuario::where('id', $usuario->id)
+            ->update(['password' => bcrypt($request->password)]);
 
-            Usuario::where('id', $usuario->id)
-                ->update(['password' => bcrypt($request->passnueva)]);
-
-            return ['success' => 1];
-        }else{
-            return ['success' => 2];
-        }
+        return ['success' => 1];
     }
 }

@@ -32,12 +32,12 @@
                             </div>
 
                             <div class="form-group">
-                                <label>Contraseña Actual</label>
+                                <label>Nueva Contraseña</label>
                                 <input type="text" maxlength="16" class="form-control" id="password" placeholder="Contraseña">
                             </div>
 
                             <div class="form-group">
-                                <label>Contraseña Nueva</label>
+                                <label>Repetir Contraseña</label>
                                 <input type="text" maxlength="16" class="form-control" id="password1" placeholder="Contraseña">
                             </div>
 
@@ -75,52 +75,58 @@
         }
 
         function actualizar(){
-            var passwordActual = document.getElementById('password').value;
-            var passwordNueva = document.getElementById('password1').value;
-
-            if(passwordActual === ''){
-                toastr.error('contraseña actual es requerida');
-                return;
-            }
+            var passwordNueva = document.getElementById('password').value;
+            var passwordRepetida = document.getElementById('password1').value;
 
             if(passwordNueva === ''){
                 toastr.error('contraseña nueva es requerida');
                 return;
             }
 
-            if(passwordActual.length > 16){
-                toastr.error('máximo 16 caracteres para contraseña actual');
-                return;
-            }
-
-            if(passwordNueva.length < 4){
-                toastr.error('mínimo 4 caracteres para contraseña');
+            if(passwordRepetida === ''){
+                toastr.error('contraseña repetida es requerida');
                 return;
             }
 
             if(passwordNueva.length > 16){
-                toastr.error('máximo 16 caracteres para contraseña');
+                toastr.error('máximo 16 caracteres para contraseña nueva');
+                return;
+            }
+
+            if(passwordNueva.length < 4){
+                toastr.error('mínimo 4 caracteres para contraseña nueva');
+                return;
+            }
+
+            if(passwordRepetida.length > 16){
+                toastr.error('máximo 16 caracteres para contraseña repetida');
+                return;
+            }
+
+            if(passwordRepetida.length < 4){
+                toastr.error('mínimo 4 caracteres para contraseña repetida');
+                return;
+            }
+
+            if(passwordNueva !== passwordRepetida){
+                toastr.error('las contraseñas no coinciden');
                 return;
             }
 
             openLoading()
             var formData = new FormData();
-            formData.append('passactual', passwordActual);
-            formData.append('passnueva', passwordNueva);
+            formData.append('password', passwordNueva);
 
             axios.post(url+'/editar-perfil/actualizar', formData, {
             })
                 .then((response) => {
-                    closeLoading()
+                    closeLoading();
 
                     if (response.data.success === 1) {
-                        toastr.success('Actualizado');
+                        toastr.success('Contraseña Actualizada');
                         $('#modalEditar').modal('hide');
                         document.getElementById('password').value = '';
                         document.getElementById('password1').value = '';
-                    }
-                    else if(response.data.success === 2){
-                        toastr.error('contraseña actual no coincide');
                     }
                     else {
                         toastr.error('error al actualizar');
