@@ -78,7 +78,7 @@ class PermisosController extends Controller
             $usuario->activo = $request->toggle;
 
             if($request->password != null){
-                $usuario->password = $request->password;
+                $usuario->password = bcrypt($request->password);
             }
 
             //$usuario->assignRole($request->rol); asigna un rol extra

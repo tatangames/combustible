@@ -107,7 +107,7 @@
         formData.append('usuario', usuario);
         formData.append('password', password);
 
-        axios.post('/login', formData, {
+        axios.post('/combustible/login', formData, {
         })
             .then((response) => {
                 closeLoading();
