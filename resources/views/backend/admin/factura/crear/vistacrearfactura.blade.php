@@ -4,7 +4,17 @@
     <link href="{{ asset('css/adminlte.min.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/dataTables.bootstrap4.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/toastr.min.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('css/select2.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ asset('css/select2-bootstrap-5-theme.min.css') }}" type="text/css" rel="stylesheet">
 @stop
+
+<style>
+
+    body{
+        overflow-x: hidden;
+    }
+
+</style>
 
 <section class="content-header">
     <div class="container-fluid">
@@ -14,7 +24,9 @@
 <section class="content">
     <div class="container-fluid" style="margin-left: 15px">
         <div class="row">
-            <div class="col-md-6">
+
+
+            <div class="col-md-5">
                 <div class="card card-green">
                     <div class="card-header">
                         <h3 class="card-title">Formulario</h3>
@@ -23,9 +35,39 @@
                         <div class="card-body">
 
                             <div class="form-group">
-                                <label>Factura Nº</label>
-                                <input type="text" class="form-control" id="factura-nuevo">
+                                <label>Factura Nº *</label>
+                                <input type="text" class="form-control" autocomplete="off" id="factura-nuevo">
                             </div>
+
+                            <div class="form-group">
+                                <label>Fecha *</label>
+                                <input type="date" class="form-control" id="fecha-nuevo" autocomplete="off">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Galones (3 decimales máximo) *</label>
+                                <input type="number" class="form-control" id="galones-nuevo" autocomplete="off">
+                            </div>
+
+                            <div class="form-group">
+                                <label>Precio Unitario (2 decimales máximo) *</label>
+                                <input type="number" class="form-control" id="precio-nuevo" autocomplete="off">
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+
+            <div class="col-md-5">
+                <div class="card card-green">
+                    <div class="card-header">
+                        <h3 class="card-title">Formulario</h3>
+                    </div>
+                    <form id="formulario-nuevo">
+                        <div class="card-body">
 
                             <div class="form-group">
                                 <label class="control-label">Equipo: </label>
@@ -37,27 +79,12 @@
                             </div>
 
                             <div class="form-group">
-                                <label class="control-label">Producto: </label>
+                                <label class="control-label">Combustible: </label>
                                 <select id="select-producto" class="form-control">
-                                    <option value="D">DIESEL</option>
-                                    <option value="R">REGULAR</option>
-                                    <option value="E">ESPECIAL</option>
+                                    @foreach($arraycombustible as $item)
+                                        <option value="{{$item->id}}">{{$item->nombre}}</option>
+                                    @endforeach
                                 </select>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Fecha</label>
-                                <input type="date" class="form-control" id="fecha-nuevo">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Galones</label>
-                                <input type="number" class="form-control" id="galones-nuevo">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Precio Unitario</label>
-                                <input type="number" class="form-control" id="precio-nuevo">
                             </div>
 
                         </div>
@@ -67,8 +94,8 @@
                         </div>
                     </form>
                 </div>
-
             </div>
+
 
         </div>
     </div>
@@ -85,6 +112,23 @@
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
     <script src="{{ asset('js/alertaPersonalizada.js') }}"></script>
+    <script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+
+            $('#select-equipo').select2({
+                theme: "bootstrap-5",
+                "language": {
+                    "noResults": function(){
+                        return "Búsqueda no encontrada";
+                    }
+                },
+            });
+
+        });
+    </script>
+
 
     <script>
 
@@ -92,7 +136,7 @@
 
             var factura = document.getElementById('factura-nuevo').value;
             var equipo = document.getElementById('select-equipo').value;
-            var producto = document.getElementById('select-producto').value;
+            var tipocombustible = document.getElementById('select-producto').value;
             var fecha = document.getElementById('fecha-nuevo').value;
             var galones = document.getElementById('galones-nuevo').value;
             var precio = document.getElementById('precio-nuevo').value;
@@ -101,81 +145,81 @@
             var reglaNumeroDecimal = /^[0-9]\d*(\.\d+)?$/;
 
             if(factura === ''){
-                toastr.error('factura es requerido');
+                toastr.error('Factura es requerido');
                 return;
             }
 
             if(!factura.match(reglaNumeroEntero)) {
-                toastr.error('factura debe ser número Entero');
+                toastr.error('Factura debe ser número Entero');
                 return;
             }
 
             if(factura < 0){
-                toastr.error('factura no debe tener números negativos');
+                toastr.error('Factura no debe tener números negativos');
                 return;
             }
 
-            if(factura > 10000000){
-                toastr.error('factura no debe superar 10 millones');
+            if(factura.length > 8){
+                toastr.error('Factura no debe superar 8 dígitos');
                 return;
             }
 
             if(equipo === ''){
-                toastr.error('equipo es requerido');
+                toastr.error('Equipo es requerido');
                 return;
             }
 
-            if(producto === ''){
-                toastr.error('producto es requerido');
+            if(tipocombustible === ''){
+                toastr.error('Tipo Combustible es requerido');
                 return;
             }
 
             if(fecha === ''){
-                toastr.error('fecha es requerida');
+                toastr.error('Fecha es requerida');
                 return;
             }
 
             // ----- galones ------
 
             if(galones === ''){
-                toastr.error('galones es requerido');
+                toastr.error('Galones es requerido');
                 return;
             }
 
             if(!galones.match(reglaNumeroDecimal)) {
-                toastr.error('galones debe ser número');
+                toastr.error('Galones debe ser número Decimal y no Negativo');
                 return;
             }
 
             if(galones < 0){
-                toastr.error('galones no debe tener números negativos');
+                toastr.error('Galones no debe tener números negativos');
                 return;
             }
 
-            if(galones > 10000000){
-                toastr.error('galones no debe superar 10 millones');
+            if(galones.length > 8){
+                toastr.error('Galones no debe superar 8 dígitos');
                 return;
             }
 
             // ----- precio unitario ------
 
             if(precio === ''){
-                toastr.error('precio unitario es requerido');
+                toastr.error('Precio unitario es requerido');
                 return;
             }
 
             if(!precio.match(reglaNumeroDecimal)) {
-                toastr.error('precio unitario debe ser número');
+                toastr.error('Precio unitario debe se debe ser número Decimal y no Negativo.');
                 return;
             }
 
             if(precio < 0){
-                toastr.error('precio unitario no debe tener números negativos');
+                toastr.error('Precio unitario no debe tener números negativos');
                 return;
             }
 
-            if(precio > 10000000){
-                toastr.error('precio unitario no debe superar 10 millones');
+            if(precio > 1000000){
+                toastr.error('Precio unitario no debe superar 1 millon');
                 return;
             }
 
@@ -183,7 +227,7 @@
             var formData = new FormData();
             formData.append('factura', factura);
             formData.append('equipo', equipo);
-            formData.append('producto', producto);
+            formData.append('combustible', tipocombustible);
             formData.append('fecha', fecha);
             formData.append('galones', galones);
             formData.append('precio', precio);
@@ -195,7 +239,9 @@
 
                     if (response.data.success === 1) {
                         toastr.success('registrado correctamente');
-                        document.getElementById("formulario-nuevo").reset();
+                        document.getElementById("galones-nuevo").value = "";
+                        document.getElementById("precio-nuevo").value = "";
+                        document.getElementById("factura-nuevo").value = "";
                     }
                     else {
                         toastr.error('error al registrar');

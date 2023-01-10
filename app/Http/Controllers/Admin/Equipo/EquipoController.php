@@ -14,7 +14,7 @@ class EquipoController extends Controller
     }
 
     public function index(){
-        return view('backend.admin.equipo.index');
+        return view('backend.admin.equipo.vistaequipo');
     }
 
     public function tablaEquipo(){

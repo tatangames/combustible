@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin\Factura;
 
 use App\Http\Controllers\Controller;
 use App\Models\Anteriores;
+use App\Models\Configuracion;
 use App\Models\Equipo;
 use App\Models\Factura;
+use App\Models\TipoCombustible;
 use Carbon\Carbon;
+use Illuminate\Cookie\CookieValuePrefix;
 use Illuminate\Http\Request;
 
 class ReportesController extends Controller
@@ -17,13 +20,12 @@ class ReportesController extends Controller
 
     public function index(){
         $equipo = Equipo::orderBy('tipo', 'ASC')->get();
-        return view('backend.admin.reporte.index', compact('equipo'));
+        return view('backend.admin.reporte.vistareportes', compact('equipo'));
     }
 
     public function reporteEquipo($desde, $hasta, $idequipo){
 
         $lista = Factura::where('id_equipo', $idequipo)
-            ->where('visible', 1)
         ->whereBetween('fecha', array($desde, $hasta))
             ->orderBy('fecha', 'ASC')->get();
 
@@ -46,59 +48,116 @@ class ReportesController extends Controller
             $totalmulti = $totalmulti + $multi;
             $totalgalones = $totalgalones + $ll->cantidad;
 
-            $ll->valor = number_format((float)$multi, 2, '.', ',');
+            $ll->valorunitario = number_format((float)$ll->unitario, 2, '.', ',');
+
+            $ll->multiplicado = number_format((float)$multi, 2, '.', ',');
+
+            $tipocom = TipoCombustible::where('id', $ll->id_tipocombustible)->first();
+            $ll->unaletra = substr($tipocom->nombre, 0, 1);
         }
 
         $totalgalones = number_format((float)$totalgalones, 3, '.', ',');
-        $totalmulti = number_format((float)$totalmulti, 2, '.', ',');
+        $totalmulti = '$' . number_format((float)$totalmulti, 2, '.', ',');
 
-        $view =  \View::make('backend.admin.reporte.tabla.reporteequipo', compact(['lista', 'totalgalones',
-            'totalmulti', 'equipo', 'placa', 'fecha1', 'fecha2']))->render();
-        $pdf = \App::make('dompdf.wrapper');
-        $pdf->getDomPDF()->set_option("enable_php", true);
-        $pdf->loadHTML($view)->setPaper('carta', 'portrait');
 
-        return $pdf->stream();
-    }
+        $infoConfig = Configuracion::where('id', 1)->first();
 
-    public function indexAnterior(){
-        return view('backend.admin.reporte.anteriores.index');
-    }
 
-    public function reporteFacturaAnterior($desde, $hasta, $equipo){
+        //$mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+        $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
+        $mpdf->SetTitle('Combustible');
 
-        $lista = Anteriores::where('equipo', $equipo)
-            ->whereBetween('fecha', array($desde, $hasta))
-            ->orderBy('fecha', 'ASC')->get();
+        // mostrar errores
+        $mpdf->showImageErrors = false;
 
-        $fecha1 = Carbon::parse($desde)->format('d-m-Y');
-        $fecha2 = Carbon::parse($hasta)->format('d-m-Y');
+        $stylesheet = file_get_contents('css/cssreporte.css');
 
-        $totalgalones = 0;
-        $totalmulti = 0;
+        $mpdf->WriteHTML($stylesheet,1);
 
-        foreach ($lista as $ll){
 
-            $ll->fecha = date("d-m-Y", strtotime($ll->fecha));
+        $logoalcaldia = 'images/logo2.png';
 
-            $multi = $ll->cantidad * $ll->unitario;
+        $tabla = "<div class='content'>
+            <img id='logo' src='$logoalcaldia'>
+            <p id='titulo'>ALCALDÍA MUNICIPAL DE METAPÁN <br>
+            REPORTE DE COMBUSTIBLE <br>
+              Gasolinera Metapán<br>
+              Equipo: $equipo<br>
+              Placa: $placa<br>
+                 </p>
+                 <p style='font-size: 16px; margin-left: 165px; font-weight: bold; margin-bottom: 20px !important;'>
+                De: $fecha1 Hasta: $fecha2 <br>
+             </p>
+            </div>";
 
-            $totalmulti = $totalmulti + $multi;
-            $totalgalones = $totalgalones + $ll->cantidad;
+        $tabla .= "<div style='margin-top: 45px'></div>";
 
-            $ll->valor = number_format((float)$multi, 2, '.', ',');
+
+        $tabla .= "<table id='tablaFor' style='width: 72%'>
+                <tbody>
+                <tr style='background-color: #e1e1e1;'>
+                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Fecha</th>
+                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Factura</th>
+                    <th style='text-align: center; font-size:13px; width: 8%; font-weight: bold'>Pro.</th>
+                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Galones</th>
+                    <th style='text-align: center; font-size:13px; width: 20%; font-weight: bold'>Precio U.</th>
+                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Valor</th>
+                </tr>";
+
+        foreach ($lista as $data){
+
+            $tabla .= "<tr>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->fecha</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->factura</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->unaletra</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->cantidad</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->valorunitario</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->multiplicado</td>
+            </tr>";
         }
 
-        $totalgalones = number_format((float)$totalgalones, 3, '.', ',');
-        $totalmulti = number_format((float)$totalmulti, 2, '.', ',');
+        $tabla .= "<tr>
+                <td colspan='3' style='font-size:15px;  text-align: center; font-weight: bold'>Total</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$totalgalones</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'></td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$totalmulti</td>
+            </tr>";
 
-        $view =  \View::make('backend.admin.reporte.anteriores.tabla.reporteequipo', compact(['lista', 'totalgalones',
-            'totalmulti', 'equipo', 'fecha1', 'fecha2']))->render();
-        $pdf = \App::make('dompdf.wrapper');
-        $pdf->getDomPDF()->set_option("enable_php", true);
-        $pdf->loadHTML($view)->setPaper('carta', 'portrait');
+        $tabla .= "</tbody></table>";
 
-        return $pdf->stream();
+        // ************* FOOTER ***************
+
+        $footer = "<table width='100%' id='tablaForTranspa'>
+            <tbody>";
+
+        $footer .= "</tbody></table>";
+
+        $footer .= "<table width='100%' id='tablaForTranspa' style='margin-top: 35px'>
+            <tbody>";
+
+        $footer .= "<tr>
+                    <td width='25%' style='font-weight: normal; font-size: 14px'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ______________________________ <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoConfig->nombre1 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoConfig->cargo1</td>
+                    <td width='25%' style='font-weight: normal; font-size: 14px'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _________________________________________<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoConfig->nombre2 <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $infoConfig->cargo2
+
+                    </td>
+                    </tr>";
+
+        $footer .= "<tr>
+                    <td colspan=2 style='font-weight: bold; text-align: center; font-size: 12px'> Página {PAGENO}/{nb}</td>
+                    </tr>";
+
+        $footer .= "</tbody></table>";
+
+
+        $mpdf->SetHTMLFooter($footer);
+
+        $mpdf->SetAutoPageBreak(true, 45);
+
+
+        $mpdf->WriteHTML($tabla, 2);
+
+
+        $mpdf->Output();
     }
 
 }

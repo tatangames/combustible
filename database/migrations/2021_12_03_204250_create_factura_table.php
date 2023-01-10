@@ -16,14 +16,15 @@ class CreateFacturaTable extends Migration
         Schema::create('factura', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('id_equipo')->unsigned();
+            $table->bigInteger('id_tipocombustible')->unsigned();
+
             $table->integer('factura');
             $table->date('fecha');
-            $table->string('producto', 1);
-            $table->decimal('cantidad', 7,3);
-            $table->decimal('unitario', 6, 2);
-            $table->boolean('visible');
+            $table->decimal('cantidad', 7,3); // cantidad de combustible
+            $table->decimal('unitario', 10, 2); // $
 
             $table->foreign('id_equipo')->references('id')->on('equipos');
+            $table->foreign('id_tipocombustible')->references('id')->on('tipo_combustible');
         });
     }
 

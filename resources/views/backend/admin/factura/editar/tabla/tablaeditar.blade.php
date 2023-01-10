@@ -10,7 +10,7 @@
                                 <th>Factura</th>
                                 <th>Equipo</th>
                                 <th>Fecha</th>
-                                <th>Producto</th>
+                                <th>Tipo Combustible</th>
                                 <th>Cantidad</th>
                                 <th>Precio</th>
                                 <th>Opciones</th>
@@ -23,7 +23,7 @@
                                     <td>{{ $dato->factura }}</td>
                                     <td>{{ $dato->equipo }}</td>
                                     <td>{{ $dato->fecha }}</td>
-                                    <td>{{ $dato->producto }}</td>
+                                    <td>{{ $dato->tipocombustible }}</td>
                                     <td>{{ $dato->cantidad }}</td>
                                     <td>{{ $dato->unitario }}</td>
 
@@ -38,7 +38,25 @@
 
                                     </td>
                                 </tr>
+
+
+                                @if($loop->last)
+                                    <script>
+                                        setTimeout(function () {
+                                            closeLoading();
+                                        }, 1000);
+                                    </script>
+                                @endif
+
                             @endforeach
+
+                            @if($lista == null)
+                                <script>
+                                    setTimeout(function () {
+                                        closeLoading();
+                                    }, 1000);
+                                </script>
+                            @endif
 
                             </tbody>
                         </table>

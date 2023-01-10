@@ -4,6 +4,8 @@
     <link href="{{ asset('css/adminlte.min.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/dataTables.bootstrap4.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/toastr.min.css') }}" type="text/css" rel="stylesheet" />
+    <link href="{{ asset('css/select2.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ asset('css/select2-bootstrap-5-theme.min.css') }}" type="text/css" rel="stylesheet">
 @stop
 
 <section class="content-header">
@@ -44,7 +46,10 @@
                         </div>
 
                         <div class="card-footer" style="float: right;">
-                            <button type="button" class="btn btn-success" onclick="buscar()">PDF</button>
+                            <button type="button" onclick="buscar()" class="btn" style="margin-left: 15px; border-color: black; border-radius: 0.1px;">
+                                <img src="{{ asset('images/logopdf.png') }}" width="55px" height="55px">
+                                Generar PDF
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -66,6 +71,7 @@
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
     <script src="{{ asset('js/alertaPersonalizada.js') }}"></script>
+    <script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
 
     <script>
 
@@ -76,12 +82,12 @@
             var fechahasta = document.getElementById('fecha-hasta').value;
 
             if(fechadesde === ''){
-                toastr.error('fecha desde es requerido');
+                toastr.error('Fecha desde es requerido');
                 return;
             }
 
             if(fechahasta === ''){
-                toastr.error('fecha hasta es requerido');
+                toastr.error('Fecha hasta es requerido');
                 return;
             }
 

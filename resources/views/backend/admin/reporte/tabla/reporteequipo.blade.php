@@ -80,7 +80,6 @@
         }
 
         #tabla {
-            font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
             border-collapse: collapse;
             width: 100%;
             margin-left: 20px;

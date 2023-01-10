@@ -49,7 +49,7 @@
                         <div class="input-group-prepend">
                             <span class="input-group-text"><i class="fas fa-user"></i></span>
                         </div>
-                        <input id="usuario" type="text" class="form-control" maxlength="50" placeholder="usuario">
+                        <input id="usuario" type="text" class="form-control" autocomplete="off" maxlength="50" placeholder="usuario">
                     </div>
                     <div class="input-group form-group">
                         <div class="input-group-prepend">
@@ -106,6 +106,8 @@
         let formData = new FormData();
         formData.append('usuario', usuario);
         formData.append('password', password);
+
+        // combustible
 
         axios.post('/combustible/login', formData, {
         })

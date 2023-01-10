@@ -64,17 +64,17 @@
 
                                     <div class="form-group">
                                         <label>Nombre</label>
-                                        <input type="text" maxlength="50" class="form-control" id="nombre-nuevo" placeholder="Nombre">
+                                        <input type="text" maxlength="50" autocomplete="off" class="form-control" id="nombre-nuevo" placeholder="Nombre">
                                     </div>
 
                                     <div class="form-group">
                                         <label>Usuario</label>
-                                        <input type="text" maxlength="50" class="form-control" id="usuario-nuevo" placeholder="Usuario">
+                                        <input type="text" maxlength="50" autocomplete="off" class="form-control" id="usuario-nuevo" placeholder="Usuario">
                                     </div>
 
                                     <div class="form-group">
                                         <label>Contraseña</label>
-                                        <input type="text" maxlength="16" class="form-control" id="password-nuevo" placeholder="Contraseña">
+                                        <input type="text" maxlength="16" autocomplete="off" class="form-control" id="password-nuevo" placeholder="Contraseña">
                                     </div>
 
                                     <div class="form-group">

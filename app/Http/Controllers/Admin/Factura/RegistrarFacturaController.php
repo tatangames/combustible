@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Factura;
 use App\Http\Controllers\Controller;
 use App\Models\Equipo;
 use App\Models\Factura;
+use App\Models\TipoCombustible;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -18,8 +19,9 @@ class RegistrarFacturaController extends Controller
     public function index(){
 
         $equipo = Equipo::orderBy('tipo')->get();
+        $arraycombustible = TipoCombustible::orderBy('id', 'ASC')->get();
 
-        return view('backend.admin.factura.crear.index', compact('equipo'));
+        return view('backend.admin.factura.crear.vistacrearfactura', compact('equipo', 'arraycombustible'));
     }
 
     public function nuevaFactura(Request $request){
@@ -27,7 +29,7 @@ class RegistrarFacturaController extends Controller
         $regla = array(
             'factura' => 'required',
             'equipo' => 'required',
-            'producto' => 'required',
+            'combustible' => 'required', // tipo combustible
             'fecha' => 'required',
             'galones' => 'required',
             'precio' => 'required'
@@ -41,10 +43,9 @@ class RegistrarFacturaController extends Controller
         $dato->id_equipo = $request->equipo;
         $dato->factura = $request->factura;
         $dato->fecha = $request->fecha;
-        $dato->producto = $request->producto;
+        $dato->id_tipocombustible = $request->combustible;
         $dato->cantidad = $request->galones;
         $dato->unitario = $request->precio;
-        $dato->visible = 1;
 
         if($dato->save()){
             return ['success' => 1];

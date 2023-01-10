@@ -18,7 +18,7 @@ class PermisosController extends Controller
     public function index(){
         $roles = Role::all()->pluck('name', 'id');
 
-        return view('backend.admin.permisos.index', compact('roles'));
+        return view('backend.admin.permisos.vistapermisos', compact('roles'));
     }
 
     public function tablaUsuarios(){

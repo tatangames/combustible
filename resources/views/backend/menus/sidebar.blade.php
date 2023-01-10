@@ -39,12 +39,6 @@
                 @endcan
 
                 @can('vista.factura.index')
-                    <li class="nav-item">
-                        <a href="{{ route('admin.nuevo.equipo.index') }}" target="frameprincipal" class="nav-link">
-                            <i class="far fa-circle nav-icon"></i>
-                            <p>Nuevo Equipo</p>
-                        </a>
-                    </li>
 
                     <li class="nav-item">
                         <a href="{{ route('admin.registrar.factura.index') }}" target="frameprincipal" class="nav-link">
@@ -60,37 +54,28 @@
                         </a>
                     </li>
 
+                    <li class="nav-item">
+                        <a href="{{ route('admin.nuevo.equipo.index') }}" target="frameprincipal" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Nuevo Equipo</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('admin.factura.reporte.index') }}" target="frameprincipal" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Reporte</p>
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a href="{{ route('admin.configuracion.nombre.index') }}" target="frameprincipal" class="nav-link">
+                            <i class="far fa-circle nav-icon"></i>
+                            <p>Configuración</p>
+                        </a>
+                    </li>
+
                 @endcan
-
-                    <!-- Seccion libre -->
-                <li class="nav-item">
-
-                    <a href="#" class="nav-link">
-                        <i class="far fa-edit"></i>
-                        <p>
-                            Reportes
-                            <i class="fas fa-angle-left right"></i>
-                        </p>
-                    </a>
-
-                    <ul class="nav nav-treeview">
-
-                        <li class="nav-item">
-                            <a href="{{ route('admin.factura.reporte.index') }}" target="frameprincipal" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Factura</p>
-                            </a>
-                        </li>
-
-                        <li class="nav-item">
-                            <a href="{{ route('admin.factura.reporte.anterior.index') }}" target="frameprincipal" class="nav-link">
-                                <i class="far fa-circle nav-icon"></i>
-                                <p>Factura Anteriores</p>
-                            </a>
-                        </li>
-
-                    </ul>
-                </li>
 
             </ul>
         </nav>

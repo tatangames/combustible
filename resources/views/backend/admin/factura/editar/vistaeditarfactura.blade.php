@@ -69,10 +69,8 @@
 
                                     <div class="form-group">
                                         <label class="control-label">Producto: </label>
-                                        <select id="select-producto" class="form-control">
-                                            <option value="D">DIESEL</option>
-                                            <option value="R">REGULAR</option>
-                                            <option value="E">ESPECIAL</option>
+                                        <select id="select-combustible" class="form-control">
+
                                         </select>
                                     </div>
 
@@ -82,12 +80,12 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Galones</label>
+                                        <label>Galones (3 decimales máximo)</label>
                                         <input type="number" class="form-control" id="galones-editar">
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Precio Unitario</label>
+                                        <label>Precio Unitario (2 decimales máximo)</label>
                                         <input type="number" class="form-control" id="precio-editar">
                                     </div>
 
@@ -103,39 +101,6 @@
             </div>
         </div>
     </div>
-
-    <div class="modal fade" id="modalBorrar">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Borrar Registro?</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <form id="formulario-editar">
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-12">
-
-                                    <div class="form-group">
-                                        <input type="hidden" id="id-borrar">
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-danger" onclick="borrar()">Borrar</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
 
 
 </div>
@@ -153,6 +118,9 @@
 
     <script type="text/javascript">
         $(document).ready(function(){
+
+            openLoading();
+
             var ruta = "{{ URL::to('/admin/factura/editar/tabla') }}";
             $('#tablaDatatable').load(ruta);
             document.getElementById("divcontenedor").style.display = "block";
@@ -167,18 +135,29 @@
         }
 
         function modalBorrar(id){
-            $('#id-borrar').val(id);
-            $('#modalBorrar').modal('show');
+
+            Swal.fire({
+                title: 'Borrar Registro',
+                text: "",
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Borrar',
+                cancelButtonText: "Cancelar"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    peticionBorrar(id);
+                }
+            })
         }
 
-        function borrar(){
-            var idborrar = document.getElementById('id-borrar').value;
+        function peticionBorrar(id){
 
             openLoading();
-            var formData = new FormData();
-            formData.append('id', idborrar);
 
-            axios.post(url+'/factura/borrar', formData, {
+            axios.post(url+'/factura/borrar', {
+                'id' : id
             })
                 .then((response) => {
                     closeLoading();
@@ -216,6 +195,7 @@
                         $('#precio-editar').val(response.data.factura.unitario);
 
                         document.getElementById("select-equipo").options.length = 0;
+                        document.getElementById("select-combustible").options.length = 0;
 
                         $.each(response.data.equipo, function( key, val ){
                             if(response.data.factura.id_equipo == val.id){
@@ -225,14 +205,13 @@
                             }
                         });
 
-                        if(response.data.factura.producto == 'D'){
-                            document.getElementById("select-producto").selectedIndex = "0";
-                        }else if(response.data.factura.producto == 'R'){
-                            document.getElementById("select-producto").selectedIndex = "1";
-                        }else{
-                            // especial
-                            document.getElementById("select-producto").selectedIndex = "2";
-                        }
+                        $.each(response.data.combustible, function( key, val ){
+                            if(response.data.factura.id_tipocombustible == val.id){
+                                $('#select-combustible').append('<option value="' +val.id +'" selected="selected">'+val.nombre+'</option>');
+                            }else{
+                                $('#select-combustible').append('<option value="' +val.id +'">'+val.nombre+'</option>');
+                            }
+                        });
 
                     }else{
                         toastr.error('Información no encontrada');
@@ -250,7 +229,7 @@
 
             var factura = document.getElementById('factura-editar').value;
             var equipo = document.getElementById('select-equipo').value;
-            var producto = document.getElementById('select-producto').value;
+            var tipocombustible = document.getElementById('select-combustible').value;
             var fecha = document.getElementById('fecha-editar').value;
             var galones = document.getElementById('galones-editar').value;
             var precio = document.getElementById('precio-editar').value;
@@ -259,81 +238,81 @@
             var reglaNumeroDecimal = /^[0-9]\d*(\.\d+)?$/;
 
             if(factura === ''){
-                toastr.error('factura es requerido');
+                toastr.error('Factura es requerido');
                 return;
             }
 
             if(!factura.match(reglaNumeroEntero)) {
-                toastr.error('factura debe ser número Entero');
+                toastr.error('Factura debe ser número Entero');
                 return;
             }
 
             if(factura < 0){
-                toastr.error('factura no debe tener números negativos');
+                toastr.error('Factura no debe tener números negativos');
                 return;
             }
 
-            if(factura > 10000000){
-                toastr.error('factura no debe superar 10 millones');
+            if(factura.length > 8){
+                toastr.error('Factura no debe superar 8 dígitos');
                 return;
             }
 
             if(equipo === ''){
-                toastr.error('equipo es requerido');
+                toastr.error('Equipo es requerido');
                 return;
             }
 
-            if(producto === ''){
-                toastr.error('producto es requerido');
+            if(tipocombustible === ''){
+                toastr.error('Tipo Combustible es requerido');
                 return;
             }
 
             if(fecha === ''){
-                toastr.error('fecha es requerida');
+                toastr.error('Fecha es requerida');
                 return;
             }
 
             // ----- galones ------
 
             if(galones === ''){
-                toastr.error('galones es requerido');
+                toastr.error('Galones es requerido');
                 return;
             }
 
             if(!galones.match(reglaNumeroDecimal)) {
-                toastr.error('galones debe ser número');
+                toastr.error('Galones debe ser número Decimal y no Negativo');
                 return;
             }
 
             if(galones < 0){
-                toastr.error('galones no debe tener números negativos');
+                toastr.error('Galones no debe tener números negativos');
                 return;
             }
 
-            if(galones > 10000000){
-                toastr.error('galones no debe superar 10 millones');
+            if(galones.length > 8){
+                toastr.error('Galones no debe superar 8 dígitos');
                 return;
             }
 
             // ----- precio unitario ------
 
             if(precio === ''){
-                toastr.error('precio unitario es requerido');
+                toastr.error('Precio unitario es requerido');
                 return;
             }
 
             if(!precio.match(reglaNumeroDecimal)) {
-                toastr.error('precio unitario debe ser número');
+                toastr.error('Precio unitario debe se debe ser número Decimal y no Negativo.');
                 return;
             }
 
             if(precio < 0){
-                toastr.error('precio unitario no debe tener números negativos');
+                toastr.error('Precio unitario no debe tener números negativos');
                 return;
             }
 
             if(precio > 10000000){
-                toastr.error('precio unitario no debe superar 10 millones');
+                toastr.error('Precio unitario no debe superar 10 millones');
                 return;
             }
 
@@ -342,7 +321,7 @@
             formData.append('id', id);
             formData.append('factura', factura);
             formData.append('equipo', equipo);
-            formData.append('producto', producto);
+            formData.append('combustible', tipocombustible);
             formData.append('fecha', fecha);
             formData.append('galones', galones);
             formData.append('precio', precio);

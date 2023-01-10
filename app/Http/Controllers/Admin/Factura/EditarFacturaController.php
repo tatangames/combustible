@@ -3,34 +3,41 @@
 namespace App\Http\Controllers\Admin\Factura;
 
 use App\Http\Controllers\Controller;
+use App\Models\Configuracion;
 use App\Models\Equipo;
 use App\Models\Factura;
+use App\Models\TipoCombustible;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use PDF;
 
-class EditarFacturaController extends Controller
-{
+class EditarFacturaController extends Controller{
+
+
     public function __construct(){
         $this->middleware('auth');
     }
 
     public function index(){
-        return view('backend.admin.factura.editar.index');
+
+
+
+        return view('backend.admin.factura.editar.vistaeditarfactura');
     }
 
     public function tablaFactura(){
-        $lista = Factura::orderBy('factura', 'DESC')
-            ->where('visible', 1)
-            ->get();
+        $lista = Factura::orderBy('factura', 'DESC')->get();
 
         foreach ($lista as $ll){
 
             $dato = Equipo::where('id', $ll->id_equipo)->first();
-
             $ll->equipo = $dato->tipo;
-
             $ll->fecha = date("d-m-Y", strtotime($ll->fecha));
+
+            $infoCom = TipoCombustible::where('id', $ll->id_tipocombustible)->first();
+            $ll->tipocombustible = $infoCom->nombre;
+
+            $ll->unitario = '$' . number_format((float)$ll->unitario, 2, '.', ',');
         }
 
         return view('backend.admin.factura.editar.tabla.tablaeditar', compact('lista'));
@@ -48,9 +55,7 @@ class EditarFacturaController extends Controller
 
         if(Factura::where('id', $request->id)->first()){
 
-            Factura::where('id', $request->id)->update([
-                'visible' => 0
-            ]);
+            Factura::where('id', $request->id)->delete();
 
             return ['success' => 1];
         }else{
@@ -71,8 +76,10 @@ class EditarFacturaController extends Controller
         if($lista = Factura::where('id', $request->id)->first()){
 
             $equipo = Equipo::orderBy('tipo', 'ASC')->get();
+            $combustible = TipoCombustible::orderBy('id', 'ASC')->get();
 
-            return ['success' => 1, 'factura' => $lista, 'equipo' => $equipo];
+            return ['success' => 1, 'factura' => $lista, 'equipo' => $equipo,
+                'combustible' => $combustible];
         }else{
             return ['success' => 2];
         }
@@ -94,7 +101,7 @@ class EditarFacturaController extends Controller
                 'id_equipo' => $request->equipo,
                 'factura' => $request->factura,
                 'fecha' => $request->fecha,
-                'producto' => $request->producto,
+                'id_tipocombustible' => $request->combustible,
                 'cantidad' => $request->galones,
                 'unitario' => $request->precio
             ]);
@@ -105,7 +112,24 @@ class EditarFacturaController extends Controller
         }
     }
 
+    // configuración de nombres
+    public function indexConfiguracion(){
 
+        $lista = Configuracion::where('id', 1)->first();
+        return view('backend.admin.configuracion.vistaconfiguracion', compact('lista'));
+    }
+
+    public function editarNombres(Request $request){
+
+        Configuracion::where('id', 1)->update([
+            'nombre1' => $request->nombre1,
+            'cargo1' => $request->cargo1,
+            'nombre2' => $request->nombre2,
+            'cargo2' => $request->cargo2,
+        ]);
+
+        return ['success' => 1];
+    }
 
 
 }

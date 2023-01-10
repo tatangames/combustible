@@ -16,8 +16,8 @@ class DatabaseSeeder extends Seeder
         // \App\Models\User::factory(10)->create();
         $this->call(RolesSeeder::class);
         $this->call(UsuarioSeeder::class);
-
-
+        $this->call(TipoCombustibleSeeder::class);
+        $this->call(ConfiguracionSeeder::class);
 
     }
 }

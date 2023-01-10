@@ -66,12 +66,12 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     Route::get('/admin/factura/reporte/index', [ReportesController::class,'index'])->name('admin.factura.reporte.index');
     Route::get('/admin/factura/reporte-equipo/{fecha1}/{fecha2}/{equipo}', [ReportesController::class,'reporteEquipo']);
 
-    // --- REPORTE ANTERIORES ---
-    Route::get('/admin/factura/reporte-anterior/index', [ReportesController::class,'indexAnterior'])->name('admin.factura.reporte.anterior.index');
-    Route::get('/admin/factura/reporte-anterior/{fecha1}/{fecha2}/{equipo}', [ReportesController::class,'reporteFacturaAnterior']);
-
-
     // --- SIN PERMISOS VISTA 403 ---
     Route::get('sin-permisos', [ControlController::class,'indexSinPermiso'])->name('no.permisos.index');
+
+    // CONFIGURACION
+    Route::get('/admin/configuracion/nombres/index', [EditarFacturaController::class,'indexConfiguracion'])->name('admin.configuracion.nombre.index');
+    Route::post('/admin/configurcion/editar/nombres', [EditarFacturaController::class, 'editarNombres']);
+
 
 
