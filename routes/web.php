@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Frontend\Login\LoginController;
 use App\Http\Controllers\Controles\ControlController;
 use App\Http\Controllers\Admin\Perfil\PerfilController;
-use App\Http\Controllers\Admin\Roles\PermisosController;
+use App\Http\Controllers\Admin\Roles\PermisoController;
 use App\Http\Controllers\Admin\Roles\RolesController;
 use App\Http\Controllers\Admin\Equipo\EquipoController;
 use App\Http\Controllers\Admin\Factura\RegistrarFacturaController;
@@ -31,18 +31,23 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     Route::post('/admin/roles/borrar-global', [RolesController::class, 'borrarRolGlobal']);
 
     // --- PERMISOS ---
-    Route::get('/admin/permisos/index', [PermisosController::class,'index'])->name('admin.permisos.index');
-    Route::get('/admin/permisos/tabla', [PermisosController::class,'tablaUsuarios']);
-    Route::post('/admin/permisos/nuevo-usuario', [PermisosController::class, 'nuevoUsuario']);
-    Route::post('/admin/permisos/info-usuario', [PermisosController::class, 'infoUsuario']);
-    Route::post('/admin/permisos/editar-usuario', [PermisosController::class, 'editarUsuario']);
-    Route::post('/admin/permisos/nuevo-rol', [PermisosController::class, 'nuevoRol']);
-    Route::post('/admin/permisos/extra-nuevo', [PermisosController::class, 'nuevoPermisoExtra']);
-    Route::post('/admin/permisos/extra-borrar', [PermisosController::class, 'borrarPermisoGlobal']);
+    Route::get('/admin/permisos/index', [PermisoController::class,'index'])->name('admin.permisos.index');
+    Route::get('/admin/permisos/tabla', [PermisoController::class,'tablaUsuarios']);
+    Route::post('/admin/permisos/nuevo-usuario', [PermisoController::class, 'nuevoUsuario']);
+    Route::post('/admin/permisos/info-usuario', [PermisoController::class, 'infoUsuario']);
+    Route::post('/admin/permisos/editar-usuario', [PermisoController::class, 'editarUsuario']);
+    Route::post('/admin/permisos/nuevo-rol', [PermisoController::class, 'nuevoRol']);
+    Route::post('/admin/permisos/extra-nuevo', [PermisoController::class, 'nuevoPermisoExtra']);
+    Route::post('/admin/permisos/extra-borrar', [PermisoController::class, 'borrarPermisoGlobal']);
 
     // --- PERFIL ---
     Route::get('/admin/editar-perfil/index', [PerfilController::class,'indexEditarPerfil'])->name('admin.perfil');
     Route::post('/admin/editar-perfil/actualizar', [PerfilController::class, 'editarUsuario']);
+
+
+
+
+
 
     // --- VEHICULO ---
     Route::get('/admin/equipo/index', [EquipoController::class,'index'])->name('admin.nuevo.equipo.index');

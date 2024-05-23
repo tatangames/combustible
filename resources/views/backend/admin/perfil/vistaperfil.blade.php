@@ -9,7 +9,7 @@
 <section class="content-header">
     <div class="container-fluid">
         <div class="col-sm-12">
-            <h1>Perfil</h1>
+            <h1>Perfil de Usuario</h1>
         </div>
 
     </div>
@@ -19,7 +19,7 @@
     <div class="container-fluid" style="margin-left: 15px">
         <div class="row">
             <div class="col-md-6">
-                <div class="card card-green">
+                <div class="card card-gray-dark">
                     <div class="card-header">
                         <h3 class="card-title">Formulario</h3>
                     </div>
@@ -44,7 +44,7 @@
                         </div>
 
                         <div class="card-footer" style="float: right;">
-                            <button type="button" class="btn btn-success" onclick="actualizar()">Actualizar</button>
+                            <button type="button" class="btn btn-primary" onclick="actualizar()">Actualizar</button>
                         </div>
                     </form>
                 </div>
@@ -54,7 +54,6 @@
         </div>
     </div>
 </section>
-
 
 @extends('backend.menus.footerjs')
 @section('archivos-js')
@@ -79,37 +78,37 @@
             var passwordRepetida = document.getElementById('password1').value;
 
             if(passwordNueva === ''){
-                toastr.error('contraseña nueva es requerida');
+                toastr.error('Contraseña nueva es requerida');
                 return;
             }
 
             if(passwordRepetida === ''){
-                toastr.error('contraseña repetida es requerida');
+                toastr.error('Contraseña repetida es requerida');
                 return;
             }
 
             if(passwordNueva.length > 16){
-                toastr.error('máximo 16 caracteres para contraseña nueva');
+                toastr.error('Máximo 16 caracteres para contraseña nueva');
                 return;
             }
 
             if(passwordNueva.length < 4){
-                toastr.error('mínimo 4 caracteres para contraseña nueva');
+                toastr.error('Mínimo 4 caracteres para contraseña nueva');
                 return;
             }
 
             if(passwordRepetida.length > 16){
-                toastr.error('máximo 16 caracteres para contraseña repetida');
+                toastr.error('Máximo 16 caracteres para contraseña repetida');
                 return;
             }
 
             if(passwordRepetida.length < 4){
-                toastr.error('mínimo 4 caracteres para contraseña repetida');
+                toastr.error('Mínimo 4 caracteres para contraseña repetida');
                 return;
             }
 
             if(passwordNueva !== passwordRepetida){
-                toastr.error('las contraseñas no coinciden');
+                toastr.error('Las contraseñas no coinciden');
                 return;
             }
 
@@ -117,10 +116,10 @@
             var formData = new FormData();
             formData.append('password', passwordNueva);
 
-            axios.post(url+'/editar-perfil/actualizar', formData, {
+            axios.post('/admin/editar-perfil/actualizar', formData, {
             })
                 .then((response) => {
-                    closeLoading();
+                    closeLoading()
 
                     if (response.data.success === 1) {
                         toastr.success('Contraseña Actualizada');

@@ -15,22 +15,12 @@ class RolesSeeder extends Seeder
      */
     public function run()
     {
-        // encargado administrador
-        $role1 = Role::create(['name' => 'Encargado-Administrador']);
+        // Administrador
+        $roleAdmin = Role::create(['name' => 'admin']);
 
-        // encargado de crear factura
-        $role2 = Role::create(['name' => 'Encargado-Factura']);
 
-        // revision de reportes
-        $role3 = Role::create(['name' => 'Encargado-Reporte']);
+        Permission::create(['name' => 'sidebar.roles.y.permisos', 'description' => 'sidebar seccion roles y permisos'])->syncRoles($roleAdmin);
 
-        // --- CREAR PERMISOS ---
 
-        // visualizar roles y permisos
-        Permission::create(['name' => 'vista.roles.index', 'description' => 'Crear roles y permisos'])->syncRoles($role1);
-
-        Permission::create(['name' => 'vista.factura.index', 'description' => 'Visualiza facturas'])->syncRoles($role2);
-
-        Permission::create(['name' => 'vista.reporte.index', 'description' => 'Visualiza crear reportes'])->syncRoles($role3);
     }
 }

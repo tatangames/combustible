@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 class CreateUsuarioTable extends Migration
 {
     /**
-     * Run the migrations.
+     * USUARIO ADMINISTRADOR
      *
      * @return void
      */
