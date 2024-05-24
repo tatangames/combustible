@@ -24,23 +24,16 @@
                     <form id="formulario-nuevo">
                         <div class="card-body">
 
-                            <div class="form-group">
-                                <label class="control-label">Equipo: </label>
-                                <select id="select-equipo" class="form-control">
-                                    @foreach($equipo as $item)
-                                        <option value="{{$item->id}}">{{$item->tipo}}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                            <div class="row">
+                                <div class="form-group">
+                                    <label>Desde</label>
+                                    <input type="date" class="form-control" id="fecha-desde">
+                                </div>
 
-                            <div class="form-group">
-                                <label>Fecha Desde</label>
-                                <input type="date" class="form-control" id="fecha-desde">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Fecha Hasta</label>
-                                <input type="date" class="form-control" id="fecha-hasta">
+                                <div class="form-group" style="margin-left: 15px">
+                                    <label>Hasta</label>
+                                    <input type="date" class="form-control" id="fecha-hasta">
+                                </div>
                             </div>
 
                         </div>
@@ -77,7 +70,6 @@
 
         function buscar(){
 
-            var equipo = document.getElementById('select-equipo').value;
             var fechadesde = document.getElementById('fecha-desde').value;
             var fechahasta = document.getElementById('fecha-hasta').value;
 
@@ -91,9 +83,8 @@
                 return;
             }
 
-            window.open("{{ URL::to('admin/factura/reporte-equipo') }}/" + fechadesde + "/" + fechahasta + "/" + equipo);
+            window.open("{{ URL::to('admin/reporte/generar/fecha') }}/" + fechadesde + "/" + fechahasta);
         }
-
 
     </script>
 

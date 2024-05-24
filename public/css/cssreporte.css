@@ -13,16 +13,16 @@ br[style] {
 
 #titulo{
     text-align: center;
-    font-size: 16px;
+    font-size: 18px;
     font-family: "Arial";
     font-weight: bold;"
 }
 
 #logo{
     float: right;
-    height : 93px;
-    width : 76px;
-    margin-right: 20px;
+    height : 73px;
+    width : 66px;
+    margin-right: 40px;
 }
 
 #tablaFor {

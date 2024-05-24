@@ -8,9 +8,7 @@
 
 <section class="content-header">
     <div class="container-fluid">
-        <div class="col-sm-12">
-            <h1>Perfil de Usuario</h1>
-        </div>
+
 
     </div>
 </section>
@@ -26,19 +24,31 @@
                     <form>
                         <div class="card-body">
 
+                            <h3>Columna 1</h3>
+
                             <div class="form-group">
-                                <label>Usuario</label>
-                                <input type="text" class="form-control" disabled value="{{ $usuario->usuario }}">
+
+                                <input type="text" id="nombre1" class="form-control" maxlength="200" value="{{ $infoExtra->nombre1 }}">
                             </div>
 
                             <div class="form-group">
-                                <label>Nueva Contraseña</label>
-                                <input type="text" maxlength="16" class="form-control" id="password" placeholder="Contraseña">
+
+                                <input type="text" id="nombre2" class="form-control" maxlength="200" value="{{ $infoExtra->nombre2 }}">
+                            </div>
+
+                            <hr>
+
+
+                            <h3>Columna 2</h3>
+
+                            <div class="form-group">
+
+                                <input type="text" id="nombre3" class="form-control" maxlength="200" value="{{ $infoExtra->nombre3 }}">
                             </div>
 
                             <div class="form-group">
-                                <label>Repetir Contraseña</label>
-                                <input type="text" maxlength="16" class="form-control" id="password1" placeholder="Contraseña">
+
+                                <input type="text" id="nombre4" class="form-control" maxlength="200" value="{{ $infoExtra->nombre4 }}">
                             </div>
 
                         </div>
@@ -74,58 +84,26 @@
         }
 
         function actualizar(){
-            var passwordNueva = document.getElementById('password').value;
-            var passwordRepetida = document.getElementById('password1').value;
+            var nombre1 = document.getElementById('nombre1').value;
+            var nombre2 = document.getElementById('nombre2').value;
+            var nombre3 = document.getElementById('nombre3').value;
+            var nombre4 = document.getElementById('nombre4').value;
 
-            if(passwordNueva === ''){
-                toastr.error('Contraseña nueva es requerida');
-                return;
-            }
-
-            if(passwordRepetida === ''){
-                toastr.error('Contraseña repetida es requerida');
-                return;
-            }
-
-            if(passwordNueva.length > 16){
-                toastr.error('Máximo 16 caracteres para contraseña nueva');
-                return;
-            }
-
-            if(passwordNueva.length < 4){
-                toastr.error('Mínimo 4 caracteres para contraseña nueva');
-                return;
-            }
-
-            if(passwordRepetida.length > 16){
-                toastr.error('Máximo 16 caracteres para contraseña repetida');
-                return;
-            }
-
-            if(passwordRepetida.length < 4){
-                toastr.error('Mínimo 4 caracteres para contraseña repetida');
-                return;
-            }
-
-            if(passwordNueva !== passwordRepetida){
-                toastr.error('Las contraseñas no coinciden');
-                return;
-            }
 
             openLoading()
             var formData = new FormData();
-            formData.append('password', passwordNueva);
+            formData.append('nombre1', nombre1);
+            formData.append('nombre2', nombre2);
+            formData.append('nombre3', nombre3);
+            formData.append('nombre4', nombre4);
 
-            axios.post(url+'/editar-perfil/actualizar', formData, {
+            axios.post(url+'/cambio/nombres/actualizar', formData, {
             })
                 .then((response) => {
                     closeLoading()
 
                     if (response.data.success === 1) {
-                        toastr.success('Contraseña Actualizada');
-                        $('#modalEditar').modal('hide');
-                        document.getElementById('password').value = '';
-                        document.getElementById('password1').value = '';
+                        toastr.success('Actualizado');
                     }
                     else {
                         toastr.error('error al actualizar');

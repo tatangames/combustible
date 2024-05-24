@@ -72,17 +72,13 @@
                                 </a>
                             </li>
 
-                            <li class="nav-item">
-                                <a href="{{ route('admin.permisos.index') }}" target="frameprincipal" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Por Equipo</p>
-                                </a>
-                            </li>
+
+
 
                             <li class="nav-item">
-                                <a href="{{ route('admin.permisos.index') }}" target="frameprincipal" class="nav-link">
+                                <a href="{{ route('admin.nombres.index') }}" target="frameprincipal" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Por Factura</p>
+                                    <p>Nombres</p>
                                 </a>
                             </li>
 

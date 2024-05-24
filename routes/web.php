@@ -61,6 +61,10 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
 
     // REPORTE - POR FECHAS
     Route::get('/admin/reporte/fechas/index', [ReportesController::class,'vistaReporteFechas'])->name('admin.reporte.fechas.index');
+    Route::get('/admin/reporte/generar/fecha/{desde}/{hasta}', [ReportesController::class,'reporteFacturaFecha']);
 
 
+    // CAMBIO DE NOMBRE PARA REPORTES
+    Route::get('/admin/cambio/nombres/index', [ReportesController::class,'indexCambioNombre'])->name('admin.nombres.index');
+    Route::post('/admin/cambio/nombres/actualizar', [ReportesController::class,'actualizarBloqueNombre']);
 
