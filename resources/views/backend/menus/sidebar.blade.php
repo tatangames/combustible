@@ -72,7 +72,12 @@
                                 </a>
                             </li>
 
-
+                            <li class="nav-item">
+                                <a href="{{ route('admin.reporte.equipos.index') }}" target="frameprincipal" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Por Equipos</p>
+                                </a>
+                            </li>
 
 
                             <li class="nav-item">

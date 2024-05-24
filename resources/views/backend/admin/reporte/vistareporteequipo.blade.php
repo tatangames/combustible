@@ -19,7 +19,7 @@
             <div class="col-md-6">
                 <div class="card card-green">
                     <div class="card-header">
-                        <h3 class="card-title">Reporte por Fecha</h3>
+                        <h3 class="card-title">Reporte por Equipo</h3>
                     </div>
                     <form id="formulario-nuevo">
                         <div class="card-body">
@@ -34,6 +34,11 @@
                                     <label>Hasta</label>
                                     <input type="date" class="form-control" id="fecha-hasta">
                                 </div>
+                            </div>
+
+                            <div class="form-group" style="width: 50%">
+                                <label>Equipo</label>
+                                <input type="input" maxlength="200" class="form-control" id="equipo">
                             </div>
 
                         </div>
@@ -67,11 +72,27 @@
     <script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
 
     <script>
+        $(document).ready(function() {
+
+            $('#select-equipos').select2({
+                theme: "bootstrap-5",
+                "language": {
+                    "noResults": function(){
+                        return "Búsqueda no encontrada";
+                    }
+                },
+            });
+        });
+
+    </script>
+
+    <script>
 
         function buscar(){
 
             var fechadesde = document.getElementById('fecha-desde').value;
             var fechahasta = document.getElementById('fecha-hasta').value;
+            var equipo = document.getElementById('equipo').value;
 
             if(fechadesde === ''){
                 toastr.error('Fecha desde es requerido');
@@ -83,7 +104,12 @@
                 return;
             }
 
-            window.open("{{ URL::to('admin/reportev1/generar/fecha') }}/" + fechadesde + "/" + fechahasta);
+            if(equipo === ''){
+                toastr.error('Equipo es requerido');
+                return;
+            }
+
+            window.open("{{ URL::to('admin/reportev1/generar/equipos') }}/" + fechadesde + "/" + fechahasta + "/" + equipo);
         }
 
     </script>

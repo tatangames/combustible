@@ -20,6 +20,9 @@ class CreateExtrasTable extends Migration
             $table->string('nombre2', 200)->nullable();
             $table->string('nombre3', 200)->nullable();
             $table->string('nombre4', 200)->nullable();
+
+            // Cuando se usa MPDF hay un uso local y un Servidor
+            $table->boolean('reporte');
         });
     }
 
