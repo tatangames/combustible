@@ -18,10 +18,12 @@ class ReportesController extends Controller
         $this->middleware('auth');
     }
 
-    public function index(){
-        $equipo = Equipo::orderBy('tipo', 'ASC')->get();
+    public function vistaReporteFechas(){
+
         return view('backend.admin.reporte.vistareportes', compact('equipo'));
     }
+
+
 
     public function reporteEquipo($desde, $hasta, $idequipo){
 

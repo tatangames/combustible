@@ -6,10 +6,9 @@ use App\Http\Controllers\Controles\ControlController;
 use App\Http\Controllers\Admin\Perfil\PerfilController;
 use App\Http\Controllers\Admin\Roles\PermisoController;
 use App\Http\Controllers\Admin\Roles\RolesController;
-use App\Http\Controllers\Admin\Equipo\EquipoController;
-use App\Http\Controllers\Admin\Factura\RegistrarFacturaController;
-use App\Http\Controllers\Admin\Factura\EditarFacturaController;
+use App\Http\Controllers\Admin\Factura\FacturaController;
 use App\Http\Controllers\Admin\Factura\ReportesController;
+
 
 Route::get('/', [LoginController::class,'index'])->name('login');
 
@@ -46,37 +45,22 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
 
 
 
+    // FACTURA
+    Route::get('/admin/factura/index', [FacturaController::class,'indexFactura'])->name('admin.factura.index');
+    Route::get('/admin/factura/tabla', [FacturaController::class, 'tablaFactura']);
+    Route::get('/admin/factura/tabla/tipo/{valor}', [FacturaController::class, 'tablaFacturaTodos']);
+    Route::post('/admin/factura/informacion', [FacturaController::class, 'informacionFactura']);
+    Route::post('/admin/factura/actualizar', [FacturaController::class, 'actualizarFactura']);
+    Route::post('/admin/factura/borrar', [FacturaController::class, 'borrarFactura']);
 
 
+    // REGISTRO NUEVA FACTURA
+    Route::get('/admin/nuevafactura/index', [FacturaController::class,'indexNuevaFactura'])->name('admin.nuevafactura.index');
+    Route::post('/admin/nuevafactura/nuevo', [FacturaController::class,'nuevaFactura']);
 
-    // --- VEHICULO ---
-    Route::get('/admin/equipo/index', [EquipoController::class,'index'])->name('admin.nuevo.equipo.index');
-    Route::get('/admin/equipo/tabla', [EquipoController::class,'tablaEquipo']);
-    Route::post('/admin/equipo/nuevo', [EquipoController::class, 'nuevoEquipo']);
-    Route::post('/admin/equipo/informacion', [EquipoController::class, 'informacionEquipo']);
-    Route::post('/admin/equipo/editar', [EquipoController::class, 'editarEquipo']);
 
-    // --- REGISTRAR FACTURA ---
-    Route::get('/admin/factura/index', [RegistrarFacturaController::class,'index'])->name('admin.registrar.factura.index');
-    Route::post('/admin/factura/nuevo', [RegistrarFacturaController::class, 'nuevaFactura']);
-
-    // --- EDITAR FACTURA ---
-    Route::get('/admin/factura/editar/index', [EditarFacturaController::class,'index'])->name('admin.factura.editar.index');
-    Route::get('/admin/factura/editar/tabla', [EditarFacturaController::class,'tablaFactura']);
-    Route::post('/admin/factura/borrar', [EditarFacturaController::class, 'borrarFactura']);
-    Route::post('/admin/factura/informacion', [EditarFacturaController::class, 'infoFactura']);
-    Route::post('/admin/factura/editar', [EditarFacturaController::class, 'editarFactura']);
-
-    // --- REPORTE ---
-    Route::get('/admin/factura/reporte/index', [ReportesController::class,'index'])->name('admin.factura.reporte.index');
-    Route::get('/admin/factura/reporte-equipo/{fecha1}/{fecha2}/{equipo}', [ReportesController::class,'reporteEquipo']);
-
-    // --- SIN PERMISOS VISTA 403 ---
-    Route::get('sin-permisos', [ControlController::class,'indexSinPermiso'])->name('no.permisos.index');
-
-    // CONFIGURACION
-    Route::get('/admin/configuracion/nombres/index', [EditarFacturaController::class,'indexConfiguracion'])->name('admin.configuracion.nombre.index');
-    Route::post('/admin/configurcion/editar/nombres', [EditarFacturaController::class, 'editarNombres']);
+    // REPORTE - POR FECHAS
+    Route::get('/admin/reporte/fechas/index', [ReportesController::class,'vistaReporteFechas'])->name('admin.reporte.fechas.index');
 
 
 
