@@ -8,7 +8,9 @@ use App\Http\Controllers\Admin\Roles\PermisoController;
 use App\Http\Controllers\Admin\Roles\RolesController;
 use App\Http\Controllers\Admin\Factura\FacturaController;
 use App\Http\Controllers\Admin\Factura\ReportesController;
-
+use App\Http\Controllers\Admin\Equipo\EquipoController;
+use App\Http\Controllers\Admin\FacturaV2\FacturaV2Controller;
+use App\Http\Controllers\Admin\FacturaV2\ReporteV2Controller;
 
 Route::get('/', [LoginController::class,'index'])->name('login');
 
@@ -45,6 +47,36 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
 
 
 
+
+
+    // EQUIPO
+    Route::get('/admin/equipo/index', [EquipoController::class,'indexEquipo'])->name('admin.equipos.index');
+    Route::get('/admin/equipo/tabla', [EquipoController::class, 'tablaEquipo']);
+    Route::post('/admin/equipo/nuevo', [EquipoController::class, 'nuevoEquipo']);
+    Route::post('/admin/equipo/informacion', [EquipoController::class, 'informacionEquipo']);
+    Route::post('/admin/equipo/editar', [EquipoController::class, 'actualizarEquipo']);
+
+
+    // REGISTRAR FACTURACION
+    Route::get('/admin/facturav2/index', [FacturaV2Controller::class,'indexFactura'])->name('admin.facturav2.index');
+    Route::post('/admin/facturav2/nuevo', [FacturaV2Controller::class, 'nuevoFactura']);
+
+
+    // TABLA FACTURACION
+    Route::get('/admin/facturav2/listado/index', [FacturaV2Controller::class,'indexFacturacion'])->name('admin.facturav2.listado.index');
+    Route::get('/admin/facturav2/listado/tabla', [FacturaV2Controller::class, 'tablaFacturacionTabla']);
+
+
+
+
+
+
+
+
+
+    //******************** PARTE DEL SISTEMA ANTERIOR ***************************************
+
+
     // FACTURA
     Route::get('/admin/factura/index', [FacturaController::class,'indexFactura'])->name('admin.factura.index');
     Route::get('/admin/factura/tabla', [FacturaController::class, 'tablaFactura']);
@@ -70,4 +102,9 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     // REPORTE - POR EQUIPOS
     Route::get('/admin/reportev1/equipos/index', [ReportesController::class,'vistaReporteEquipos'])->name('admin.reporte.equipos.index');
     Route::get('/admin/reportev1/generar/equipos/{desde}/{hasta}/{texto}', [ReportesController::class,'reporteFacturaEquipos']);
+
+
+
+
+
 

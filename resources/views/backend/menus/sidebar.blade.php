@@ -54,11 +54,20 @@
 
 
                             <li class="nav-item">
-                                <a href="{{ route('admin.nombres.index') }}" target="frameprincipal" class="nav-link">
+                                <a href="{{ route('admin.facturav2.index') }}" target="frameprincipal" class="nav-link">
                                     <i class="far fa-circle nav-icon"></i>
-                                    <p>Nombres</p>
+                                    <p>Nueva Factura</p>
                                 </a>
                             </li>
+
+
+                            <li class="nav-item">
+                                <a href="{{ route('admin.facturav2.listado.index') }}" target="frameprincipal" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Listado Factura</p>
+                                </a>
+                            </li>
+
 
                         </ul>
                     </li>
@@ -71,7 +80,43 @@
                         <a href="#" class="nav-link">
                             <i class="far fa-edit"></i>
                             <p>
-                                Sistema Viejo
+                                Configuración
+                                <i class="fas fa-angle-left right"></i>
+                            </p>
+                        </a>
+
+                        <ul class="nav nav-treeview">
+
+
+
+                            <li class="nav-item">
+                                <a href="{{ route('admin.equipos.index') }}" target="frameprincipal" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Equipos</p>
+                                </a>
+                            </li>
+
+
+                            <li class="nav-item">
+                                <a href="{{ route('admin.nombres.index') }}" target="frameprincipal" class="nav-link">
+                                    <i class="far fa-circle nav-icon"></i>
+                                    <p>Nombre a Reporte</p>
+                                </a>
+                            </li>
+
+                        </ul>
+                    </li>
+
+
+
+
+
+
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">
+                            <i class="far fa-edit"></i>
+                            <p>
+                                Sistema Anterior
                                 <i class="fas fa-angle-left right"></i>
                             </p>
                         </a>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin\Equipo;
 use App\Http\Controllers\Controller;
 use App\Models\Equipo;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class EquipoController extends Controller
@@ -13,35 +15,42 @@ class EquipoController extends Controller
         $this->middleware('auth');
     }
 
-    public function index(){
-        return view('backend.admin.equipo.vistaequipo');
+    public function indexEquipo(){
+        return view('backend.admin.configuracion.equipo.vistaequipo');
     }
 
     public function tablaEquipo(){
-        $lista = Equipo::orderBy('tipo')->get();
-        return view('backend.admin.equipo.tabla.tablaequipo', compact('lista'));
+
+        $listado = Equipo::orderBy('nombre', 'ASC')->get();
+
+        return view('backend.admin.configuracion.equipo.tablaequipo', compact('listado'));
     }
 
     public function nuevoEquipo(Request $request){
 
         $regla = array(
-            'tipo' => 'required'
+            'nombre' => 'required'
         );
 
         $validar = Validator::make($request->all(), $regla);
 
         if ($validar->fails()){ return ['success' => 0];}
 
+        DB::beginTransaction();
+        try {
 
-        $dato = new Equipo();
-        $dato->tipo = $request->tipo;
-        $dato->descripcion = $request->descripcion;
-        $dato->placa = $request->placa;
+            $registro = new Equipo();
+            $registro->nombre = $request->nombre;
+            $registro->placa = $request->placa;
+            $registro->save();
 
-        if($dato->save()){
+            DB::commit();
             return ['success' => 1];
-        }else{
-            return ['success' => 2];
+
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
         }
     }
 
@@ -57,18 +66,18 @@ class EquipoController extends Controller
 
         if($lista = Equipo::where('id', $request->id)->first()){
 
-            return ['success' => 1, 'equipo' => $lista];
+            return ['success' => 1, 'info' => $lista];
         }else{
             return ['success' => 2];
         }
     }
 
     // editar
-    public function editarEquipo(Request $request){
+    public function actualizarEquipo(Request $request){
 
         $regla = array(
             'id' => 'required',
-            'tipo' => 'required',
+            'nombre' => 'required',
         );
 
         $validar = Validator::make($request->all(), $regla);
@@ -78,8 +87,7 @@ class EquipoController extends Controller
         if(Equipo::where('id', $request->id)->first()){
 
             Equipo::where('id', $request->id)->update([
-                'tipo' => $request->tipo,
-                'descripcion' => $request->descripcion,
+                'nombre' => $request->nombre,
                 'placa' => $request->placa
             ]);
 
