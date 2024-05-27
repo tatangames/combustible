@@ -21,7 +21,7 @@ class ReportesController extends Controller
 
     public function vistaReporteFechas(){
 
-        return view('backend.admin.reporte.vistareportefecha');
+        return view('backend.admin.sistemaviejo.reporte.vistareportefecha');
     }
 
     public function indexCambioNombre(){
@@ -145,44 +145,7 @@ class ReportesController extends Controller
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->producto</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->cantidad</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->km</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->unitario</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->multi</td>
-
-            </tr>";
-        }
-
-
-
-        $tabla .= "</tbody></table>";
-
-
-
-
-        $tabla .= "<table id='tablaFor' style='width: 72%'>
-                <tbody>
-                <tr style='background-color: #e1e1e1;'>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Fecha</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Equipo</th>
-                    <th style='text-align: center; font-size:13px; width: 8%; font-weight: bold'>Placa</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Factura</th>
-                    <th style='text-align: center; font-size:13px; width: 20%; font-weight: bold'>Prod.</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Galones</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>KM</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Precio U.</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Valor</th>
-                </tr>";
-
-        foreach ($arrayFactura as $data){
-
-            $tabla .= "<tr>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->fechaFormat</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->equipo</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->placa</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->idfactura</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->producto</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->cantidad</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->km</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->unitario</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->unitario</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->multi</td>
 
             </tr>";
@@ -208,9 +171,9 @@ class ReportesController extends Controller
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN REGULAR: $$totalRegular</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN DIESEL: $$totalDiesel</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN ESPECIAL: $$totalEspecial</p>";
-        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Regular: $$totalGalonRegular</p>";
-        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Diesel: $$totalGalonDiesel</p>";
-        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Especial: $$totalGalonEspecial</p>";
+        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Regular: $totalGalonRegular</p>";
+        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Diesel: $totalGalonDiesel</p>";
+        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Especial: $totalGalonEspecial</p>";
         $tabla .= "</div>";
 
 
@@ -275,7 +238,7 @@ class ReportesController extends Controller
 
     public function vistaReporteEquipos(){
 
-        return view('backend.admin.reporte.vistareporteequipo');
+        return view('backend.admin.sistemaviejo.reporte.vistareporteequipo');
     }
 
 
@@ -396,7 +359,7 @@ class ReportesController extends Controller
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->producto</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->cantidad</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->km</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->unitario</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->unitario</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->multi</td>
 
             </tr>";
@@ -424,9 +387,9 @@ class ReportesController extends Controller
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN REGULAR: $$totalRegular</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN DIESEL: $$totalDiesel</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN ESPECIAL: $$totalEspecial</p>";
-        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Regular: $$totalGalonRegular</p>";
-        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Diesel: $$totalGalonDiesel</p>";
-        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Especial: $$totalGalonEspecial</p>";
+        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Regular: $totalGalonRegular</p>";
+        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Diesel: $totalGalonDiesel</p>";
+        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Especial: $totalGalonEspecial</p>";
         $tabla .= "</div>";
 
 

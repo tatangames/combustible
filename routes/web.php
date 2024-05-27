@@ -41,6 +41,9 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     Route::post('/admin/permisos/extra-nuevo', [PermisoController::class, 'nuevoPermisoExtra']);
     Route::post('/admin/permisos/extra-borrar', [PermisoController::class, 'borrarPermisoGlobal']);
 
+    // --- SIN PERMISOS VISTA 403 ---
+    Route::get('sin-permisos', [ControlController::class,'indexSinPermiso'])->name('no.permisos.index');
+
     // --- PERFIL ---
     Route::get('/admin/editar-perfil/index', [PerfilController::class,'indexEditarPerfil'])->name('admin.perfil');
     Route::post('/admin/editar-perfil/actualizar', [PerfilController::class, 'editarUsuario']);
@@ -65,6 +68,20 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     // TABLA FACTURACION
     Route::get('/admin/facturav2/listado/index', [FacturaV2Controller::class,'indexFacturacion'])->name('admin.facturav2.listado.index');
     Route::get('/admin/facturav2/listado/tabla', [FacturaV2Controller::class, 'tablaFacturacionTabla']);
+    Route::get('/admin/facturav2/listado/tabla/{idfiltro}', [FacturaV2Controller::class, 'tablaFacturacionTablaFiltro']);
+
+    Route::post('/admin/facturav2/informacion', [FacturaV2Controller::class, 'informacionFactura']);
+    Route::post('/admin/facturav2/actualizar', [FacturaV2Controller::class, 'actualizarFactura']);
+    Route::post('/admin/facturav2/borrar', [FacturaV2Controller::class, 'borrarFactura']);
+
+
+    // REPORTES
+    Route::get('/admin/reportev2/fechas/index', [ReporteV2Controller::class,'vistaReporteFechas'])->name('admin.reporte.facturacion.equipos');
+    Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}', [ReporteV2Controller::class,'reporteFacturaFecha']);
+
+
+
+
 
 
 
@@ -104,7 +121,7 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     Route::get('/admin/reportev1/generar/equipos/{desde}/{hasta}/{texto}', [ReportesController::class,'reporteFacturaEquipos']);
 
 
-
+//***************************************************************
 
 
 

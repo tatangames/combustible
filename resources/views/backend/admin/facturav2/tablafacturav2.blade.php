@@ -29,11 +29,11 @@
                                     <td>{{ $dato->cantidad }}</td>
                                     <td>
 
-                                        <button type="button" class="btn btn-success btn-xs" onclick="informacion({{ $dato->idauto }})">
+                                        <button type="button" class="btn btn-success btn-xs" onclick="informacion({{ $dato->id }})">
                                             <i class="fas fa-eye" title="Editar"></i>&nbsp; Editar
                                         </button>
 
-                                        <button type="button" style="margin-left: 5px" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->idauto }})">
+                                        <button type="button" style="margin-left: 5px" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->id }})">
                                             <i class="fas fa-trash" title="Borrar"></i>&nbsp; Borrar
                                         </button>
 

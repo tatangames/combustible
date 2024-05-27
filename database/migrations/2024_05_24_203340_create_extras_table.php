@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\Schema;
 class CreateExtrasTable extends Migration
 {
     /**
-     * Run the migrations.
+     * SOLO ES 1 FILA,
      *
      * @return void
      */

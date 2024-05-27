@@ -28,12 +28,12 @@
 
                             <div class="form-group">
 
-                                <input type="text" id="nombre1" class="form-control" maxlength="200" value="{{ $infoExtra->nombre1 }}">
+                                <input type="text" id="nombre1" autocomplete="off" class="form-control" maxlength="200" value="{{ $infoExtra->nombre1 }}">
                             </div>
 
                             <div class="form-group">
 
-                                <input type="text" id="nombre2" class="form-control" maxlength="200" value="{{ $infoExtra->nombre2 }}">
+                                <input type="text" id="nombre2" autocomplete="off" class="form-control" maxlength="200" value="{{ $infoExtra->nombre2 }}">
                             </div>
 
                             <hr>
@@ -43,12 +43,12 @@
 
                             <div class="form-group">
 
-                                <input type="text" id="nombre3" class="form-control" maxlength="200" value="{{ $infoExtra->nombre3 }}">
+                                <input type="text" id="nombre3" autocomplete="off" class="form-control" maxlength="200" value="{{ $infoExtra->nombre3 }}">
                             </div>
 
                             <div class="form-group">
 
-                                <input type="text" id="nombre4" class="form-control" maxlength="200" value="{{ $infoExtra->nombre4 }}">
+                                <input type="text" id="nombre4" autocomplete="off" class="form-control" maxlength="200" value="{{ $infoExtra->nombre4 }}">
                             </div>
 
                         </div>

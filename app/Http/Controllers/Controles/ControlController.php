@@ -20,6 +20,9 @@ class ControlController extends Controller
         if($user->hasRole('admin')){
             $ruta = 'admin.roles.index';
         }
+        else if($user->hasRole('secretaria')){
+            $ruta = 'admin.facturav2.index';
+        }
         else{
             $ruta = 'no.permisos.index';
         }

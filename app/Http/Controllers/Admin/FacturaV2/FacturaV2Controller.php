@@ -74,7 +74,8 @@ class FacturaV2Controller extends Controller
 
     public function indexFacturacion()
     {
-        return view('backend.admin.facturav2.vistafacturav2');
+        $arrayEquipos = Equipo::orderBy('nombre', 'ASC')->get();
+        return view('backend.admin.facturav2.vistafacturav2', compact('arrayEquipos'));
     }
 
     public function tablaFacturacionTabla()
@@ -99,9 +100,119 @@ class FacturaV2Controller extends Controller
         return view('backend.admin.facturav2.tablafacturav2', compact('listado'));
     }
 
+    public function tablaFacturacionTablaFiltro($filtro){
+
+        if($filtro == '0'){
+            // TODOS
+            $listado = Facturacion::orderBy('fecha', 'DESC')->get();
+        }else{
+            $listado = Facturacion::where('id_equipo', $filtro)->orderBy('fecha', 'DESC')->get();
+        }
 
 
+        foreach ($listado as $dato){
+            $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
+            $dato->precioFormat = '$ ' . number_format((float)$dato->unitario, 2, '.', ',');
 
+            $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
+            $dato->nombreEquipo = $infoEquipo->nombre;
+            $dato->placaEquipo = $infoEquipo->placa;
+
+            $infoCombustible = TipoCombustible::where('id', $dato->id_tipocombustible)->first();
+            $dato->tipoCombustible = $infoCombustible->nombre;
+        }
+
+        return view('backend.admin.facturav2.tablafacturav2', compact('listado'));
+    }
+
+
+    public function informacionFactura(Request $request){
+
+        $regla = array(
+            'id' => 'required',
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        if($info = Facturacion::where('id', $request->id)->first()){
+
+            $arrayPro = TipoCombustible::orderBy('nombre', 'ASC')->get();
+            $arrayEquipo = Equipo::orderBy('nombre', 'ASC')->get();
+
+
+            return ['success' => 1, 'info' => $info, 'arrayproducto' => $arrayPro,
+                'arrayequipo' => $arrayEquipo];
+        }else{
+            return ['success' => 2];
+        }
+    }
+
+
+    public function actualizarFactura(Request $request){
+
+        $regla = array(
+            'id' => 'required',
+            'numfactura' => 'required',
+            'fecha' => 'required',
+            'producto' => 'required',
+            'equipo' => 'required',
+            'galones' => 'required',
+            'unitario' => 'required'
+        );
+
+        // equipo, km
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+
+        DB::beginTransaction();
+        try {
+
+            Facturacion::where('id', $request->id)
+                ->update([
+                    'id_equipo' => $request->equipo,
+                    'id_tipocombustible' => $request->producto,
+                    'numero_factura' => $request->numfactura,
+                    'fecha' => $request->fecha,
+                    'cantidad' => $request->galones,
+                    'unitario' => $request->unitario,
+                    'km' => $request->km,
+                ]);
+
+            DB::commit();
+            return ['success' => 1];
+
+        }catch(\Throwable $e){
+            Log::info('error: ' . $e);
+            DB::rollback();
+            return ['success' => 99];
+        }
+    }
+
+
+    public function borrarFactura(Request  $request){
+
+        $regla = array(
+            'id' => 'required',
+        );
+
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        if(Facturacion::where('id', $request->id)->first()){
+
+            Facturacion::where('id', $request->id)->delete();
+
+            return ['success' => 1];
+        }
+
+        return ['success' => 1];
+    }
 
 
 }

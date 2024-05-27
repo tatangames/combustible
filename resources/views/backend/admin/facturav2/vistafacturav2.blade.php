@@ -13,15 +13,27 @@
 
 <style>
 
-
+    html, body {
+        overflow-x: hidden;
+    }
 </style>
 
 <section class="content-header">
     <div class="container-fluid">
 
-
         <div class="form-group">
-            <label>Tabla de Registros</label>
+
+            <div class="form-group" style="width: 30%">
+                <label>Filtro por Equipo</label>
+                <select class="form-control" id="select-equipo">
+                    <option value="0" selected>TODOS</option>
+                    @foreach($arrayEquipos as $dato)
+                        <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <button type="button" class="btn btn-primary" onclick="filtrarDatos()">Filtrar</button>
 
         </div>
 
@@ -50,7 +62,7 @@
 
 <!-- modal editar -->
 <div class="modal fade" id="modalEditar">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h4 class="modal-title">Editar</h4>
@@ -68,10 +80,7 @@
                                     <input type="hidden" id="id-editar"/>
                                 </div>
 
-
-
                                 <div class="row">
-
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label># de Factura</label>
@@ -80,28 +89,20 @@
 
                                         <div class="form-group">
                                             <label>Equipo</label>
-                                            <input type="text" id="equipo-editar" maxlength="350" class="form-control">
+                                            <select class="form-control" id="equipo-editar">
+                                            </select>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label>Placa (Opcional)</label>
-                                            <input type="text" id="placa-editar" maxlength="15" class="form-control">
-                                        </div>
 
                                         <div class="form-group">
                                             <label>Producto</label>
                                             <select class="form-control" id="producto-editar">
-                                                <option value="D">DIESEL</option>
-                                                <option value="R">REGULAR</option>
-                                                <option value="E">ESPECIAL</option>
                                             </select>
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Línea</label>
-                                            <select class="form-control" id="linea-editar">
-                                                <option value="0101">0101</option>
-                                            </select>
+                                            <label>KM (Opcional)</label>
+                                            <input type="text" id="km-editar" maxlength="15" class="form-control">
                                         </div>
 
                                     </div>
@@ -124,15 +125,8 @@
                                             <input type="number" id="precio-editar" class="form-control">
                                         </div>
 
-
-                                        <div class="form-group">
-                                            <label>KM (Opcional)</label>
-                                            <input type="text" id="km-editar" maxlength="15" class="form-control">
-                                        </div>
-
                                     </div>
                                 </div>
-
 
                             </div>
                         </div>
@@ -167,6 +161,15 @@
 
             openLoading();
 
+            $('#select-equipo').select2({
+                theme: "bootstrap-5",
+                "language": {
+                    "noResults": function(){
+                        return "Búsqueda no encontrada";
+                    }
+                },
+            });
+
             var ruta = "{{ URL::to('/admin/facturav2/listado/tabla') }}";
             $('#tablaDatatable').load(ruta);
 
@@ -175,26 +178,11 @@
 
     <script>
 
-        function solicitarDatos(){
+        function recargar(){
+            $('#select-equipo').val(0).trigger('change');
 
-            let t = document.getElementById('toggle').checked;
-            let toggle = t ? 1 : 0;
-
-            document.getElementById('tablaDatatable').innerHTML = '';
-            document.getElementById('toggle').disabled = true;
-
-            openLoading();
-
-            var ruta = "{{ URL::to('/admin/factura/tabla/tipo') }}/" + toggle;
-            $('#tablaDatatable').load(ruta, function(response, status, xhr) {
-                /* if (status == "success") {
-
-                 } else if (status == "error") {
-
-                 }*/
-                closeLoading();
-                document.getElementById('toggle').disabled = false;
-            });
+            var ruta = "{{ URL::to('/admin/facturav2/listado/tabla') }}";
+            $('#tablaDatatable').load(ruta);
         }
 
 
@@ -202,7 +190,7 @@
             openLoading();
             document.getElementById("formulario-editar").reset();
 
-            axios.post(url+'/factura/informacion', {
+            axios.post(url+'/facturav2/informacion', {
                 'id': id
             })
                 .then((response) => {
@@ -211,21 +199,31 @@
                         $('#modalEditar').modal('show');
                         $('#id-editar').val(id);
 
-                        $('#numfactura-editar').val(response.data.info.idfactura);
-                        $('#equipo-editar').val(response.data.info.equipo);
-                        $('#placa-editar').val(response.data.info.placa);
+                        $('#numfactura-editar').val(response.data.info.numero_factura);
                         $('#fecha-editar').val(response.data.info.fecha);
                         $('#galones-editar').val(response.data.info.cantidad);
                         $('#precio-editar').val(response.data.info.unitario);
                         $('#km-editar').val(response.data.info.km);
 
-                        if(response.data.info.producto == 'D'){
-                            document.getElementById('producto-editar').options.selectedIndex = 0;
-                        }else if(response.data.info.producto == 'R'){
-                            document.getElementById('producto-editar').options.selectedIndex = 1;
-                        }else if(response.data.info.producto == 'E'){
-                            document.getElementById('producto-editar').options.selectedIndex = 2;
-                        }
+                        document.getElementById("producto-editar").options.length = 0;
+                        document.getElementById("equipo-editar").options.length = 0;
+
+                        $.each(response.data.arrayproducto, function( key, val ){
+                            if(response.data.info.id_tipocombustible == val.id){
+                                $('#producto-editar').append('<option value="' +val.id +'" selected="selected">'+ val.nombre +'</option>');
+                            }else{
+                                $('#producto-editar').append('<option value="' +val.id +'">'+ val.nombre +'</option>');
+                            }
+                        });
+
+
+                        $.each(response.data.arrayequipo, function( key, val ){
+                            if(response.data.info.id_equipo == val.id){
+                                $('#equipo-editar').append('<option value="' +val.id +'" selected="selected">'+ val.nombre +'</option>');
+                            }else{
+                                $('#equipo-editar').append('<option value="' +val.id +'">'+ val.nombre +'</option>');
+                            }
+                        });
 
                     }else{
                         toastr.error('Información no encontrada');
@@ -243,7 +241,6 @@
             var id = document.getElementById('id-editar').value;
             var numfactura = document.getElementById('numfactura-editar').value;
             var equipo = document.getElementById('equipo-editar').value;
-            var placa = document.getElementById('placa-editar').value;
             var producto = document.getElementById('producto-editar').value;
             var fecha = document.getElementById('fecha-editar').value;
             var galones = document.getElementById('galones-editar').value;
@@ -252,11 +249,6 @@
 
             if(numfactura === ''){
                 toastr.error('# Factura es requerido');
-                return
-            }
-
-            if(equipo === ''){
-                toastr.error('Equipo es requerido');
                 return
             }
 
@@ -281,13 +273,12 @@
             formData.append('numfactura', numfactura);
             formData.append('fecha', fecha);
             formData.append('equipo', equipo);
-            formData.append('placa', placa);
             formData.append('producto', producto);
             formData.append('galones', galones);
             formData.append('unitario', unitario);
             formData.append('km', km);
 
-            axios.post(url+'/factura/actualizar', formData, {
+            axios.post(url+'/facturav2/actualizar', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -298,7 +289,7 @@
                     else if(response.data.success === 1){
                         toastr.success('Actualizado');
                         $('#modalEditar').modal('hide');
-                        solicitarDatos();
+                        recargar()
                     }
                     else {
                         toastr.error('error al registrar');
@@ -328,19 +319,18 @@
             })
         }
 
-
         function solicitarBorrar(idfila){
 
             openLoading();
 
-            axios.post(url+'/factura/borrar', {
+            axios.post(url+'/facturav2/borrar', {
                 'id': idfila
             })
                 .then((response) => {
                     closeLoading();
                     if(response.data.success === 1){
                         toastr.success('Borrado');
-                        solicitarDatos();
+                        recargar();
                     }else{
                         toastr.error('Error al borrar');
                     }
@@ -349,6 +339,16 @@
                     toastr.error('Error al borrar');
                     closeLoading();
                 });
+        }
+
+
+        function filtrarDatos(){
+            var id = document.getElementById('select-equipo').value;
+
+            openLoading();
+
+            var ruta = "{{ URL::to('/admin/facturav2/listado/tabla') }}/" + id;
+            $('#tablaDatatable').load(ruta);
         }
 
 

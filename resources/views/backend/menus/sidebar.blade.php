@@ -39,127 +39,144 @@
                 @endcan
 
 
+                    @can('sidebar.combustible')
 
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="far fa-edit"></i>
-                            <p>
-                                Factura
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="far fa-edit"></i>
+                                <p>
+                                    Factura
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
 
-                        <ul class="nav nav-treeview">
-
-
-
-                            <li class="nav-item">
-                                <a href="{{ route('admin.facturav2.index') }}" target="frameprincipal" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Nueva Factura</p>
-                                </a>
-                            </li>
-
-
-                            <li class="nav-item">
-                                <a href="{{ route('admin.facturav2.listado.index') }}" target="frameprincipal" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Listado Factura</p>
-                                </a>
-                            </li>
-
-
-                        </ul>
-                    </li>
+                            <ul class="nav nav-treeview">
 
 
 
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.facturav2.index') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Nueva Factura</p>
+                                    </a>
+                                </li>
 
 
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="far fa-edit"></i>
-                            <p>
-                                Configuración
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
-
-                        <ul class="nav nav-treeview">
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.facturav2.listado.index') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Listado Factura</p>
+                                    </a>
+                                </li>
 
 
-
-                            <li class="nav-item">
-                                <a href="{{ route('admin.equipos.index') }}" target="frameprincipal" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Equipos</p>
-                                </a>
-                            </li>
+                            </ul>
+                        </li>
 
 
-                            <li class="nav-item">
-                                <a href="{{ route('admin.nombres.index') }}" target="frameprincipal" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Nombre a Reporte</p>
-                                </a>
-                            </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="far fa-edit"></i>
+                                <p>
+                                    Configuración
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
 
-                        </ul>
-                    </li>
-
+                            <ul class="nav nav-treeview">
 
 
 
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.equipos.index') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Equipos</p>
+                                    </a>
+                                </li>
 
 
-                    <li class="nav-item">
-                        <a href="#" class="nav-link">
-                            <i class="far fa-edit"></i>
-                            <p>
-                                Sistema Anterior
-                                <i class="fas fa-angle-left right"></i>
-                            </p>
-                        </a>
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.nombres.index') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Nombre a Reporte</p>
+                                    </a>
+                                </li>
 
-                        <ul class="nav nav-treeview">
-
-
-                            <li class="nav-item">
-                                <a href="{{ route('admin.nuevafactura.index') }}" target="frameprincipal" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Nueva Factura</p>
-                                </a>
-                            </li>
+                            </ul>
+                        </li>
 
 
-                            <li class="nav-item">
-                                <a href="{{ route('admin.factura.index') }}" target="frameprincipal" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Tabla Factura</p>
-                                </a>
-                            </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="far fa-edit"></i>
+                                <p>
+                                    Reportes
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
 
-
-                            <li class="nav-item">
-                                <a href="{{ route('admin.reporte.fechas.index') }}" target="frameprincipal" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Reporte Fechas</p>
-                                </a>
-                            </li>
-
-                            <li class="nav-item">
-                                <a href="{{ route('admin.reporte.equipos.index') }}" target="frameprincipal" class="nav-link">
-                                    <i class="far fa-circle nav-icon"></i>
-                                    <p>Reporte Equipos</p>
-                                </a>
-                            </li>
+                            <ul class="nav nav-treeview">
 
 
 
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.reporte.facturacion.equipos') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Equipos</p>
+                                    </a>
+                                </li>
 
-                        </ul>
-                    </li>
 
+                            </ul>
+                        </li>
+
+
+                        <li class="nav-item">
+                            <a href="#" class="nav-link">
+                                <i class="far fa-edit"></i>
+                                <p>
+                                    Sistema Anterior
+                                    <i class="fas fa-angle-left right"></i>
+                                </p>
+                            </a>
+
+                            <ul class="nav nav-treeview">
+
+
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.nuevafactura.index') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Nueva Factura</p>
+                                    </a>
+                                </li>
+
+
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.factura.index') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Tabla Factura</p>
+                                    </a>
+                                </li>
+
+
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.reporte.fechas.index') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Reporte Fechas</p>
+                                    </a>
+                                </li>
+
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.reporte.equipos.index') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Reporte Equipos</p>
+                                    </a>
+                                </li>
+
+                            </ul>
+                        </li>
+
+                    @endcan
 
 
 

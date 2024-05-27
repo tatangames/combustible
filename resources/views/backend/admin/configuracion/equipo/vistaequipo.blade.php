@@ -71,12 +71,12 @@
 
                                     <div class="form-group">
                                         <label>Nombre</label>
-                                        <input type="text" id="nombre-nuevo" class="form-control" maxlength="100" />
+                                        <input type="text" id="nombre-nuevo" autocomplete="off" class="form-control" maxlength="100" />
                                     </div>
 
                                     <div class="form-group">
                                         <label>Placa (Opcional)</label>
-                                        <input type="text" id="placa-nuevo" class="form-control" maxlength="20" />
+                                        <input type="text" id="placa-nuevo" autocomplete="off" class="form-control" maxlength="20" />
                                     </div>
 
                                 </div>
@@ -114,12 +114,12 @@
 
                                     <div class="form-group">
                                         <label>Nombre</label>
-                                        <input type="text" id="nombre-editar" class="form-control" maxlength="100" />
+                                        <input type="text" id="nombre-editar" autocomplete="off" class="form-control" maxlength="100" />
                                     </div>
 
                                     <div class="form-group">
                                         <label>Placa (Opcional)</label>
-                                        <input type="text" id="placa-editar" class="form-control" maxlength="20" />
+                                        <input type="text" id="placa-editar" autocomplete="off" class="form-control" maxlength="20" />
                                     </div>
 
                                 </div>

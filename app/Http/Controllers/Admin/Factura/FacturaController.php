@@ -14,7 +14,7 @@ class FacturaController extends Controller
 {
 
     public function indexFactura(){
-        return view('backend.admin.factura.vistafactura');
+        return view('backend.admin.sistemaviejo.factura.vistafactura');
     }
 
 
@@ -35,7 +35,7 @@ class FacturaController extends Controller
             $dato->precioFormat = '$ ' . number_format((float)$dato->unitario, 2, '.', ',');
         }
 
-        return view('backend.admin.factura.tablafactura', compact('listado'));
+        return view('backend.admin.sistemaviejo.factura.tablafactura', compact('listado'));
     }
 
 
@@ -51,7 +51,7 @@ class FacturaController extends Controller
                 $dato->precioFormat = '$ ' . number_format((float)$dato->unitario, 2, '.', ',');
             }
 
-            return view('backend.admin.factura.tablafactura', compact('listado'));
+            return view('backend.admin.sistemaviejo.factura.tablafactura', compact('listado'));
         }else{
             $fechaActual = Carbon::now();
 
@@ -67,7 +67,7 @@ class FacturaController extends Controller
                 $dato->precioFormat = '$ ' . number_format((float)$dato->unitario, 2, '.', ',');
             }
 
-            return view('backend.admin.factura.tablafactura', compact('listado'));
+            return view('backend.admin.sistemaviejo.factura.tablafactura', compact('listado'));
         }
     }
 
@@ -171,7 +171,7 @@ class FacturaController extends Controller
     public function indexNuevaFactura(){
         $fechaActual = Carbon::now('America/El_Salvador');
 
-        return view('backend.admin.factura.nueva.nuevafactura', compact('fechaActual'));
+        return view('backend.admin.sistemaviejo.factura.nueva.nuevafactura', compact('fechaActual'));
     }
 
 
