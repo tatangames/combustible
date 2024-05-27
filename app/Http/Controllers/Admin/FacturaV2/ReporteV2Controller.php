@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin\FacturaV2;
 
+use App\Exports\ReporteEquipoExcel;
 use App\Http\Controllers\Controller;
 use App\Models\Equipo;
 use App\Models\Extras;
 use App\Models\Facturacion;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReporteV2Controller extends Controller
 {
@@ -17,7 +19,6 @@ class ReporteV2Controller extends Controller
 
 
     public function vistaReporteFechas(){
-
 
         $arrayEquipos = Equipo::orderBy('nombre', 'ASC')->get();
         return view('backend.admin.configuracion.reporte.equipo.vistareporteequipo', compact('arrayEquipos'));
@@ -194,16 +195,6 @@ class ReporteV2Controller extends Controller
 
 
 
-
-
-
-
-
-
-
-
-
-
         // ************* FOOTER ***************
 
         $footer = "<table width='100%' id='tablaForTranspa'>
@@ -233,5 +224,93 @@ class ReporteV2Controller extends Controller
         $mpdf->Output();
 
     }
+
+
+
+    public function reporteFacturaFechaExcel($desde, $hasta, $idequipo){
+
+        $nombre = 'combustible.xlsx';
+
+
+        $start = Carbon::parse($desde)->startOfDay();
+        $end = Carbon::parse($hasta)->endOfDay();
+
+        //$desdeFormat = date("d-m-Y", strtotime($desde));
+        //$hastaFormat = date("d-m-Y", strtotime($hasta));
+
+
+        $totalLinea = 0;
+        $totalRegular = 0;
+        $totalDiesel = 0;
+        $totalEspecial = 0;
+        $totalGalonRegular = 0;
+        $totalGalonDiesel = 0;
+        $totalGalonEspecial = 0;
+
+
+        if($idequipo == '0'){
+            // TODOS
+            $listado = Facturacion::whereBetween('fecha', array($start, $end))
+                ->orderBy('fecha', 'DESC')
+                ->get();
+        }else{
+            $listado = Facturacion::whereBetween('fecha', array($start, $end))
+                ->where('id_equipo', $idequipo)
+                ->orderBy('fecha', 'DESC')
+                ->get();
+        }
+
+
+        foreach ($listado as $dato){
+            $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
+
+            $multi = $dato->cantidad * $dato->unitario;
+            $totalLinea += $multi;
+
+            $producto = '';
+
+            if($dato->id_tipocombustible == 2){ // REGULAR
+                $totalRegular += $multi;
+                $totalGalonRegular += $dato->cantidad;
+                $producto = "R";
+            }
+            else if($dato->id_tipocombustible == 1){ // DIESEL
+                $totalDiesel += $multi;
+                $totalGalonDiesel += $dato->cantidad;
+                $producto = "D";
+            }
+            else if($dato->id_tipocombustible == 3){ // ESPECIAL
+                $totalEspecial += $multi;
+                $totalGalonEspecial += $dato->cantidad;
+                $producto = "E";
+            }
+
+            $dato->producto = $producto;
+
+            $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
+
+            $dato->placa = $infoEquipo->placa;
+            $dato->equipo = $infoEquipo->nombre;
+
+            $dato->multi = number_format((float)$multi, 2, '.', ',');
+        }
+
+
+        $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
+        $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
+        $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
+        $totalEspecial = number_format((float)$totalEspecial, 2, '.', ',');
+        $totalGalonRegular = number_format((float)$totalGalonRegular, 2, '.', ',');
+        $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
+        $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
+
+
+
+        return Excel::download(new ReporteEquipoExcel($listado, $totalLinea, $totalRegular, $totalDiesel,
+        $totalEspecial, $totalGalonRegular, $totalGalonDiesel, $totalGalonEspecial), $nombre);
+    }
+
+
+
 
 }

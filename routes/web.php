@@ -78,6 +78,7 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     // REPORTES
     Route::get('/admin/reportev2/fechas/index', [ReporteV2Controller::class,'vistaReporteFechas'])->name('admin.reporte.facturacion.equipos');
     Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}', [ReporteV2Controller::class,'reporteFacturaFecha']);
+    Route::get('/admin/reportev2/generar/equiposexcel/{desde}/{hasta}/{equipo}', [ReporteV2Controller::class,'reporteFacturaFechaExcel']);
 
 
 

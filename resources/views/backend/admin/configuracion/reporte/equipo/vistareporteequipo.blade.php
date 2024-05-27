@@ -49,7 +49,14 @@
                         </div>
 
                         <div class="card-footer" style="float: right;">
-                            <button type="button" onclick="buscar()" class="btn" style="margin-left: 15px; border-color: black; border-radius: 0.1px;">
+                            <button type="button" onclick="reporteExcel()" class="btn" style="margin-left: 15px; border-color: black; border-radius: 0.1px;">
+                                <img src="{{ asset('images/logopdf.png') }}" width="55px" height="55px">
+                                Generar Excel
+                            </button>
+                        </div>
+
+                        <div class="card-footer" style="float: right;">
+                            <button type="button" onclick="reportePdf()" class="btn" style="margin-left: 15px; border-color: black; border-radius: 0.1px;">
                                 <img src="{{ asset('images/logopdf.png') }}" width="55px" height="55px">
                                 Generar PDF
                             </button>
@@ -93,7 +100,7 @@
 
     <script>
 
-        function buscar(){
+        function reportePdf(){
 
             var fechadesde = document.getElementById('fecha-desde').value;
             var fechahasta = document.getElementById('fecha-hasta').value;
@@ -110,6 +117,26 @@
             }
 
             window.open("{{ URL::to('admin/reportev2/generar/equipos') }}/" + fechadesde + "/" + fechahasta + "/" + equipo);
+        }
+
+
+        function reporteExcel(){
+
+            var fechadesde = document.getElementById('fecha-desde').value;
+            var fechahasta = document.getElementById('fecha-hasta').value;
+            var equipo = document.getElementById('select-equipos').value;
+
+            if(fechadesde === ''){
+                toastr.error('Fecha desde es requerido');
+                return;
+            }
+
+            if(fechahasta === ''){
+                toastr.error('Fecha hasta es requerido');
+                return;
+            }
+
+            window.open("{{ URL::to('admin/reportev2/generar/equiposexcel') }}/" + fechadesde + "/" + fechahasta + "/" + equipo);
         }
 
     </script>
