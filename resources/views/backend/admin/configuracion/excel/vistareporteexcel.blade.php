@@ -31,7 +31,7 @@
 
         <tr>
             <td colspan="8" style="text-align: center">TOTAL</td>
-            <td>$EE</td>
+            <td>{{ $totalLinea }}</td>
         </tr>
 
         <tr>

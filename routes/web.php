@@ -75,12 +75,15 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     Route::post('/admin/facturav2/borrar', [FacturaV2Controller::class, 'borrarFactura']);
 
 
-    // REPORTES
+    // REPORTES EQUIPOS
     Route::get('/admin/reportev2/fechas/index', [ReporteV2Controller::class,'vistaReporteFechas'])->name('admin.reporte.facturacion.equipos');
-    Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}', [ReporteV2Controller::class,'reporteFacturaFecha']);
-    Route::get('/admin/reportev2/generar/equiposexcel/{desde}/{hasta}/{equipo}', [ReporteV2Controller::class,'reporteFacturaFechaExcel']);
+    Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}', [ReporteV2Controller::class,'reporteEquipoFechaPDF']);
+    Route::get('/admin/reportev2/generar/equiposexcel/{desde}/{hasta}/{equipo}', [ReporteV2Controller::class,'reporteEquipoFechaExcel']);
 
-
+    // REPORTE FACTURA
+    Route::get('/admin/reportev2/factura/index', [ReporteV2Controller::class,'vistaReporteFactura'])->name('admin.reporte.facturacion.factura');
+    Route::get('/admin/reportev2/pdf/factura/{numfactura}', [ReporteV2Controller::class,'reporteFacturaPDF']);
+    Route::get('/admin/reportev2/excel/factura/{numfactura}', [ReporteV2Controller::class,'reporteFacturaExcel']);
 
 
 

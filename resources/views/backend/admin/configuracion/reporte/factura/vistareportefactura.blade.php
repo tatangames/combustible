@@ -26,24 +26,10 @@
 
                             <div class="row">
                                 <div class="form-group">
-                                    <label>Desde</label>
-                                    <input type="date" class="form-control" id="fecha-desde">
+                                    <label>Número de Factura</label>
+                                    <input type="text" class="form-control" id="numfactura" autocomplete="off" maxlength="100">
                                 </div>
 
-                                <div class="form-group" style="margin-left: 15px">
-                                    <label>Hasta</label>
-                                    <input type="date" class="form-control" id="fecha-hasta">
-                                </div>
-                            </div>
-
-                            <div class="form-group" style="width: 50%">
-                                <label>Equipo</label>
-                                <select class="form-control" id="select-equipos">
-                                    <option value="0">TODOS</option>
-                                    @foreach($arrayEquipos as $dato)
-                                        <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
-                                    @endforeach
-                                </select>
                             </div>
 
                         </div>
@@ -102,41 +88,27 @@
 
         function reportePdf(){
 
-            var fechadesde = document.getElementById('fecha-desde').value;
-            var fechahasta = document.getElementById('fecha-hasta').value;
-            var equipo = document.getElementById('select-equipos').value;
+            var numfactura = document.getElementById('numfactura').value;
 
-            if(fechadesde === ''){
-                toastr.error('Fecha desde es requerido');
+            if(numfactura === ''){
+                toastr.error('Factura es requerido')
                 return;
             }
 
-            if(fechahasta === ''){
-                toastr.error('Fecha hasta es requerido');
-                return;
-            }
-
-            window.open("{{ URL::to('admin/reportev2/generar/equipos') }}/" + fechadesde + "/" + fechahasta + "/" + equipo);
+            window.open("{{ URL::to('admin/reportev2/pdf/factura') }}/" + numfactura);
         }
 
 
         function reporteExcel(){
 
-            var fechadesde = document.getElementById('fecha-desde').value;
-            var fechahasta = document.getElementById('fecha-hasta').value;
-            var equipo = document.getElementById('select-equipos').value;
+            var numfactura = document.getElementById('numfactura').value;
 
-            if(fechadesde === ''){
-                toastr.error('Fecha desde es requerido');
+            if(numfactura === ''){
+                toastr.error('Factura es requerido')
                 return;
             }
 
-            if(fechahasta === ''){
-                toastr.error('Fecha hasta es requerido');
-                return;
-            }
-
-            window.open("{{ URL::to('admin/reportev2/generar/equiposexcel') }}/" + fechadesde + "/" + fechahasta + "/" + equipo);
+            window.open("{{ URL::to('admin/reportev2/excel/factura') }}/" + numfactura);
         }
 
     </script>
