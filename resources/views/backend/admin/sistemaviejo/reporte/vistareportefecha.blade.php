@@ -34,7 +34,16 @@
                                     <label>Hasta</label>
                                     <input type="date" class="form-control" id="fecha-hasta">
                                 </div>
+
+
                             </div>
+
+
+                            <div class="form-group" style="width: 40%">
+                                <label># Factura</label>
+                                <input type="text" maxlength="100" class="form-control" id="numero-factura">
+                            </div>
+
 
                         </div>
 
@@ -72,6 +81,7 @@
 
             var fechadesde = document.getElementById('fecha-desde').value;
             var fechahasta = document.getElementById('fecha-hasta').value;
+            var factura = document.getElementById('numero-factura').value;
 
             if(fechadesde === ''){
                 toastr.error('Fecha desde es requerido');
@@ -83,7 +93,7 @@
                 return;
             }
 
-            window.open("{{ URL::to('admin/reportev1/generar/fecha') }}/" + fechadesde + "/" + fechahasta);
+            window.open("{{ URL::to('admin/reportev1/generar/fecha') }}/" + fechadesde + "/" + fechahasta + "/" + factura);
         }
 
     </script>

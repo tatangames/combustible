@@ -118,7 +118,7 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
 
     // REPORTE - POR FECHAS
     Route::get('/admin/reportev1/fechas/index', [ReportesController::class,'vistaReporteFechas'])->name('admin.reporte.fechas.index');
-    Route::get('/admin/reportev1/generar/fecha/{desde}/{hasta}', [ReportesController::class,'reporteFacturaFecha']);
+    Route::get('/admin/reportev1/generar/fecha/{desde}/{hasta}/{factura}', [ReportesController::class,'reporteFacturaFecha']);
 
     // REPORTE - POR EQUIPOS
     Route::get('/admin/reportev1/equipos/index', [ReportesController::class,'vistaReporteEquipos'])->name('admin.reporte.equipos.index');

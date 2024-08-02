@@ -31,7 +31,7 @@ class ReportesController extends Controller
     }
 
 
-    public function reporteFacturaFecha($desde, $hasta){
+    public function reporteFacturaFecha($desde, $hasta, $textoFactura){
 
         $start = Carbon::parse($desde)->startOfDay();
         $end = Carbon::parse($hasta)->endOfDay();
@@ -48,17 +48,37 @@ class ReportesController extends Controller
         $totalGalonDiesel = 0;
         $totalGalonEspecial = 0;
 
+        $totalGalonesMixtos = 0;
+        $totalDineroMixto = 0;
+
+        if($textoFactura == "-"){
+            $arrayFactura = Factura::whereBetween('fecha', array($start, $end))
+                ->orderBy('fecha', 'ASC')
+                ->get();
+        }else{
+            $arrayFactura = Factura::whereBetween('fecha', array($start, $end))
+                ->where('idfactura', $textoFactura)
+                ->orderBy('fecha', 'ASC')
+                ->get();
+        }
 
 
-        $arrayFactura = Factura::whereBetween('fecha', array($start, $end))
-                                ->orderBy('fecha', 'DESC')
-                                ->get();
 
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
+
+
             $multi = $dato->cantidad * $dato->unitario;
+            $totalGalonesMixtos += $dato->cantidad;
             $totalLinea += $multi;
+
+
+
+
+            $pasado = number_format((float)$multi, 2, '.', ',');
+            $float = (float)$pasado;
+            $totalDineroMixto += $float;
 
             if($dato->producto == 'R'){
                 $totalRegular += $multi;
@@ -78,6 +98,8 @@ class ReportesController extends Controller
         }
 
 
+
+
         $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
@@ -86,6 +108,7 @@ class ReportesController extends Controller
         $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
         $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
 
+        $totalDineroMixto = number_format((float)$totalDineroMixto, 2, '.', ',');
 
         $infoExtra = Extras::where('id', 1)->first();
 
@@ -121,18 +144,18 @@ class ReportesController extends Controller
         $tabla .= "<div style='margin-top: 45px'></div>";
 
 
-        $tabla .= "<table id='tablaFor' style='width: 72%'>
+        $tabla .= "<table id='tablaFor' style='width: 100%'>
                 <tbody>
                 <tr style='background-color: #e1e1e1;'>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Fecha</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Equipo</th>
-                    <th style='text-align: center; font-size:13px; width: 8%; font-weight: bold'>Placa</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Factura</th>
-                    <th style='text-align: center; font-size:13px; width: 20%; font-weight: bold'>Prod.</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Galones</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>KM</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Precio U.</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Valor</th>
+                    <th style='text-align: center; font-size:13px; font-weight: bold'>Fecha</th>
+                    <th style='text-align: center; font-size:13px;  font-weight: bold'>Equipo</th>
+                    <th style='text-align: center; font-size:13px;  font-weight: bold'>Placa</th>
+                    <th style='text-align: center; font-size:13px;  font-weight: bold'>Factura</th>
+                    <th style='text-align: center; font-size:13px;  font-weight: bold'>Prod.</th>
+                    <th style='text-align: center; font-size:13px;font-weight: bold'>Galones</th>
+                    <th style='text-align: center; font-size:13px;  font-weight: bold'>KM</th>
+                    <th style='text-align: center; font-size:13px;font-weight: bold'>Precio U.</th>
+                    <th style='text-align: center; font-size:13px;  font-weight: bold'>Valor</th>
                 </tr>";
 
         foreach ($arrayFactura as $data){
@@ -152,8 +175,11 @@ class ReportesController extends Controller
         }
 
         $tabla .= "<tr>
-                <td colspan='8' style='font-size:13px; text-align: center; font-weight: bold'>TOTAL</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$$totalLinea</td>
+                <td colspan='5' style='font-size:13px; text-align: center; font-weight: bold'>TOTAL</td>
+                  <td style='font-size:13px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'></td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'></td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$$totalDineroMixto</td>
             </tr>";
 
         $tabla .= "</tbody></table>";
