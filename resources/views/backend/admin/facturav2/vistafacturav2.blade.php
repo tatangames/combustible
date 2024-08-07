@@ -125,6 +125,11 @@
                                             <input type="number" id="precio-editar" class="form-control">
                                         </div>
 
+                                        <div class="form-group">
+                                            <label>Descripción</label>
+                                            <input type="text" id="descripcion-editar" class="form-control">
+                                        </div>
+
                                     </div>
                                 </div>
 
@@ -204,6 +209,7 @@
                         $('#galones-editar').val(response.data.info.cantidad);
                         $('#precio-editar').val(response.data.info.unitario);
                         $('#km-editar').val(response.data.info.km);
+                        $('#descripcion-editar').val(response.data.info.descripcion);
 
                         document.getElementById("producto-editar").options.length = 0;
                         document.getElementById("equipo-editar").options.length = 0;
@@ -246,6 +252,7 @@
             var galones = document.getElementById('galones-editar').value;
             var unitario = document.getElementById('precio-editar').value;
             var km = document.getElementById('km-editar').value;
+            var descripcion = document.getElementById('descripcion-editar').value;
 
             if(numfactura === ''){
                 toastr.error('# Factura es requerido');
@@ -277,6 +284,7 @@
             formData.append('galones', galones);
             formData.append('unitario', unitario);
             formData.append('km', km);
+            formData.append('descripcion', descripcion);
 
             axios.post(url+'/facturav2/actualizar', formData, {
             })

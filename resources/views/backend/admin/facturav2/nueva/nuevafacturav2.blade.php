@@ -92,12 +92,24 @@
                                             <input type="text" id="km-nuevo" maxlength="15" class="form-control">
                                         </div>
 
-                                        <div class="card-footer" style="float: right;">
-                                            <button type="button" class="btn btn-primary" onclick="registrar()">Registrar</button>
-                                        </div>
                                     </div>
                                 </div>
 
+                                <div class="row">
+                                    <div class="col-md-6">
+
+                                        <div class="form-group">
+                                            <label>Descripción</label>
+                                            <input type="text" id="descripcion-nuevo" maxlength="800" placeholder="Descripción" class="form-control">
+                                        </div>
+
+
+                                        <div class="card-footer" style="float: right;">
+                                            <button type="button" class="btn btn-primary" onclick="registrar()">Registrar</button>
+                                        </div>
+
+                                    </div>
+                                </div>
 
                             </div>
 
@@ -156,7 +168,7 @@
             var galones = document.getElementById('galones-nuevo').value;
             var unitario = document.getElementById('precio-nuevo').value;
             var km = document.getElementById('km-nuevo').value;
-
+            var descripcion = document.getElementById('descripcion-nuevo').value;
 
             if(numfactura === ''){
                 toastr.error('# Factura es requerido');
@@ -192,6 +204,7 @@
             formData.append('galones', galones);
             formData.append('unitario', unitario);
             formData.append('km', km);
+            formData.append('descripcion', descripcion);
 
             axios.post(url+'/facturav2/nuevo', formData, {
             })
@@ -203,9 +216,9 @@
                     }
                     else if(response.data.success === 1){
                         toastr.success('Registrado');
-                        $('#equipo-nuevo').val(0).trigger('change');
+                        resetear();
 
-                        document.getElementById("formulario-nuevo").reset();
+
                     }
                     else {
                         toastr.error('error al registrar');
@@ -215,6 +228,19 @@
                     toastr.error('error al registrar');
                     closeLoading();
                 });
+        }
+
+
+        function resetear(){
+
+            $('#equipo-nuevo').val(0).trigger('change');
+
+            //$('#numfactura-nuevo').val("");
+
+            $('#galones-nuevo').val("");
+            $('#precio-nuevo').val("");
+            $('#km-nuevo').val("");
+            $('#descripcion-nuevo').val("");
         }
 
 

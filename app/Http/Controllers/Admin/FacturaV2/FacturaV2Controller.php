@@ -39,7 +39,7 @@ class FacturaV2Controller extends Controller
             'unitario' => 'required'
         );
 
-        // equipo, km
+        // equipo, km, descripcion
 
         $validar = Validator::make($request->all(), $regla);
 
@@ -57,6 +57,7 @@ class FacturaV2Controller extends Controller
             $registro->cantidad = $request->galones;
             $registro->unitario = $request->unitario;
             $registro->km = $request->km;
+            $registro->descripcion = $request->descripcion;
             $registro->save();
 
             DB::commit();
@@ -162,7 +163,7 @@ class FacturaV2Controller extends Controller
             'unitario' => 'required'
         );
 
-        // equipo, km
+        // equipo, km, descripcion
 
         $validar = Validator::make($request->all(), $regla);
 
@@ -181,6 +182,7 @@ class FacturaV2Controller extends Controller
                     'cantidad' => $request->galones,
                     'unitario' => $request->unitario,
                     'km' => $request->km,
+                    'descripcion' => $request->descripcion,
                 ]);
 
             DB::commit();

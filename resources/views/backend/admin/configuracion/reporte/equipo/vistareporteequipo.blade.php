@@ -48,12 +48,6 @@
 
                         </div>
 
-                        <div class="card-footer" style="float: right;">
-                            <button type="button" onclick="reporteExcel()" class="btn" style="margin-left: 15px; border-color: black; border-radius: 0.1px;">
-                                <img src="{{ asset('images/logoexcel.png') }}" width="55px" height="55px">
-                                Generar Excel
-                            </button>
-                        </div>
 
                         <div class="card-footer" style="float: right;">
                             <button type="button" onclick="reportePdf()" class="btn" style="margin-left: 15px; border-color: black; border-radius: 0.1px;">

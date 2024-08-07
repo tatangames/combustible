@@ -22,8 +22,10 @@ class CreateFacturacionTable extends Migration
             $table->string('numero_factura', 50);
             $table->date('fecha');
             $table->decimal('cantidad', 10,3);
-            $table->decimal('unitario', 10,3);
+            $table->decimal('unitario', 10,2);
             $table->string('km', 15)->nullable();
+
+            $table->string('descripcion', 800)->nullable();
 
             $table->foreign('id_equipo')->references('id')->on('equipos');
             $table->foreign('id_tipocombustible')->references('id')->on('tipocombustible');

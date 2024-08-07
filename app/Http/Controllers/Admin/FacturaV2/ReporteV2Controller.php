@@ -145,7 +145,8 @@ class ReporteV2Controller extends Controller
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Equipo</th>
                     <th style='text-align: center; font-size:13px; width: 8%; font-weight: bold'>Placa</th>
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Factura</th>
-                    <th style='text-align: center; font-size:13px; width: 20%; font-weight: bold'>Prod.</th>
+                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Prod.</th>
+                    <th style='text-align: center; font-size:13px; width: 20%; font-weight: bold'>Descripción</th>
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Galones</th>
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>KM</th>
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Precio U.</th>
@@ -160,6 +161,7 @@ class ReporteV2Controller extends Controller
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->placa</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->numero_factura</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->producto</td>
+                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->descripcion</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->cantidad</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$data->km</td>
                 <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->unitario</td>
@@ -232,94 +234,8 @@ class ReporteV2Controller extends Controller
 
 
 
-    public function reporteEquipoFechaExcel($desde, $hasta, $idequipo){
-
-        $nombre = 'combustible.xlsx';
-
-
-        $start = Carbon::parse($desde)->startOfDay();
-        $end = Carbon::parse($hasta)->endOfDay();
-
-        //$desdeFormat = date("d-m-Y", strtotime($desde));
-        //$hastaFormat = date("d-m-Y", strtotime($hasta));
-
-
-        $totalLinea = 0;
-        $totalRegular = 0;
-        $totalDiesel = 0;
-        $totalEspecial = 0;
-        $totalGalonRegular = 0;
-        $totalGalonDiesel = 0;
-        $totalGalonEspecial = 0;
-
-
-        if($idequipo == '0'){
-            // TODOS
-            $listado = Facturacion::whereBetween('fecha', array($start, $end))
-                ->orderBy('fecha', 'DESC')
-                ->get();
-        }else{
-            $listado = Facturacion::whereBetween('fecha', array($start, $end))
-                ->where('id_equipo', $idequipo)
-                ->orderBy('fecha', 'DESC')
-                ->get();
-        }
-
-
-        foreach ($listado as $dato){
-            $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
-
-            $multi = $dato->cantidad * $dato->unitario;
-            $totalLinea += $multi;
-
-            $producto = '';
-
-            if($dato->id_tipocombustible == 2){ // REGULAR
-                $totalRegular += $multi;
-                $totalGalonRegular += $dato->cantidad;
-                $producto = "R";
-            }
-            else if($dato->id_tipocombustible == 1){ // DIESEL
-                $totalDiesel += $multi;
-                $totalGalonDiesel += $dato->cantidad;
-                $producto = "D";
-            }
-            else if($dato->id_tipocombustible == 3){ // ESPECIAL
-                $totalEspecial += $multi;
-                $totalGalonEspecial += $dato->cantidad;
-                $producto = "E";
-            }
-
-            $dato->producto = $producto;
-
-            $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
-
-            $dato->placa = $infoEquipo->placa;
-            $dato->equipo = $infoEquipo->nombre;
-
-            $dato->multi = number_format((float)$multi, 2, '.', ',');
-        }
-
-
-        $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
-        $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
-        $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
-        $totalEspecial = number_format((float)$totalEspecial, 2, '.', ',');
-        $totalGalonRegular = number_format((float)$totalGalonRegular, 2, '.', ',');
-        $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
-        $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
-
-
-
-        return Excel::download(new ReporteEquipoExcel($listado, $totalLinea, $totalRegular, $totalDiesel,
-        $totalEspecial, $totalGalonRegular, $totalGalonDiesel, $totalGalonEspecial), $nombre);
-    }
-
-
-
     public function reporteFacturaPDF($numfactura){
 
-        $totalLinea = 0;
         $totalRegular = 0;
         $totalDiesel = 0;
         $totalEspecial = 0;
@@ -327,6 +243,8 @@ class ReporteV2Controller extends Controller
         $totalGalonDiesel = 0;
         $totalGalonEspecial = 0;
 
+        $totalDineroMixto = 0;
+        $totalGalonajeColumna = 0;
 
         $arrayFactura = Facturacion::where('numero_factura', $numfactura)
             ->orderBy('fecha', 'DESC')
@@ -336,7 +254,12 @@ class ReporteV2Controller extends Controller
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
             $multi = $dato->cantidad * $dato->unitario;
-            $totalLinea += $multi;
+
+            $pasado = number_format((float)$multi, 2, '.', ',');
+            $float = (float)$pasado;
+            $totalDineroMixto += $float;
+
+            $totalGalonajeColumna += $dato->cantidad;
 
             $producto = '';
 
@@ -367,13 +290,13 @@ class ReporteV2Controller extends Controller
         }
 
 
-        $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
         $totalEspecial = number_format((float)$totalEspecial, 2, '.', ',');
         $totalGalonRegular = number_format((float)$totalGalonRegular, 2, '.', ',');
         $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
         $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
+        $totalDineroMixto = number_format((float)$totalDineroMixto, 2, '.', ',');
 
 
         $infoExtra = Extras::where('id', 1)->first();
@@ -413,10 +336,11 @@ class ReporteV2Controller extends Controller
                 <tbody>
                 <tr style='background-color: #e1e1e1;'>
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Fecha</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Equipo</th>
-                    <th style='text-align: center; font-size:13px; width: 8%; font-weight: bold'>Placa</th>
+                    <th style='text-align: center; font-size:13px; width: 15%; font-weight: bold'>Equipo</th>
+                    <th style='text-align: center; font-size:13px; width: 9%; font-weight: bold'>Placa</th>
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Factura</th>
-                    <th style=';text-align: center; font-size:13px; width: 20%; font-weight: bold'>Prod.</th>
+                    <th style=';text-align: center; font-size:13px; width: 8% !important; font-weight: bold'>Prod.</th>
+                     <th style=';text-align: center; font-size:13px; width: 20%; font-weight: bold'>Descripción</th>
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Galones</th>
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>KM</th>
                     <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Precio U.</th>
@@ -426,22 +350,26 @@ class ReporteV2Controller extends Controller
         foreach ($arrayFactura as $data){
 
             $tabla .= "<tr>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->fechaFormat</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->equipo</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->placa</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->numero_factura</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->producto</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->cantidad</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->km</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->unitario</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->multi</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->fechaFormat</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->placa</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->numero_factura</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->producto</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->descripcion</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->cantidad</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->km</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$data->unitario</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$data->multi</td>
 
             </tr>";
         }
 
         $tabla .= "<tr>
-                <td colspan='8' style='font-size:13px; text-align: center; font-weight: bold'>TOTAL</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$$totalLinea</td>
+                <td colspan='6' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
+                 <td style='font-size:10px; text-align: center; font-weight: bold'>$totalGalonajeColumna</td>
+                 <td style='font-size:10px; text-align: center; font-weight: bold'></td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'></td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalDineroMixto</td>
             </tr>";
 
         $tabla .= "</tbody></table>";
@@ -455,7 +383,7 @@ class ReporteV2Controller extends Controller
 
         $tabla .= "<br>";
         $tabla .= "<div style='margin-left: 18px'>";
-        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL $$totalLinea</p>";
+        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL $$totalDineroMixto</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN REGULAR: $$totalRegular</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN DIESEL: $$totalDiesel</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN ESPECIAL: $$totalEspecial</p>";
@@ -500,73 +428,6 @@ class ReporteV2Controller extends Controller
         $mpdf->Output();
     }
 
-
-
-    public function reporteFacturaExcel($numfactura){
-
-        $nombre = 'combustible.xlsx';
-
-        $totalLinea = 0;
-        $totalRegular = 0;
-        $totalDiesel = 0;
-        $totalEspecial = 0;
-        $totalGalonRegular = 0;
-        $totalGalonDiesel = 0;
-        $totalGalonEspecial = 0;
-
-
-        $listado = Facturacion::where('numero_factura', $numfactura)
-            ->orderBy('fecha', 'DESC')
-            ->get();
-
-
-        foreach ($listado as $dato){
-            $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
-
-            $multi = $dato->cantidad * $dato->unitario;
-            $totalLinea += $multi;
-
-            $producto = '';
-
-            if($dato->id_tipocombustible == 2){ // REGULAR
-                $totalRegular += $multi;
-                $totalGalonRegular += $dato->cantidad;
-                $producto = "R";
-            }
-            else if($dato->id_tipocombustible == 1){ // DIESEL
-                $totalDiesel += $multi;
-                $totalGalonDiesel += $dato->cantidad;
-                $producto = "D";
-            }
-            else if($dato->id_tipocombustible == 3){ // ESPECIAL
-                $totalEspecial += $multi;
-                $totalGalonEspecial += $dato->cantidad;
-                $producto = "E";
-            }
-
-            $dato->producto = $producto;
-
-            $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
-
-            $dato->placa = $infoEquipo->placa;
-            $dato->equipo = $infoEquipo->nombre;
-
-            $dato->multi = number_format((float)$multi, 2, '.', ',');
-        }
-
-
-        $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
-        $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
-        $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
-        $totalEspecial = number_format((float)$totalEspecial, 2, '.', ',');
-        $totalGalonRegular = number_format((float)$totalGalonRegular, 2, '.', ',');
-        $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
-        $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
-
-
-        return Excel::download(new ReporteFacturaExcel($listado, $totalLinea, $totalRegular, $totalDiesel,
-            $totalEspecial, $totalGalonRegular, $totalGalonDiesel, $totalGalonEspecial), $nombre);
-    }
 
 
 }
