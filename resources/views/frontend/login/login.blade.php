@@ -145,7 +145,7 @@
 
         //distritometapan.com
 
-        axios.post('/login', formData, {
+        axios.post('/combustible.com/login', formData, {
         })
             .then((response) => {
                 closeLoading();
