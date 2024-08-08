@@ -202,7 +202,7 @@
                     }
                     else if(response.data.success === 1){
                         toastr.success('Registrado');
-                        document.getElementById("formulario-nuevo").reset();
+                        resetear()
                     }
                     else {
                         toastr.error('error al registrar');
@@ -213,6 +213,20 @@
                     closeLoading();
                 });
         }
+
+
+        function resetear(){
+
+            $('#equipo-nuevo').val(0).trigger('change');
+
+            //$('#numfactura-nuevo').val("");
+
+            $('#galones-nuevo').val("");
+            $('#precio-nuevo').val("");
+            $('#km-nuevo').val("");
+
+        }
+
 
 
 
