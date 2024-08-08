@@ -217,10 +217,8 @@
 
         function resetear(){
 
-            $('#equipo-nuevo').val(0).trigger('change');
 
-            //$('#numfactura-nuevo').val("");
-
+            $('#equipo-nuevo').val("");
             $('#galones-nuevo').val("");
             $('#precio-nuevo').val("");
             $('#km-nuevo').val("");
