@@ -221,6 +221,7 @@
             $('#equipo-nuevo').val("");
             $('#galones-nuevo').val("");
             $('#precio-nuevo').val("");
+            $('#placa-nuevo').val("");
             $('#km-nuevo').val("");
 
         }
