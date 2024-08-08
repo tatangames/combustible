@@ -10,6 +10,7 @@ use App\Models\Extras;
 use App\Models\Facturacion;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReporteV2Controller extends Controller
@@ -255,9 +256,9 @@ class ReporteV2Controller extends Controller
 
             $multi = $dato->cantidad * $dato->unitario;
 
-            $pasado = number_format((float)$multi, 2, '.', ',');
-            $float = (float)$pasado;
-            $totalDineroMixto += $float;
+            $pasado = number_format((float) $multi , 2, '.', ',');
+            $numero = (float) str_replace([',', ' '], '', $pasado);
+            $totalDineroMixto += $numero;
 
             $totalGalonajeColumna += $dato->cantidad;
 

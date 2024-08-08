@@ -15,6 +15,8 @@
     <link href="{{ asset('css/toastr.min.css') }}" type="text/css" rel="stylesheet" />
     @yield('content-admin-css')
 
+    <!-- combustible.com/ -->
+
     <script type="text/javascript"> var url = "/combustible.com/admin"; </script>
 </head>
 <body class="hold-transition sidebar-mini">

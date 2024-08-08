@@ -169,7 +169,7 @@
             var formData = new FormData();
             formData.append('idrol', idrol);
 
-            axios.post('/admin/roles/borrar-global', formData, {
+            axios.post(url+'/roles/borrar-global', formData, {
             })
                 .then((response) => {
                     closeLoading()
@@ -205,7 +205,7 @@
             var formData = new FormData();
             formData.append('nombre', nombre);
 
-            axios.post('/admin/permisos/nuevo-rol', formData, {
+            axios.post(url+'/permisos/nuevo-rol', formData, {
             })
                 .then((response) => {
                     closeLoading()

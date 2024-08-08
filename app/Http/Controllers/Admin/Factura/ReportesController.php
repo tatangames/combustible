@@ -74,8 +74,6 @@ class ReportesController extends Controller
             $totalLinea += $multi;
 
 
-
-
             $pasado = number_format((float)$multi, 2, '.', ',');
             $float = (float)$pasado;
             $totalDineroMixto += $float;
