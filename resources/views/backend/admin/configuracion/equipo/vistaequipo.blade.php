@@ -113,13 +113,13 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Nombre</label>
-                                        <input type="text" id="nombre-editar" autocomplete="off" class="form-control" maxlength="100" />
+                                        <label># de Equipo</label>
+                                        <input type="text" id="nombre-editar" autocomplete="off" placeholder="Equipo" class="form-control" maxlength="100" />
                                     </div>
 
                                     <div class="form-group">
                                         <label>Placa (Opcional)</label>
-                                        <input type="text" id="placa-editar" autocomplete="off" class="form-control" maxlength="20" />
+                                        <input type="text" id="placa-editar" autocomplete="off" placeholder="" class="form-control" maxlength="20" />
                                     </div>
 
                                 </div>
