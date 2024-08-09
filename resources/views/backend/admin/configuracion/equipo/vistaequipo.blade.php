@@ -187,7 +187,7 @@
             formData.append('nombre', nombre);
             formData.append('placa', placa);
 
-            axios.post('/admin/equipo/nuevo', formData, {
+            axios.post(url+'/equipo/nuevo', formData, {
             })
                 .then((response) => {
                     closeLoading();
@@ -210,7 +210,7 @@
             openLoading();
             document.getElementById("formulario-editar").reset();
 
-            axios.post('/admin/equipo/informacion',{
+            axios.post(url+'/equipo/informacion',{
                 'id': id
             })
                 .then((response) => {
@@ -250,7 +250,7 @@
             formData.append('nombre', nombre);
             formData.append('placa', placa);
 
-            axios.post('/admin/equipo/editar', formData, {
+            axios.post(url+'/equipo/editar', formData, {
             })
                 .then((response) => {
                     closeLoading();
