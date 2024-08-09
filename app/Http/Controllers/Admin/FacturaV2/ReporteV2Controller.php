@@ -52,12 +52,12 @@ class ReporteV2Controller extends Controller
         if($idequipo == '0'){
             // TODOS
             $arrayFactura = Facturacion::whereBetween('fecha', array($start, $end))
-                ->orderBy('fecha', 'DESC')
+                ->orderBy('fecha', 'ASC')
                 ->get();
         }else{
             $arrayFactura = Facturacion::whereBetween('fecha', array($start, $end))
                 ->where('id_equipo', $idequipo)
-                ->orderBy('fecha', 'DESC')
+                ->orderBy('fecha', 'ASC')
                 ->get();
         }
 
