@@ -346,11 +346,11 @@ class ReporteV2Controller extends Controller
                 <tbody>
                 <tr style='background-color: #e1e1e1;'>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Fecha</th>
-                    <th style='text-align: center; font-size:10px; width: 15%; font-weight: bold'>Equipo</th>
+                    <th style='text-align: center; font-size:10px; width: 14%; font-weight: bold'>Equipo</th>
                     <th style='text-align: center; font-size:10px; width: 9%; font-weight: bold'>Placa</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Factura</th>
                     <th style=';text-align: center; font-size:10px; width: 8% !important; font-weight: bold'>Prod.</th>
-                     <th style=';text-align: center; font-size:10px; width: 20%; font-weight: bold'>Descripción</th>
+                     <th style=';text-align: center; font-size:10px; width: 13%; font-weight: bold'>Descripción</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Galones</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>KM</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Precio U.</th>
