@@ -70,8 +70,8 @@
                                 <div class="col-md-12">
 
                                     <div class="form-group">
-                                        <label>Nombre</label>
-                                        <input type="text" id="nombre-nuevo" autocomplete="off" class="form-control" maxlength="100" />
+                                        <label># de Equipo</label>
+                                        <input type="text" id="nombre-nuevo" autocomplete="off" placeholder="Equipo" class="form-control" maxlength="100" />
                                     </div>
 
                                     <div class="form-group">
