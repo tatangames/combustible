@@ -68,7 +68,10 @@ class ReporteV2Controller extends Controller
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
             $multi = $dato->cantidad * $dato->unitario;
-            $totalLinea += $multi;
+
+            $pasado = number_format((float) $multi , 2, '.', ',');
+            $numero = (float) str_replace([',', ' '], '', $pasado);
+            $totalLinea += $numero;
 
             $totalGalonesMixtos += $dato->cantidad;
 
