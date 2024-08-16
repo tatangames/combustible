@@ -285,17 +285,18 @@ class ReportesController extends Controller
         $totalGalonDiesel = 0;
         $totalGalonEspecial = 0;
 
-
+        $totalGalonesMixtos = 0;
 
         $arrayFactura = Factura::whereBetween('fecha', array($start, $end))
             ->where('equipo', $equipo)
-            ->orderBy('fecha', 'DESC')
+            ->orderBy('fecha', 'ASC')
             ->get();
 
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
             $multi = $dato->cantidad * $dato->unitario;
+            $totalGalonesMixtos += $dato->cantidad;
 
 
             $multi = $dato->cantidad * $dato->unitario;
@@ -324,6 +325,8 @@ class ReportesController extends Controller
         $totalGalonRegular = number_format((float)$totalGalonRegular, 2, '.', ',');
         $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
         $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
+
+        $totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 2, '.', ',');
 
 
 
@@ -362,37 +365,40 @@ class ReportesController extends Controller
         $tabla .= "<table id='tablaFor' style='width: 72%'>
                 <tbody>
                 <tr style='background-color: #e1e1e1;'>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Fecha</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Equipo</th>
-                    <th style='text-align: center; font-size:13px; width: 8%; font-weight: bold'>Placa</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Factura</th>
-                    <th style='text-align: center; font-size:13px; width: 20%; font-weight: bold'>Prod.</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Galones</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>KM</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Precio U.</th>
-                    <th style='text-align: center; font-size:13px; width: 12%; font-weight: bold'>Valor</th>
+                    <th style='text-align: center; font-size:12px; width: 12%; font-weight: bold'>Fecha</th>
+                    <th style='text-align: center; font-size:12px; width: 12%; font-weight: bold'>Equipo</th>
+                    <th style='text-align: center; font-size:12px; width: 8%; font-weight: bold'>Placa</th>
+                    <th style='text-align: center; font-size:12px; width: 12%; font-weight: bold'>Factura</th>
+                    <th style='text-align: center; font-size:12px; width: 12%; font-weight: bold'>Prod.</th>
+                    <th style='text-align: center; font-size:12px; width: 12%; font-weight: bold'>Galones</th>
+                    <th style='text-align: center; font-size:12px; width: 12%; font-weight: bold'>KM</th>
+                    <th style='text-align: center; font-size:12px; width: 12%; font-weight: bold'>Precio U.</th>
+                    <th style='text-align: center; font-size:12px; width: 12%; font-weight: bold'>Valor</th>
                 </tr>";
 
         foreach ($arrayFactura as $data){
 
             $tabla .= "<tr>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->fechaFormat</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->equipo</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->placa</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->idfactura</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->producto</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->cantidad</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$data->km</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->unitario</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$$data->multi</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->fechaFormat</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->placa</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->idfactura</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->producto</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->cantidad</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->km</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$data->unitario</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$data->multi</td>
 
             </tr>";
         }
 
 
         $tabla .= "<tr>
-                <td colspan='8' style='font-size:13px; text-align: center; font-weight: bold'>TOTAL</td>
-                <td style='font-size:13px; text-align: center; font-weight: bold'>$$totalLinea</td>
+                <td colspan='5' style='font-size:13px; text-align: center; font-weight: bold'>TOTAL</td>
+                <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
+                <td style='font-size:11px; text-align: center; font-weight: bold'></td>
+                <td style='font-size:11px; text-align: center; font-weight: bold'></td>
+                <td style='font-size:11px; text-align: center; font-weight: bold'>$$totalLinea</td>
             </tr>";
 
 
