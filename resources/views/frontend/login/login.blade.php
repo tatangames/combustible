@@ -73,11 +73,11 @@
             <div class="container">
                 <div class="row">
                     <div class="col-lg-6 col-12 mx-auto">
-                        <div class="text-center image-size-small position-relative">
-                            <img src="{{ asset('images/logo.png') }}" class="rounded-circle p-2 bg-white">
-                        </div>
                         <div class="p-5 bg-white rounded shadow-lg">
-                            <h3 class="mb-2 text-center pt-5"><strong>Alcaldía Municipal de Metapán</strong></h3>
+                        <div class="text-center image-size-small position-relative">
+                            <img src="{{ asset('images/logo2.png') }}" class=" p-2">
+                        </div>
+                            <h3 class="mb-2 text-center pt-5"><strong>&nbsp;</strong></h3>
                             <p class="text-center lead">Registro de Combustible</p>
                             <form>
                                 <label style="margin-top: 10px" class="font-500">Usuario</label>
