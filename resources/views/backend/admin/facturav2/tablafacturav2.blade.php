@@ -9,9 +9,7 @@
                             <tr>
                                 <th>Fecha</th>
                                 <th>Factura</th>
-                                <th>Distrito</th>
-                                <th>Fondo</th>
-                                <th>Turno</th>
+
                                 <th>Equipo</th>
                                 <th>Producto</th>
                                 <th>Precio</th>
@@ -26,9 +24,7 @@
                                 <tr>
                                     <td>{{ $dato->fechaFormat }}</td>
                                     <td>{{ $dato->numero_factura }}</td>
-                                    <td>{{ $dato->distrito }}</td>
-                                    <td>{{ $dato->fondos }}</td>
-                                    <td>{{ $dato->turnoFormat }}</td>
+
                                     <td>{{ $dato->nombreEquipo }}</td>
                                     <td>{{ $dato->tipoCombustible }}</td>
                                     <td>{{ $dato->precioFormat }}</td>
