@@ -108,7 +108,6 @@ class ReporteV2Controller extends Controller
             $totalLinea += $numero;
 
             $totalGalonesMixtos += $dato->cantidad;
-
             $producto = '';
 
             if($dato->id_tipocombustible == 2){ // REGULAR
@@ -128,11 +127,21 @@ class ReporteV2Controller extends Controller
             }
 
             $dato->producto = $producto;
-
             $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
 
             $dato->placa = $infoEquipo->placa;
             $dato->equipo = $infoEquipo->nombre;
+
+
+            $turno = "";
+            if($dato->turno !== null) {
+                if ($dato->turno == 0) {
+                    $turno = "M";
+                } else if ($dato->turno == 1) {
+                    $turno = "T";
+                }
+            }
+            $dato->turnoFormat = $turno;
 
             $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
@@ -193,6 +202,7 @@ class ReporteV2Controller extends Controller
                     <th style='text-align: center; font-size:10px; width: 8%; font-weight: bold'>Placa</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Factura</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Prod.</th>
+                    <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Turno</th>
                     <th style='text-align: center; font-size:10px; width: 13%; font-weight: bold'>Descripción</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Galones</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>KM</th>
@@ -208,6 +218,7 @@ class ReporteV2Controller extends Controller
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->placa</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->numero_factura</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->producto</td>
+                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->turnoFormat</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->descripcion</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->cantidad</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->km</td>
