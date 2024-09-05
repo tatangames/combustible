@@ -170,7 +170,7 @@ class ReporteV2Controller extends Controller
     <tr>
         <td style='text-align: center;'>
             <p id='titulo' style='margin: 0;'>REPORTE DE COMBUSTIBLE <br>
-            $infoExtra->nombre_gasolinera <br>
+            Gasolinera PUMA Metapán <br>
             Distrito de: $nombreDistrito <br>
             Tipo Fondo: $nombreFondo <br>
             De: $desdeFormat hasta: $hastaFormat <br>
@@ -329,6 +329,23 @@ class ReporteV2Controller extends Controller
                 $producto = "E";
             }
 
+
+
+            $nombreDistrito = "";
+            if($infoDistrito = Distritos::where('id', $dato->id_distrito)->first()){
+                $nombreDistrito = $infoDistrito->nombre;
+            }
+
+            $nombreFondo = "";
+            if($infoFondo = TipoFondos::where('id', $dato->id_fondos)->first()){
+                $nombreFondo = $infoFondo->nombre;
+            }
+
+            $dato->nombredistrito = $nombreDistrito;
+            $dato->nombrefondos = $nombreFondo;
+
+
+
             $dato->producto = $producto;
 
             $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
@@ -370,14 +387,19 @@ class ReporteV2Controller extends Controller
 
         $logoalcaldia = 'images/logo.png';
 
-        $tabla = "<div class='content'>
-            <img id='logo' src='$logoalcaldia'>
-            <p id='titulo'>REPORTE DE COMBUSTIBLE <br>
-            G$infoExtra->nombre_gasolinera <br>
-                  Factura: $numfactura <br>
-                 </p>
-
-            </div>";
+        $tabla = "
+            <table style='width: 100%;'>
+                <tr>
+                    <td style='text-align: center;'>
+                        <p id='titulo' style='margin: 0;'>REPORTE DE COMBUSTIBLE <br>
+                        Gasolinera PUMA Metapán <br>
+                        </p>
+                    </td>
+                    <td style='width: 66px; text-align: right;'>
+                        <img id='logo' src='$logoalcaldia' style='width: 66px; height: 73px;' />
+                    </td>
+                </tr>
+            </table>";
 
         $tabla .= "<div style='margin-top: 45px'></div>";
 
@@ -388,6 +410,8 @@ class ReporteV2Controller extends Controller
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Fecha</th>
                     <th style='text-align: center; font-size:10px; width: 14%; font-weight: bold'>Equipo</th>
                     <th style='text-align: center; font-size:10px; width: 9%; font-weight: bold'>Placa</th>
+                    <th style='text-align: center; font-size:10px; width: 9%; font-weight: bold'>Distrito</th>
+                    <th style='text-align: center; font-size:10px; width: 9%; font-weight: bold'>Fondo</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Factura</th>
                     <th style=';text-align: center; font-size:10px; width: 8% !important; font-weight: bold'>Prod.</th>
                      <th style=';text-align: center; font-size:10px; width: 13%; font-weight: bold'>Descripción</th>
@@ -403,6 +427,8 @@ class ReporteV2Controller extends Controller
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->fechaFormat</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->placa</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->nombredistrito</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->nombrefondos</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->numero_factura</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->producto</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->descripcion</td>
@@ -415,7 +441,7 @@ class ReporteV2Controller extends Controller
         }
 
         $tabla .= "<tr>
-                <td colspan='6' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
+                <td colspan='8' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
                  <td style='font-size:10px; text-align: center; font-weight: bold'>$totalGalonajeColumna</td>
                  <td style='font-size:10px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'></td>
