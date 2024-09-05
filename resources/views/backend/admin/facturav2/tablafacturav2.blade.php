@@ -9,7 +9,6 @@
                             <tr>
                                 <th>Fecha</th>
                                 <th>Factura</th>
-
                                 <th>Equipo</th>
                                 <th>Producto</th>
                                 <th>Precio</th>
@@ -24,7 +23,6 @@
                                 <tr>
                                     <td>{{ $dato->fechaFormat }}</td>
                                     <td>{{ $dato->numero_factura }}</td>
-
                                     <td>{{ $dato->nombreEquipo }}</td>
                                     <td>{{ $dato->tipoCombustible }}</td>
                                     <td>{{ $dato->precioFormat }}</td>
