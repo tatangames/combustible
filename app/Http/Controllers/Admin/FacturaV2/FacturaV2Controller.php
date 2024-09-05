@@ -45,7 +45,6 @@ class FacturaV2Controller extends Controller
             'unitario' => 'required',
             'fondos' => 'required',
             'distrito' => 'required',
-            'turno' => 'required'
         );
 
         // equipo, km, descripcion
@@ -68,7 +67,6 @@ class FacturaV2Controller extends Controller
             $registro->descripcion = $request->descripcion;
             $registro->id_fondos = $request->fondos;
             $registro->id_distrito = $request->distrito;
-            $registro->turno = $request->turno;
             $registro->save();
 
             DB::commit();
@@ -118,18 +116,6 @@ class FacturaV2Controller extends Controller
 
             $dato->distrito = $nombreDistrito;
             $dato->fondos = $nombreFondo;
-
-
-            $turno = "";
-            if($dato->turno !== null){
-                if($dato->turno == 0){
-                    $turno = "M";
-                }else if($dato->turno == 1){
-                    $turno = "T";
-                }
-            }
-
-            $dato->turnoFormat = $turno;
         }
 
         return view('backend.admin.facturav2.tablafacturav2', compact('listado'));
@@ -199,7 +185,6 @@ class FacturaV2Controller extends Controller
             'unitario' => 'required',
             'fondo' => 'required',
             'distrito' => 'required',
-            'turno' => 'required'
         );
 
         // equipo, km, descripcion
@@ -224,7 +209,6 @@ class FacturaV2Controller extends Controller
                     'descripcion' => $request->descripcion,
                     'id_fondos' => $request->fondo,
                     'id_distrito' => $request->distrito,
-                    'turno' => $request->turno
                 ]);
 
             DB::commit();

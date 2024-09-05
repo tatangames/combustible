@@ -51,16 +51,6 @@
                                 </select>
                             </div>
 
-                            <div class="form-group" style="width: 50%">
-                                <label>Turno</label>
-                                <select class="form-control" id="select-turno">
-                                    <option value="10">TODOS</option>
-                                    <option value="0">Mañana</option>
-                                    <option value="1">Tarde</option>
-                                </select>
-                            </div>
-
-
                         </div>
 
 
@@ -115,7 +105,6 @@
             var numfactura = document.getElementById('numfactura').value;
             var distrito = document.getElementById('select-distrito').value;
             var fondos = document.getElementById('select-fondos').value;
-            var turno = document.getElementById('select-turno').value;
 
             if(numfactura === ''){
                 toastr.error('Factura es requerido')
@@ -123,7 +112,7 @@
             }
 
             window.open("{{ URL::to('admin/reportev2/pdf/factura') }}/" + numfactura
-                + "/" + distrito + "/" + fondos + "/" + turno);
+                + "/" + distrito + "/" + fondos);
         }
 
 

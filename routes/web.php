@@ -79,11 +79,11 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
 
     // REPORTES EQUIPOS
     Route::get('/admin/reportev2/fechas/index', [ReporteV2Controller::class,'vistaReporteFechas'])->name('admin.reporte.facturacion.equipos');
-    Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}/{distrito}/{fondo}/{turno}', [ReporteV2Controller::class,'reporteEquipoFechaPDF']);
+    Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}/{distrito}/{fondo}', [ReporteV2Controller::class,'reporteEquipoFechaPDF']);
 
     // REPORTE FACTURA
     Route::get('/admin/reportev2/factura/index', [ReporteV2Controller::class,'vistaReporteFactura'])->name('admin.reporte.facturacion.factura');
-    Route::get('/admin/reportev2/pdf/factura/{numfactura}/{distrito}/{fondo}/{turno}', [ReporteV2Controller::class,'reporteFacturaPDF']);
+    Route::get('/admin/reportev2/pdf/factura/{numfactura}/{distrito}/{fondo}', [ReporteV2Controller::class,'reporteFacturaPDF']);
 
 
     //******************** PARTE DEL SISTEMA ANTERIOR ***************************************

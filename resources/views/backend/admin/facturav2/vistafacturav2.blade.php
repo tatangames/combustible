@@ -93,13 +93,6 @@
                                             </select>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label>Turno</label>
-                                            <select class="form-control" id="select-turno" >
-                                                <option value="0">Mañana</option>
-                                                <option value="1">Tarde</option>
-                                            </select>
-                                        </div>
 
                                         <hr>
                                         <br>
@@ -137,8 +130,6 @@
                                             <select class="form-control" id="fondo-editar">
                                             </select>
                                         </div>
-
-
 
 
                                         <hr>
@@ -284,16 +275,6 @@
                             }
                         });
 
-
-                        let turno = response.data.info.turno;
-                        if(turno != null){
-                            if(turno === 0){
-                                document.getElementById('select-turno').options.selectedIndex = 0;
-                            }else if(turno === 1){
-                                document.getElementById('select-turno').options.selectedIndex = 1;
-                            }
-                        }
-
                     }else{
                         toastr.error('Información no encontrada');
                     }
@@ -319,7 +300,6 @@
 
             var fondos = document.getElementById('fondo-editar').value;
             var distrito = document.getElementById('distrito-editar').value;
-            var turno = document.getElementById('select-turno').value;
 
             if(numfactura === ''){
                 toastr.error('# Factura es requerido');
@@ -354,7 +334,6 @@
             formData.append('descripcion', descripcion);
             formData.append('fondo', fondos);
             formData.append('distrito', distrito);
-            formData.append('turno', turno);
 
             axios.post(url+'/facturav2/actualizar', formData, {
             })

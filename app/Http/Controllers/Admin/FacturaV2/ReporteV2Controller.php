@@ -41,7 +41,7 @@ class ReporteV2Controller extends Controller
     }
 
 
-    public function reporteEquipoFechaPDF($desde, $hasta, $idequipo, $iddistrito, $idfondo, $idturno){
+    public function reporteEquipoFechaPDF($desde, $hasta, $idequipo, $iddistrito, $idfondo){
 
         $start = Carbon::parse($desde)->startOfDay();
         $end = Carbon::parse($hasta)->endOfDay();
@@ -86,9 +86,6 @@ class ReporteV2Controller extends Controller
             $boolFondosTodos = false; // defecto seran todos los fondos
         }
 
-        if($idturno == '10'){
-            $boolTurno = false; // defecto seran todos
-        }
 
         $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
             ->when($boolEquipoTodos, function($query) use ($idequipo) {
@@ -100,9 +97,7 @@ class ReporteV2Controller extends Controller
             ->when($boolFondosTodos, function($query) use ($idfondo) {
                 return $query->where('id_fondos', $idfondo);
             })
-            ->when($boolTurno, function($query) use ($idturno) {
-                return $query->where('turno', $idturno);
-            })
+
             ->orderBy('fecha', 'ASC')
             ->get();
 
@@ -141,17 +136,6 @@ class ReporteV2Controller extends Controller
 
             $dato->placa = $infoEquipo->placa;
             $dato->equipo = $infoEquipo->nombre;
-
-
-            $turno = "";
-            if($dato->turno !== null) {
-                if ($dato->turno == 0) {
-                    $turno = "M";
-                } else if ($dato->turno == 1) {
-                    $turno = "T";
-                }
-            }
-            $dato->turnoFormat = $turno;
 
             $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
@@ -216,7 +200,6 @@ class ReporteV2Controller extends Controller
                     <th style='text-align: center; font-size:10px; width: 8%; font-weight: bold'>Placa</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Factura</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Prod.</th>
-                    <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Turno</th>
                     <th style='text-align: center; font-size:10px; width: 13%; font-weight: bold'>Descripción</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Galones</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>KM</th>
@@ -232,7 +215,6 @@ class ReporteV2Controller extends Controller
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->placa</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->numero_factura</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->producto</td>
-                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->turnoFormat</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->descripcion</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->cantidad</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->km</td>
@@ -302,7 +284,7 @@ class ReporteV2Controller extends Controller
 
 
 
-    public function reporteFacturaPDF($numfactura, $iddistrito, $idfondo, $idturno){
+    public function reporteFacturaPDF($numfactura, $iddistrito, $idfondo){
 
         $totalRegular = 0;
         $totalDiesel = 0;
@@ -336,18 +318,6 @@ class ReporteV2Controller extends Controller
             }
         }
 
-        $textoTurno = "Turno: Mañana y Tarde";
-        if($idturno == '10'){
-            $boolTurno = false; // defecto seran todos
-        }else{
-            if($idturno == '0') {
-               $textoTurno = "Turno: Mañana";
-            }else if($idturno == '1'){
-                $textoTurno = "Turno: Tarde";
-            }
-        }
-
-
 
         $arrayFactura = Facturacion::where('numero_factura', $numfactura)
             ->when($boolDistritoTodos, function($query) use ($iddistrito) {
@@ -355,9 +325,6 @@ class ReporteV2Controller extends Controller
             })
             ->when($boolFondosTodos, function($query) use ($idfondo) {
                 return $query->where('id_fondos', $idfondo);
-            })
-            ->when($boolTurno, function($query) use ($idturno) {
-                return $query->where('turno', $idturno);
             })
             ->orderBy('fecha', 'ASC')
             ->get();
@@ -391,8 +358,6 @@ class ReporteV2Controller extends Controller
                 $totalGalonEspecial += $dato->cantidad;
                 $producto = "E";
             }
-
-
 
             $nombreDistrito = "";
             if($infoDistrito = Distritos::where('id', $dato->id_distrito)->first()){
@@ -444,9 +409,6 @@ class ReporteV2Controller extends Controller
         $logoalcaldia = 'images/logo.png';
 
 
-
-
-
         $tabla = "
             <table style='width: 100%;'>
                 <tr>
@@ -455,7 +417,6 @@ class ReporteV2Controller extends Controller
                         Gasolinera PUMA Metapán <br>
                         $textoDistrito <br>
                         $textoFondos <br>
-                        $textoTurno
                         </p>
                     </td>
                     <td style='width: 66px; text-align: right;'>

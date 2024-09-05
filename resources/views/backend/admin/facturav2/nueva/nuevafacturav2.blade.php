@@ -56,9 +56,7 @@
                                                 @endforeach
                                             </select>
                                         </div>
-                                        <div class="form-group">
-                                            <label></label>
-                                        </div>
+
                                         <hr>
                                         <br>
 
@@ -108,13 +106,6 @@
                                             </select>
                                         </div>
 
-                                        <div class="form-group">
-                                            <label>Turno</label>
-                                            <select class="form-control" id="select-turno" >
-                                                <option value="0">Mañana</option>
-                                                <option value="1">Tarde</option>
-                                            </select>
-                                        </div>
 
                                         <hr>
                                         <br>
@@ -210,7 +201,6 @@
 
             var selectFondos = document.getElementById('fondos-nuevo').value;
             var selectDistritos = document.getElementById('distrito-nuevo').value;
-            var selectTurno = document.getElementById('select-turno').value;
 
 
             if(numfactura === ''){
@@ -260,7 +250,6 @@
             formData.append('descripcion', descripcion);
             formData.append('fondos', selectFondos);
             formData.append('distrito', selectDistritos);
-            formData.append('turno', selectTurno);
 
             axios.post(url+'/facturav2/nuevo', formData, {
             })
