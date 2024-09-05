@@ -30,6 +30,37 @@
                                     <input type="text" class="form-control" id="numfactura" autocomplete="off" maxlength="100">
                                 </div>
                             </div>
+
+                            <div class="form-group" style="width: 50%">
+                                <label>Distrito</label>
+                                <select class="form-control" id="select-distrito">
+                                    <option value="0">TODOS</option>
+                                    @foreach($arrayDistrito as $dato)
+                                        <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="width: 50%">
+                                <label>Fondos</label>
+                                <select class="form-control" id="select-fondos">
+                                    <option value="0">TODOS</option>
+                                    @foreach($arrayFondos as $dato)
+                                        <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="width: 50%">
+                                <label>Turno</label>
+                                <select class="form-control" id="select-turno">
+                                    <option value="10">TODOS</option>
+                                    <option value="0">Mañana</option>
+                                    <option value="1">Tarde</option>
+                                </select>
+                            </div>
+
+
                         </div>
 
 
@@ -82,27 +113,20 @@
         function reportePdf(){
 
             var numfactura = document.getElementById('numfactura').value;
+            var distrito = document.getElementById('select-distrito').value;
+            var fondos = document.getElementById('select-fondos').value;
+            var turno = document.getElementById('select-turno').value;
 
             if(numfactura === ''){
                 toastr.error('Factura es requerido')
                 return;
             }
 
-            window.open("{{ URL::to('admin/reportev2/pdf/factura') }}/" + numfactura);
+            window.open("{{ URL::to('admin/reportev2/pdf/factura') }}/" + numfactura
+                + "/" + distrito + "/" + fondos + "/" + turno);
         }
 
 
-        function reporteExcel(){
-
-            var numfactura = document.getElementById('numfactura').value;
-
-            if(numfactura === ''){
-                toastr.error('Factura es requerido')
-                return;
-            }
-
-            window.open("{{ URL::to('admin/reportev2/excel/factura') }}/" + numfactura);
-        }
 
     </script>
 

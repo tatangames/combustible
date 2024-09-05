@@ -33,11 +33,15 @@ class ReporteV2Controller extends Controller
     }
 
     public function vistaReporteFactura(){
-        return view('backend.admin.configuracion.reporte.factura.vistareportefactura');
+        $arrayDistrito = Distritos::orderBy('nombre', 'ASC')->get();
+        $arrayFondos = TipoFondos::orderBy('nombre', 'ASC')->get();
+
+        return view('backend.admin.configuracion.reporte.factura.vistareportefactura',
+        compact('arrayDistrito', 'arrayFondos'));
     }
 
 
-    public function reporteEquipoFechaPDF($desde, $hasta, $idequipo, $iddistrito, $idfondo){
+    public function reporteEquipoFechaPDF($desde, $hasta, $idequipo, $iddistrito, $idfondo, $idturno){
 
         $start = Carbon::parse($desde)->startOfDay();
         $end = Carbon::parse($hasta)->endOfDay();
@@ -68,7 +72,7 @@ class ReporteV2Controller extends Controller
         $boolEquipoTodos = true; // defecto buscar por algun equipo
         $boolDistritoTodos = true; // defecto buscar por algun distrito
         $boolFondosTodos = true; // defecto buscar por algun fondos
-
+        $boolTurno = true;
 
         if($idequipo == '0'){
             $boolEquipoTodos = false; // defecto seran todos los equipos
@@ -82,6 +86,9 @@ class ReporteV2Controller extends Controller
             $boolFondosTodos = false; // defecto seran todos los fondos
         }
 
+        if($idturno == '10'){
+            $boolTurno = false; // defecto seran todos
+        }
 
         $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
             ->when($boolEquipoTodos, function($query) use ($idequipo) {
@@ -92,6 +99,9 @@ class ReporteV2Controller extends Controller
             })
             ->when($boolFondosTodos, function($query) use ($idfondo) {
                 return $query->where('id_fondos', $idfondo);
+            })
+            ->when($boolTurno, function($query) use ($idturno) {
+                return $query->where('turno', $idturno);
             })
             ->orderBy('fecha', 'ASC')
             ->get();
@@ -160,7 +170,11 @@ class ReporteV2Controller extends Controller
 
         $infoExtra = Extras::where('id', 1)->first();
 
-        $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+        if($infoExtra->reporte == 1){
+            $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+        }else{
+            $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
+        }
 
         $mpdf->SetTitle('Combustible');
 
@@ -175,21 +189,21 @@ class ReporteV2Controller extends Controller
         $logoalcaldia = 'images/logo.png';
 
         $tabla = "
-<table style='width: 100%;'>
-    <tr>
-        <td style='text-align: center;'>
-            <p id='titulo' style='margin: 0;'>REPORTE DE COMBUSTIBLE <br>
-            Gasolinera PUMA Metapán <br>
-            Distrito de: $nombreDistrito <br>
-            Tipo Fondo: $nombreFondo <br>
-            De: $desdeFormat hasta: $hastaFormat <br>
-            </p>
-        </td>
-        <td style='width: 66px; text-align: right;'>
-            <img id='logo' src='$logoalcaldia' style='width: 66px; height: 73px;' />
-        </td>
-    </tr>
-</table>";
+            <table style='width: 100%;'>
+                <tr>
+                    <td style='text-align: center;'>
+                        <p id='titulo' style='margin: 0;'>REPORTE DE COMBUSTIBLE <br>
+                        Gasolinera PUMA Metapán <br>
+                        Distrito de: $nombreDistrito <br>
+                        Tipo Fondo: $nombreFondo <br>
+                        De: $desdeFormat hasta: $hastaFormat <br>
+                        </p>
+                    </td>
+                    <td style='width: 66px; text-align: right;'>
+                        <img id='logo' src='$logoalcaldia' style='width: 66px; height: 73px;' />
+                    </td>
+                </tr>
+            </table>";
 
         $tabla .= "<div style='margin-top: 45px'></div>";
 
@@ -239,8 +253,6 @@ class ReporteV2Controller extends Controller
         $tabla .= "</tbody></table>";
 
 
-
-
         //***********************************************
 
 
@@ -255,10 +267,6 @@ class ReporteV2Controller extends Controller
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Diesel: $totalGalonDiesel</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Especial: $totalGalonEspecial</p>";
         $tabla .= "</div>";
-
-
-
-
 
 
 
@@ -290,12 +298,11 @@ class ReporteV2Controller extends Controller
         $mpdf->SetAutoPageBreak(true, 45);
         $mpdf->WriteHTML($tabla, 2);
         $mpdf->Output();
-
     }
 
 
 
-    public function reporteFacturaPDF($numfactura){
+    public function reporteFacturaPDF($numfactura, $iddistrito, $idfondo, $idturno){
 
         $totalRegular = 0;
         $totalDiesel = 0;
@@ -303,13 +310,58 @@ class ReporteV2Controller extends Controller
         $totalGalonRegular = 0;
         $totalGalonDiesel = 0;
         $totalGalonEspecial = 0;
-
         $totalDineroMixto = 0;
         $totalGalonajeColumna = 0;
 
+        $boolDistritoTodos = true; // defecto buscar por algun distrito
+        $boolFondosTodos = true; // defecto buscar por algun fondos
+        $boolTurno = true;
+
+        $textoDistrito = "Todos los Distritos";
+
+        if($iddistrito == '0'){
+            $boolDistritoTodos = false; // defecto seran todos los distrito
+        }else{
+            if($infoDistrito = Distritos::where('id', $iddistrito)->first()){
+                $textoDistrito = "Distrito de: " . $infoDistrito->nombre;
+            }
+        }
+
+        $textoFondos = "Todos los Fondos";
+        if($idfondo == '0'){
+            $boolFondosTodos = false; // defecto seran todos los fondos
+        }else{
+            if($infoFondo = TipoFondos::where('id', $idfondo)->first()){
+                $textoFondos = "Tipo Fondo: " . $infoFondo->nombre;
+            }
+        }
+
+        $textoTurno = "Turno: Mañana y Tarde";
+        if($idturno == '10'){
+            $boolTurno = false; // defecto seran todos
+        }else{
+            if($idturno == '0') {
+               $textoTurno = "Turno: Mañana";
+            }else if($idturno == '1'){
+                $textoTurno = "Turno: Tarde";
+            }
+        }
+
+
+
         $arrayFactura = Facturacion::where('numero_factura', $numfactura)
-            ->orderBy('fecha', 'DESC')
+            ->when($boolDistritoTodos, function($query) use ($iddistrito) {
+                return $query->where('id_distrito', $iddistrito);
+            })
+            ->when($boolFondosTodos, function($query) use ($idfondo) {
+                return $query->where('id_fondos', $idfondo);
+            })
+            ->when($boolTurno, function($query) use ($idturno) {
+                return $query->where('turno', $idturno);
+            })
+            ->orderBy('fecha', 'ASC')
             ->get();
+
 
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
@@ -355,8 +407,6 @@ class ReporteV2Controller extends Controller
             $dato->nombredistrito = $nombreDistrito;
             $dato->nombrefondos = $nombreFondo;
 
-
-
             $dato->producto = $producto;
 
             $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
@@ -366,7 +416,6 @@ class ReporteV2Controller extends Controller
 
             $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
-
 
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
@@ -390,13 +439,13 @@ class ReporteV2Controller extends Controller
 
         // mostrar errores
         $mpdf->showImageErrors = false;
-
         $stylesheet = file_get_contents('css/cssreporte.css');
-
         $mpdf->WriteHTML($stylesheet,1);
-
-
         $logoalcaldia = 'images/logo.png';
+
+
+
+
 
         $tabla = "
             <table style='width: 100%;'>
@@ -404,6 +453,9 @@ class ReporteV2Controller extends Controller
                     <td style='text-align: center;'>
                         <p id='titulo' style='margin: 0;'>REPORTE DE COMBUSTIBLE <br>
                         Gasolinera PUMA Metapán <br>
+                        $textoDistrito <br>
+                        $textoFondos <br>
+                        $textoTurno
                         </p>
                     </td>
                     <td style='width: 66px; text-align: right;'>
@@ -421,8 +473,6 @@ class ReporteV2Controller extends Controller
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Fecha</th>
                     <th style='text-align: center; font-size:10px; width: 14%; font-weight: bold'>Equipo</th>
                     <th style='text-align: center; font-size:10px; width: 9%; font-weight: bold'>Placa</th>
-                    <th style='text-align: center; font-size:10px; width: 9%; font-weight: bold'>Distrito</th>
-                    <th style='text-align: center; font-size:10px; width: 9%; font-weight: bold'>Fondo</th>
                     <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Factura</th>
                     <th style=';text-align: center; font-size:10px; width: 8% !important; font-weight: bold'>Prod.</th>
                      <th style=';text-align: center; font-size:10px; width: 13%; font-weight: bold'>Descripción</th>
@@ -438,8 +488,6 @@ class ReporteV2Controller extends Controller
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->fechaFormat</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->placa</td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->nombredistrito</td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->nombrefondos</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->numero_factura</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->producto</td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->descripcion</td>
@@ -452,7 +500,7 @@ class ReporteV2Controller extends Controller
         }
 
         $tabla .= "<tr>
-                <td colspan='8' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
+                <td colspan='6' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
                  <td style='font-size:10px; text-align: center; font-weight: bold'>$totalGalonajeColumna</td>
                  <td style='font-size:10px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'></td>
@@ -461,12 +509,7 @@ class ReporteV2Controller extends Controller
 
         $tabla .= "</tbody></table>";
 
-
-
-
         //***********************************************
-
-
 
         $tabla .= "<br>";
         $tabla .= "<div style='margin-left: 18px'>";
@@ -478,10 +521,6 @@ class ReporteV2Controller extends Controller
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Diesel: $totalGalonDiesel</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL Galones en Especial: $totalGalonEspecial</p>";
         $tabla .= "</div>";
-
-
-
-
 
 
 
