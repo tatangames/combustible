@@ -88,6 +88,15 @@
                                         </div>
 
                                         <div class="form-group">
+                                            <label>Distrito de</label>
+                                            <select class="form-control" id="distrito-editar">
+                                            </select>
+                                        </div>
+
+                                        <hr>
+                                        <br>
+
+                                        <div class="form-group">
                                             <label>Equipo</label>
                                             <select class="form-control" id="equipo-editar">
                                             </select>
@@ -114,6 +123,15 @@
                                             <label>Fecha</label>
                                             <input type="date" id="fecha-editar"  class="form-control">
                                         </div>
+
+                                        <div class="form-group">
+                                            <label>Tipo Fondo</label>
+                                            <select class="form-control" id="fondo-editar">
+                                            </select>
+                                        </div>
+
+                                        <hr>
+                                        <br>
 
                                         <div class="form-group">
                                             <label># Galones</label>
@@ -213,6 +231,8 @@
 
                         document.getElementById("producto-editar").options.length = 0;
                         document.getElementById("equipo-editar").options.length = 0;
+                        document.getElementById("fondo-editar").options.length = 0;
+                        document.getElementById("distrito-editar").options.length = 0;
 
                         $.each(response.data.arrayproducto, function( key, val ){
                             if(response.data.info.id_tipocombustible == val.id){
@@ -230,6 +250,28 @@
                                 $('#equipo-editar').append('<option value="' +val.id +'">'+ val.nombre +'</option>');
                             }
                         });
+
+
+                        //**********************************
+
+
+                        $.each(response.data.arrayfondos, function( key, val ){
+                            if(response.data.info.id_fondos == val.id){
+                                $('#fondo-editar').append('<option value="' +val.id +'" selected="selected">'+ val.nombre +'</option>');
+                            }else{
+                                $('#fondo-editar').append('<option value="' +val.id +'">'+ val.nombre +'</option>');
+                            }
+                        });
+
+                        $.each(response.data.arraydistrito, function( key, val ){
+                            if(response.data.info.id_distrito == val.id){
+                                $('#distrito-editar').append('<option value="' +val.id +'" selected="selected">'+ val.nombre +'</option>');
+                            }else{
+                                $('#distrito-editar').append('<option value="' +val.id +'">'+ val.nombre +'</option>');
+                            }
+                        });
+
+
 
                     }else{
                         toastr.error('Información no encontrada');
@@ -253,6 +295,9 @@
             var unitario = document.getElementById('precio-editar').value;
             var km = document.getElementById('km-editar').value;
             var descripcion = document.getElementById('descripcion-editar').value;
+
+            var fondos = document.getElementById('fondo-editar').value;
+            var distrito = document.getElementById('distrito-editar').value;
 
             if(numfactura === ''){
                 toastr.error('# Factura es requerido');
@@ -285,6 +330,8 @@
             formData.append('unitario', unitario);
             formData.append('km', km);
             formData.append('descripcion', descripcion);
+            formData.append('fondo', fondos);
+            formData.append('distrito', distrito);
 
             axios.post(url+'/facturav2/actualizar', formData, {
             })

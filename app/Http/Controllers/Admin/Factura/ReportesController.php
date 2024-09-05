@@ -254,6 +254,7 @@ class ReportesController extends Controller
                 'nombre2' => $request->nombre2,
                 'nombre3' => $request->nombre3,
                 'nombre4' => $request->nombre4,
+                'nombre_gasolinera' => $request->gasolinera
             ]);
 
         return ['success' => 1];

@@ -48,6 +48,19 @@
                                         </div>
 
                                         <div class="form-group">
+                                            <label>Distrito De</label>
+                                            <select class="form-control" id="distrito-nuevo" >
+                                                <option value="0">Seleccionar opción</option>
+                                                @foreach($arrayDistritos as $dato)
+                                                    <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <hr>
+                                        <br>
+
+                                        <div class="form-group">
                                             <label>Equipo</label>
                                             <select class="form-control" id="equipo-nuevo" >
                                                 <option value="0">Seleccionar opción</option>
@@ -65,16 +78,31 @@
                                                 @endforeach
                                             </select>
                                         </div>
+
+
+
                                     </div>
 
 
                                     <div class="col-md-3">
 
-
                                         <div class="form-group">
                                             <label>Fecha</label>
                                             <input type="date" id="fecha-nuevo" value="{{ $fechaActual->format('Y-m-d') }}" class="form-control">
                                         </div>
+
+                                        <div class="form-group">
+                                            <label>Tipo de Fondos</label>
+                                            <select class="form-control" id="fondos-nuevo" >
+                                                <option value="0">Seleccionar opción</option>
+                                                @foreach($arrayTipoFondos as $dato)
+                                                    <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <hr>
+                                        <br>
 
                                         <div class="form-group">
                                             <label># Galones</label>
@@ -170,6 +198,9 @@
             var km = document.getElementById('km-nuevo').value;
             var descripcion = document.getElementById('descripcion-nuevo').value;
 
+            var selectFondos = document.getElementById('fondos-nuevo').value;
+            var selectDistritos = document.getElementById('distrito-nuevo').value;
+
             if(numfactura === ''){
                 toastr.error('# Factura es requerido');
                 return
@@ -177,6 +208,16 @@
 
             if(equipo == '0'){
                 toastr.error('Seleccionar equipo');
+                return
+            }
+
+            if(selectFondos === '0'){
+                toastr.error('Seleccionar Fondos');
+                return
+            }
+
+            if(selectDistritos === '0'){
+                toastr.error('Seleccionar Distrito');
                 return
             }
 
@@ -205,6 +246,8 @@
             formData.append('unitario', unitario);
             formData.append('km', km);
             formData.append('descripcion', descripcion);
+            formData.append('fondos', selectFondos);
+            formData.append('distrito', selectDistritos);
 
             axios.post(url+'/facturav2/nuevo', formData, {
             })

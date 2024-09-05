@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Admin\FacturaV2;
 
 use App\Http\Controllers\Controller;
+use App\Models\Distritos;
 use App\Models\Equipo;
 use App\Models\Facturacion;
 use App\Models\TipoCombustible;
+use App\Models\TipoFondos;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -23,8 +25,12 @@ class FacturaV2Controller extends Controller
         $fechaActual = Carbon::now('America/El_Salvador');
         $arrayCombus = TipoCombustible::orderBy('nombre', 'ASC')->get();
         $arrayEquipos = Equipo::orderBy('nombre', 'ASC')->get();
+        $arrayDistritos = Distritos::orderBy('nombre', 'ASC')->get();
+        $arrayTipoFondos = TipoFondos::orderBy('nombre', 'ASC')->get();
 
-        return view('backend.admin.facturav2.nueva.nuevafacturav2', compact('fechaActual', 'arrayCombus', 'arrayEquipos'));
+        return view('backend.admin.facturav2.nueva.nuevafacturav2',
+            compact('fechaActual', 'arrayCombus', 'arrayEquipos',
+            'arrayDistritos', 'arrayTipoFondos'));
     }
 
 
@@ -36,7 +42,9 @@ class FacturaV2Controller extends Controller
             'fecha' => 'required',
             'producto' => 'required',
             'galones' => 'required',
-            'unitario' => 'required'
+            'unitario' => 'required',
+            'fondos' => 'required',
+            'distrito' => 'required'
         );
 
         // equipo, km, descripcion
@@ -44,7 +52,6 @@ class FacturaV2Controller extends Controller
         $validar = Validator::make($request->all(), $regla);
 
         if ($validar->fails()){ return ['success' => 0];}
-
 
         DB::beginTransaction();
         try {
@@ -58,6 +65,8 @@ class FacturaV2Controller extends Controller
             $registro->unitario = $request->unitario;
             $registro->km = $request->km;
             $registro->descripcion = $request->descripcion;
+            $registro->id_fondos = $request->fondos;
+            $registro->id_distrito = $request->distrito;
             $registro->save();
 
             DB::commit();
@@ -95,7 +104,18 @@ class FacturaV2Controller extends Controller
             $infoCombustible = TipoCombustible::where('id', $dato->id_tipocombustible)->first();
             $dato->tipoCombustible = $infoCombustible->nombre;
 
+            $nombreDistrito = "";
+            $nombreFondo = "";
+            if($infoDistrito = Distritos::where('id', $dato->id_distrito)->first()){
+                $nombreDistrito = $infoDistrito->nombre;
+            }
 
+            if($infoFondo = TipoFondos::where('id', $dato->id_fondos)->first()){
+                $nombreFondo = $infoFondo->nombre;
+            }
+
+            $dato->distrito = $nombreDistrito;
+            $dato->fondos = $nombreFondo;
         }
 
         return view('backend.admin.facturav2.tablafacturav2', compact('listado'));
@@ -141,10 +161,12 @@ class FacturaV2Controller extends Controller
 
             $arrayPro = TipoCombustible::orderBy('nombre', 'ASC')->get();
             $arrayEquipo = Equipo::orderBy('nombre', 'ASC')->get();
-
+            $arrayFondos = TipoFondos::orderBy('nombre', 'ASC')->get();
+            $arrayDistrito = Distritos::orderBy('nombre', 'ASC')->get();
 
             return ['success' => 1, 'info' => $info, 'arrayproducto' => $arrayPro,
-                'arrayequipo' => $arrayEquipo];
+                'arrayequipo' => $arrayEquipo, 'arrayfondos' => $arrayFondos,
+                'arraydistrito' => $arrayDistrito];
         }else{
             return ['success' => 2];
         }
@@ -160,7 +182,9 @@ class FacturaV2Controller extends Controller
             'producto' => 'required',
             'equipo' => 'required',
             'galones' => 'required',
-            'unitario' => 'required'
+            'unitario' => 'required',
+            'fondo' => 'required',
+            'distrito' => 'required'
         );
 
         // equipo, km, descripcion
@@ -183,6 +207,8 @@ class FacturaV2Controller extends Controller
                     'unitario' => $request->unitario,
                     'km' => $request->km,
                     'descripcion' => $request->descripcion,
+                    'id_fondos' => $request->fondo,
+                    'id_distrito' => $request->distrito
                 ]);
 
             DB::commit();

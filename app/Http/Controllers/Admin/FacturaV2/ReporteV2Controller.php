@@ -136,14 +136,22 @@ class ReporteV2Controller extends Controller
 
         $logoalcaldia = 'images/logo.png';
 
-        $tabla = "<div class='content'>
-            <img id='logo' src='$logoalcaldia'>
-            <p id='titulo'>REPORTE DE COMBUSTIBLE <br>
-            GASOLINERA SERVICENTRO METAPAN <br>
-                  De: $desdeFormat hasta: $hastaFormat <br>
-                 </p>
-
-            </div>";
+        $tabla = "
+<table style='width: 100%;'>
+    <tr>
+        <td style='text-align: center;'>
+            <p id='titulo' style='margin: 0;'>REPORTE DE COMBUSTIBLE <br>
+            $infoExtra->nombre_gasolinera <br>
+            Distrito de: xx <br>
+            Tipo Fondo: xx <br>
+            De: $desdeFormat hasta: $hastaFormat <br>
+            </p>
+        </td>
+        <td style='width: 66px; text-align: right;'>
+            <img id='logo' src='$logoalcaldia' style='width: 66px; height: 73px;' />
+        </td>
+    </tr>
+</table>";
 
         $tabla .= "<div style='margin-top: 45px'></div>";
 
@@ -336,7 +344,7 @@ class ReporteV2Controller extends Controller
         $tabla = "<div class='content'>
             <img id='logo' src='$logoalcaldia'>
             <p id='titulo'>REPORTE DE COMBUSTIBLE <br>
-            GASOLINERA SERVICENTRO METAPAN <br>
+            G$infoExtra->nombre_gasolinera <br>
                   Factura: $numfactura <br>
                  </p>
 

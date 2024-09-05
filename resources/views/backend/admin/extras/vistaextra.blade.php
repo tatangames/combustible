@@ -51,6 +51,16 @@
                                 <input type="text" id="nombre4" autocomplete="off" class="form-control" maxlength="200" value="{{ $infoExtra->nombre4 }}">
                             </div>
 
+
+                            <hr>
+
+                            <h3>Nombre de Gasolinera</h3>
+
+                            <div class="form-group">
+
+                                <input type="text" id="gasolinera" autocomplete="off" class="form-control" maxlength="200" value="{{ $infoExtra->nombre_gasolinera }}">
+                            </div>
+
                         </div>
 
                         <div class="card-footer" style="float: right;">
@@ -89,6 +99,12 @@
             var nombre3 = document.getElementById('nombre3').value;
             var nombre4 = document.getElementById('nombre4').value;
 
+            var gasolinera = document.getElementById('gasolinera').value;
+
+            if(gasolinera === ''){
+                toastr.error('Nombre Gasolinera es requerido');
+                return;
+            }
 
             openLoading()
             var formData = new FormData();
@@ -96,6 +112,7 @@
             formData.append('nombre2', nombre2);
             formData.append('nombre3', nombre3);
             formData.append('nombre4', nombre4);
+            formData.append('gasolinera', gasolinera);
 
             axios.post(url+'/cambio/nombres/actualizar', formData, {
             })

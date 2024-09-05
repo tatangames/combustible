@@ -11,6 +11,8 @@ use App\Http\Controllers\Admin\Factura\ReportesController;
 use App\Http\Controllers\Admin\Equipo\EquipoController;
 use App\Http\Controllers\Admin\FacturaV2\FacturaV2Controller;
 use App\Http\Controllers\Admin\FacturaV2\ReporteV2Controller;
+use App\Http\Controllers\Admin\Fondos\FondosController;
+
 
 Route::get('/', [LoginController::class,'index'])->name('login');
 
@@ -84,15 +86,6 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     Route::get('/admin/reportev2/pdf/factura/{numfactura}', [ReporteV2Controller::class,'reporteFacturaPDF']);
 
 
-
-
-
-
-
-
-
-
-
     //******************** PARTE DEL SISTEMA ANTERIOR ***************************************
 
 
@@ -123,7 +116,20 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
     Route::get('/admin/reportev1/generar/equipos/{desde}/{hasta}/{texto}', [ReportesController::class,'reporteFacturaEquipos']);
 
 
-//***************************************************************
+    //***************************************************************
 
+    // TIPO DE FONDOS
+    Route::get('/admin/fondos/index', [FondosController::class,'indexTipoFondos'])->name('admin.fondos.index');
+    Route::get('/admin/fondos/tabla', [FondosController::class, 'tablaTipoFondos']);
+    Route::post('/admin/fondos/nuevo', [FondosController::class, 'nuevoTipoFondos']);
+    Route::post('/admin/fondos/informacion', [FondosController::class, 'informacionTipoFondos']);
+    Route::post('/admin/fondos/editar', [FondosController::class, 'actualizarTipoFondos']);
+
+    // DISTRITO
+    Route::get('/admin/distrito/index', [FondosController::class,'indexDistritos'])->name('admin.distritos.index');
+    Route::get('/admin/distrito/tabla', [FondosController::class, 'tablaDistritos']);
+    Route::post('/admin/distrito/nuevo', [FondosController::class, 'nuevoDistritos']);
+    Route::post('/admin/distrito/informacion', [FondosController::class, 'informacionDistritos']);
+    Route::post('/admin/distrito/editar', [FondosController::class, 'actualizarDistritos']);
 
 
