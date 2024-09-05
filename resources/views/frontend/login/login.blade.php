@@ -55,11 +55,11 @@
             font-weight:500;
         }
         .image-size-small{
-            width:140px;
+            width:200px;
             margin:0 auto;
         }
         .image-size-small img{
-            width:140px;
+            width:200px;
             margin-bottom:-70px;
         }
 
