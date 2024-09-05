@@ -46,6 +46,26 @@
                                 </select>
                             </div>
 
+                            <div class="form-group" style="width: 50%">
+                                <label>Distrito</label>
+                                <select class="form-control" id="select-distrito">
+                                    <option value="0">TODOS</option>
+                                    @foreach($arrayDistrito as $dato)
+                                        <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
+                            <div class="form-group" style="width: 50%">
+                                <label>Fondos</label>
+                                <select class="form-control" id="select-fondos">
+                                    <option value="0">TODOS</option>
+                                    @foreach($arrayFondos as $dato)
+                                        <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                         </div>
 
 
@@ -99,6 +119,8 @@
             var fechadesde = document.getElementById('fecha-desde').value;
             var fechahasta = document.getElementById('fecha-hasta').value;
             var equipo = document.getElementById('select-equipos').value;
+            var distrito = document.getElementById('select-distrito').value;
+            var fondos = document.getElementById('select-fondos').value;
 
             if(fechadesde === ''){
                 toastr.error('Fecha desde es requerido');
@@ -110,28 +132,15 @@
                 return;
             }
 
-            window.open("{{ URL::to('admin/reportev2/generar/equipos') }}/" + fechadesde + "/" + fechahasta + "/" + equipo);
+            window.open("{{ URL::to('admin/reportev2/generar/equipos') }}/" +
+                fechadesde + "/" + fechahasta + "/" + equipo + "/" + distrito + "/" + fondos);
         }
 
 
-        function reporteExcel(){
 
-            var fechadesde = document.getElementById('fecha-desde').value;
-            var fechahasta = document.getElementById('fecha-hasta').value;
-            var equipo = document.getElementById('select-equipos').value;
 
-            if(fechadesde === ''){
-                toastr.error('Fecha desde es requerido');
-                return;
-            }
 
-            if(fechahasta === ''){
-                toastr.error('Fecha hasta es requerido');
-                return;
-            }
 
-            window.open("{{ URL::to('admin/reportev2/generar/equiposexcel') }}/" + fechadesde + "/" + fechahasta + "/" + equipo);
-        }
 
     </script>
 

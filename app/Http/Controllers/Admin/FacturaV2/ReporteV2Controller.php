@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin\FacturaV2;
 use App\Exports\ReporteEquipoExcel;
 use App\Exports\ReporteFacturaExcel;
 use App\Http\Controllers\Controller;
+use App\Models\Distritos;
 use App\Models\Equipo;
 use App\Models\Extras;
 use App\Models\Facturacion;
+use App\Models\TipoFondos;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -23,7 +25,11 @@ class ReporteV2Controller extends Controller
     public function vistaReporteFechas(){
 
         $arrayEquipos = Equipo::orderBy('nombre', 'ASC')->get();
-        return view('backend.admin.configuracion.reporte.equipo.vistareporteequipo', compact('arrayEquipos'));
+        $arrayDistrito = Distritos::orderBy('nombre', 'ASC')->get();
+        $arrayFondos = TipoFondos::orderBy('nombre', 'ASC')->get();
+
+        return view('backend.admin.configuracion.reporte.equipo.vistareporteequipo',
+            compact('arrayEquipos', 'arrayDistrito', 'arrayFondos'));
     }
 
     public function vistaReporteFactura(){
@@ -31,7 +37,7 @@ class ReporteV2Controller extends Controller
     }
 
 
-    public function reporteEquipoFechaPDF($desde, $hasta, $idequipo){
+    public function reporteEquipoFechaPDF($desde, $hasta, $idequipo, $iddistrito, $idfondo){
 
         $start = Carbon::parse($desde)->startOfDay();
         $end = Carbon::parse($hasta)->endOfDay();
@@ -47,21 +53,49 @@ class ReporteV2Controller extends Controller
         $totalGalonRegular = 0;
         $totalGalonDiesel = 0;
         $totalGalonEspecial = 0;
-
         $totalGalonesMixtos = 0;
+
+        $nombreDistrito = "TODOS";
+        if($infoDistrito = Distritos::where('id', $iddistrito)->first()){
+            $nombreDistrito = $infoDistrito->nombre;
+        }
+
+        $nombreFondo = "TODOS";
+        if($infoFondo = TipoFondos::where('id', $idfondo)->first()){
+            $nombreFondo = $infoFondo->nombre;
+        }
+
+        $boolEquipoTodos = true; // defecto buscar por algun equipo
+        $boolDistritoTodos = true; // defecto buscar por algun distrito
+        $boolFondosTodos = true; // defecto buscar por algun fondos
 
 
         if($idequipo == '0'){
-            // TODOS
-            $arrayFactura = Facturacion::whereBetween('fecha', array($start, $end))
-                ->orderBy('fecha', 'ASC')
-                ->get();
-        }else{
-            $arrayFactura = Facturacion::whereBetween('fecha', array($start, $end))
-                ->where('id_equipo', $idequipo)
-                ->orderBy('fecha', 'ASC')
-                ->get();
+            $boolEquipoTodos = false; // defecto seran todos los equipos
         }
+
+        if($iddistrito == '0'){
+            $boolDistritoTodos = false; // defecto seran todos los distrito
+        }
+
+        if($idfondo == '0'){
+            $boolFondosTodos = false; // defecto seran todos los fondos
+        }
+
+
+        $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
+            ->when($boolEquipoTodos, function($query) use ($idequipo) {
+                return $query->where('id_equipo', $idequipo);
+            })
+            ->when($boolDistritoTodos, function($query) use ($iddistrito) {
+                return $query->where('id_distrito', $iddistrito);
+            })
+            ->when($boolFondosTodos, function($query) use ($idfondo) {
+                return $query->where('id_fondos', $idfondo);
+            })
+            ->orderBy('fecha', 'ASC')
+            ->get();
+
 
 
         foreach ($arrayFactura as $dato){
@@ -117,12 +151,7 @@ class ReporteV2Controller extends Controller
 
         $infoExtra = Extras::where('id', 1)->first();
 
-        // USO LOCAL O SERVIDOR
-        if($infoExtra->reporte == 1){
-            $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
-        }else{
-            $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
-        }
+        $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
 
         $mpdf->SetTitle('Combustible');
 
@@ -142,8 +171,8 @@ class ReporteV2Controller extends Controller
         <td style='text-align: center;'>
             <p id='titulo' style='margin: 0;'>REPORTE DE COMBUSTIBLE <br>
             $infoExtra->nombre_gasolinera <br>
-            Distrito de: xx <br>
-            Tipo Fondo: xx <br>
+            Distrito de: $nombreDistrito <br>
+            Tipo Fondo: $nombreFondo <br>
             De: $desdeFormat hasta: $hastaFormat <br>
             </p>
         </td>
