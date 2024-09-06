@@ -35,7 +35,6 @@ class CreateFacturacionTable extends Migration
             $table->foreign('id_equipo')->references('id')->on('equipos');
             $table->foreign('id_tipocombustible')->references('id')->on('tipocombustible');
 
-            $table->integer('turno')->nullable();
 
             $table->foreign('id_fondos')->references('id')->on('tipo_fondos');
             $table->foreign('id_distrito')->references('id')->on('distritos');
