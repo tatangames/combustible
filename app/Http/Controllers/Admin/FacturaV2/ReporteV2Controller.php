@@ -72,7 +72,6 @@ class ReporteV2Controller extends Controller
         $boolEquipoTodos = true; // defecto buscar por algun equipo
         $boolDistritoTodos = true; // defecto buscar por algun distrito
         $boolFondosTodos = true; // defecto buscar por algun fondos
-        $boolTurno = true;
 
         if($idequipo == '0'){
             $boolEquipoTodos = false; // defecto seran todos los equipos
@@ -297,7 +296,6 @@ class ReporteV2Controller extends Controller
 
         $boolDistritoTodos = true; // defecto buscar por algun distrito
         $boolFondosTodos = true; // defecto buscar por algun fondos
-        $boolTurno = true;
 
         $textoDistrito = "Todos los Distritos";
 
