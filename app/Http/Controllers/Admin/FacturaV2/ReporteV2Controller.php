@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Facades\Excel;
+use Illuminate\Support\Facades\DB;
 
 class ReporteV2Controller extends Controller
 {
@@ -29,6 +30,15 @@ class ReporteV2Controller extends Controller
         $arrayFondos = TipoFondos::orderBy('nombre', 'ASC')->get();
 
         return view('backend.admin.configuracion.reporte.equipo.vistareporteequipo',
+            compact('arrayEquipos', 'arrayDistrito', 'arrayFondos'));
+    }
+    public function vistaReporteConsolidado(){
+
+        $arrayEquipos = Equipo::orderBy('nombre', 'ASC')->get();
+        $arrayDistrito = Distritos::orderBy('nombre', 'ASC')->get();
+        $arrayFondos = TipoFondos::orderBy('nombre', 'ASC')->get();
+
+        return view('backend.admin.configuracion.reporte.equipo.vistareporteequipoconsolidado',
             compact('arrayEquipos', 'arrayDistrito', 'arrayFondos'));
     }
 
@@ -251,6 +261,206 @@ class ReporteV2Controller extends Controller
 
 
 
+
+        // ************* FOOTER ***************
+
+        $footer = "<table width='100%' id='tablaForTranspa'>
+            <tbody>";
+
+        $footer .= "</tbody></table>";
+
+        $footer .= "<table width='100%' id='tablaForTranspa' style='margin-top: 35px'>
+            <tbody>";
+
+        $footer .= "<tr>
+                    <td width='25%' style='font-weight: normal; font-size: 14px'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ______________________________ <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoExtra->nombre1 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoExtra->nombre2</td>
+                    <td width='25%' style='font-weight: normal; font-size: 14px'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _________________________________________<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoExtra->nombre3 <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $infoExtra->nombre4
+
+                    </td>
+                    </tr>";
+
+        $footer .= "<tr>
+                    <td colspan=2 style='font-weight: bold; text-align: center; font-size: 12px'> Página {PAGENO}/{nb}</td>
+                    </tr>";
+
+        $footer .= "</tbody></table>";
+
+        $mpdf->SetHTMLFooter($footer);
+        $mpdf->SetAutoPageBreak(true, 45);
+        $mpdf->WriteHTML($tabla, 2);
+        $mpdf->Output();
+    }
+
+    //Agregue para reporte consolidado de equipos
+    public function reporteEquipoConsolidado($desde, $hasta, $idequipo, $iddistrito, $idfondo){
+
+        $start = Carbon::parse($desde)->startOfDay();
+        $end = Carbon::parse($hasta)->endOfDay();
+
+        $desdeFormat = date("d-m-Y", strtotime($desde));
+        $hastaFormat = date("d-m-Y", strtotime($hasta));
+
+
+        $totalLinea = 0;
+        $totalRegular = 0;
+        $totalDiesel = 0;
+        $totalEspecial = 0;
+        $totalGalonRegular = 0;
+        $totalGalonDiesel = 0;
+        $totalGalonEspecial = 0;
+        $totalGalonesMixtos = 0;
+
+        $nombreDistrito = "TODOS";
+        if($infoDistrito = Distritos::where('id', $iddistrito)->first()){
+            $nombreDistrito = $infoDistrito->nombre;
+        }
+
+        $nombreFondo = "TODOS";
+        if($infoFondo = TipoFondos::where('id', $idfondo)->first()){
+            $nombreFondo = $infoFondo->nombre;
+        }
+
+        $boolEquipoTodos = true; // defecto buscar por algun equipo
+        $boolDistritoTodos = true; // defecto buscar por algun distrito
+        $boolFondosTodos = true; // defecto buscar por algun fondos
+
+        if($idequipo == '0'){
+            $boolEquipoTodos = false; // defecto seran todos los equipos
+        }
+
+        if($iddistrito == '0'){
+            $boolDistritoTodos = false; // defecto seran todos los distrito
+        }
+
+        if($idfondo == '0'){
+            $boolFondosTodos = false; // defecto seran todos los fondos
+        }
+
+         $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
+            ->select('id_equipo',
+                DB::raw('SUM(cantidad) as total_galones'), 
+                DB::raw('SUM(cantidad * unitario) as total_dolares')
+            )
+            ->when($boolEquipoTodos, function($query) use ($idequipo) {
+                return $query->where('id_equipo', $idequipo);
+            })
+            ->when($boolDistritoTodos, function($query) use ($iddistrito) {
+                return $query->where('id_distrito', $iddistrito);
+            })
+            ->when($boolFondosTodos, function($query) use ($idfondo) {
+                return $query->where('id_fondos', $idfondo);
+            })
+            ->groupBy('id_equipo')
+            ->orderBy('id_equipo', 'ASC')
+            ->get();
+
+
+        foreach ($arrayFactura as $dato){
+            $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
+
+            $multi = $dato->cantidad * $dato->unitario;
+
+            $pasado = number_format((float) $multi , 2, '.', ',');
+            $numero = (float) str_replace([',', ' '], '', $pasado);
+            $totalLinea += $numero;
+
+            $totalGalonesMixtos += $dato->cantidad;
+            $producto = '';
+
+            if($dato->id_tipocombustible == 2){ // REGULAR
+                $producto = "R";
+            }
+            else if($dato->id_tipocombustible == 1){ // DIESEL
+                $producto = "D";
+            }
+            else if($dato->id_tipocombustible == 3){ // ESPECIAL
+                $producto = "E";
+            }
+
+            $dato->producto = $producto;
+            $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
+
+           // $dato->placa = $infoEquipo->placa;
+            $dato->equipo = $infoEquipo->nombre;
+
+            $dato->multi = number_format((float)$multi, 2, '.', ',');
+        }
+
+
+        $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
+
+        $totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 3, '.', ',');
+
+
+        $infoExtra = Extras::where('id', 1)->first();
+
+        if($infoExtra->reporte == 1){
+            $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+        }else{
+            $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
+        }
+
+        $mpdf->SetTitle('Combustible');
+
+        // mostrar errores
+        $mpdf->showImageErrors = false;
+
+        $stylesheet = file_get_contents('css/cssreporte.css');
+
+        $mpdf->WriteHTML($stylesheet,1);
+
+
+        $logoalcaldia = 'images/logo.png';
+
+        $tabla = "
+            <table style='width: 100%;'>
+                <tr>
+                    <td style='text-align: center;'>
+                        <p id='titulo' style='margin: 0;'>REPORTE DE COMBUSTIBLE <br>
+                        Gasolinera PUMA Metapán <br>
+                        Distrito de: $nombreDistrito <br>
+                        Tipo Fondo: $nombreFondo <br>
+                        De: $desdeFormat hasta: $hastaFormat <br>
+                        </p>
+                    </td>
+                    <td style='width: 66px; text-align: right;'>
+                        <img id='logo' src='$logoalcaldia' style='width: 66px; height: 73px;' />
+                    </td>
+                </tr>
+            </table>";
+
+        $tabla .= "<div style='margin-top: 45px'></div>";
+
+
+        $tabla .= "<table id='tablaFor' style='width: 72%'>
+                <tbody>
+                <tr style='background-color: #e1e1e1;'>
+                    <th style='text-align: center; font-size:10px; width: 14%; font-weight: bold'>Equipo</th>
+                    <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Galones</th>
+                    <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Valor</th>
+                </tr>";
+
+        foreach ($arrayFactura as $data){
+            $totalDolares = number_format((float)$data->total_dolares, 2, '.', ',');
+
+            $tabla .= "<tr>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->total_galones</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalDolares</td>
+
+            </tr>";
+        }
+
+        $tabla .= "<tr>
+                <td colspan='1' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
+                <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
+                <td style='font-size:11px; text-align: center; font-weight: bold'>$$totalLinea</td>
+            </tr>";
+
+        $tabla .= "</tbody></table>";
+
+
+        //***********************************************
 
         // ************* FOOTER ***************
 

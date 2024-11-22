@@ -78,6 +78,11 @@ Route::get('/panel', [ControlController::class,'indexRedireccionamiento'])->name
 
 
     // REPORTES EQUIPOS
+    //Para consolidado
+    Route::get('/admin/reportev2/consolidado/index', [ReporteV2Controller::class,'vistaReporteConsolidado'])->name('admin.reporte.equipos.consolidado');
+    Route::get('/admin/reportev2/generar/equipos/consolidado/{desde}/{hasta}/{equipo}/{distrito}/{fondo}', [ReporteV2Controller::class,'reporteEquipoConsolidado']);
+    
+    //Para no consolidado
     Route::get('/admin/reportev2/fechas/index', [ReporteV2Controller::class,'vistaReporteFechas'])->name('admin.reporte.facturacion.equipos');
     Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}/{distrito}/{fondo}', [ReporteV2Controller::class,'reporteEquipoFechaPDF']);
 
