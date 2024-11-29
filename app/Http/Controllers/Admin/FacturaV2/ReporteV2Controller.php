@@ -339,7 +339,7 @@ class ReporteV2Controller extends Controller
         }
 
          $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
-            ->select('id_equipo', 'cantidad', 'unitario',
+            ->select('id_equipo',
                 DB::raw('SUM(cantidad) as total_galones'), 
                 DB::raw('SUM(ROUND(cantidad, 2) * unitario) as total_dolares')
             )
