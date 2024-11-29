@@ -365,9 +365,9 @@ class ReporteV2Controller extends Controller
             //$pasado = number_format((float) $multi , 2, '.', ',');
             //$numero = (float) str_replace([',', ' '], '', $pasado);
             //$totalLinea += $numero;
-            $totalLinea += $multi;
+            $totalLinea += $dato->total_dolares;
 
-            $totalGalonesMixtos += $dato->cantidad;
+            $totalGalonesMixtos += $dato->total_galones;
             $producto = '';
 
             if($dato->id_tipocombustible == 2){ // REGULAR
