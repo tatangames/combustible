@@ -341,7 +341,9 @@ class ReporteV2Controller extends Controller
          $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
             ->select('id_equipo',
                 DB::raw('SUM(cantidad) as total_galones'), 
-                DB::raw('ROUND(SUM(ROUND(cantidad, 2) * ROUND(unitario, 2)), 2)  as total_dolares')
+                DB::raw('ROUND(SUM(ROUND(cantidad, 2) * ROUND(unitario, 2)), 2)  as total_dolares'),
+                'cantidad',  // Agregar columna sin cálculos
+                'unitario'   // Agregar columna sin cálculos
             )
             ->when($boolEquipoTodos, function($query) use ($idequipo) {
                 return $query->where('id_equipo', $idequipo);
