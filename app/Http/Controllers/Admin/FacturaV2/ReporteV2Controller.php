@@ -440,11 +440,12 @@ class ReporteV2Controller extends Controller
 
         foreach ($arrayFactura as $data){
             
-            $totalDolares = number_format((float)$data->total_dolares, 2, '.', ',');
+            //$totalDolares = number_format((float)$data->total_dolares, 2, '.', ',');
+            $totalDolares = round($data->total_dolares, 2);
             //Total de dinero por todos los equipos
-            $totalLinea += $multi;
+            $totalLinea += $totalDolares;
             //Total de galones mixtos por todos los equipos
-            $totalGalonesMixtos += $data->cantidad;
+            $totalGalonesMixtos += round($data->total_galones,2);
 
             $tabla .= "<tr>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
