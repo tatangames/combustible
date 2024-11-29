@@ -341,7 +341,7 @@ class ReporteV2Controller extends Controller
          $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
             ->select('id_equipo',
                 DB::raw('SUM(cantidad) as total_galones'), 
-                DB::raw('ROUND(SUM(ROUND(cantidad, 2) * ROUND(unitario, 2)), 2)  as total_dolares')
+                DB::raw('SUM(ROUND(cantidad, 2) * unitario)  as total_dolares')
             )
             ->when($boolEquipoTodos, function($query) use ($idequipo) {
                 return $query->where('id_equipo', $idequipo);
@@ -455,11 +455,11 @@ class ReporteV2Controller extends Controller
             </tr>";
         }
 
-        $tabla .= "<tr>
-                <td colspan='1' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
-                <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
-                <td style='font-size:11px; text-align: center; font-weight: bold'>$$totalLinea</td>
-            </tr>";
+        //$tabla .= "<tr>
+        //        <td colspan='1' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
+        //        <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
+        //        <td style='font-size:11px; text-align: center; font-weight: bold'>$$totalLinea</td>
+        //    </tr>";
 
         $tabla .= "</tbody></table>";
 
