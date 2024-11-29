@@ -443,13 +443,13 @@ class ReporteV2Controller extends Controller
             $totalDolares = number_format((float)$data->total_dolares, 2, '.', ',');
             //Total de dinero por todos los equipos
             $totalLinea += $totalDolares;
-            //Total de galones mixtos por todos los equipos
-            $totalGalonesMixtos += $data->total_galones;
+            //Total de galones por todos los equipos
+            $totalGalones += $data->total_galones;
 
             $tabla .= "<tr>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->total_galones</td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalDolares</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$totalGalones</td>
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalLinea</td>
 
             </tr>";
         }
