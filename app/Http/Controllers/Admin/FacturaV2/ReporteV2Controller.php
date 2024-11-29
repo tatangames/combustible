@@ -116,7 +116,7 @@ class ReporteV2Controller extends Controller
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
             //$multi = $dato->cantidad * $dato->unitario;
-            $multi = round($dato->cantidad * $dato->unitario, 2);
+            $multi = round($dato->cantidad, 2) * $dato->unitario;
             
             $pasado = number_format((float) $multi , 2, '.', ',');
             $numero = (float) str_replace([',', ' '], '', $pasado);
