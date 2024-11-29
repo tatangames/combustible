@@ -158,7 +158,7 @@ class ReporteV2Controller extends Controller
         $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
         $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
 
-        $totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 3, '.', ',');
+        $totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 2, '.', ',');
 
 
         $infoExtra = Extras::where('id', 1)->first();
