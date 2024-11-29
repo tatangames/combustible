@@ -115,7 +115,8 @@ class ReporteV2Controller extends Controller
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
-            $multi = $dato->cantidad * $dato->unitario;
+            //$multi = $dato->cantidad * $dato->unitario;
+            $multi =  number_format((float)$$dato->cantidad, 2, '.', ',') * $dato->unitario;
 
             $pasado = number_format((float) $multi , 2, '.', ',');
             $numero = (float) str_replace([',', ' '], '', $pasado);
@@ -158,7 +159,7 @@ class ReporteV2Controller extends Controller
         $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
         $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
 
-        $totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 2, '.', ',');
+        $totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 2, '.', ','); //cambié a 2 decimales, tenía 3.
 
 
         $infoExtra = Extras::where('id', 1)->first();
