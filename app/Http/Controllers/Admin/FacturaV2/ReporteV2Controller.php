@@ -115,13 +115,13 @@ class ReporteV2Controller extends Controller
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
-            //$multi = $dato->cantidad * $dato->unitario;
-            $multi = round($dato->cantidad, 2) * $dato->unitario;
+            $multi = $dato->cantidad * $dato->unitario;
+           // $multi = round($dato->cantidad, 2) * $dato->unitario;
             
-            //$pasado = number_format((float) $multi , 2, '.', ',');
-            //$numero = (float) str_replace([',', ' '], '', $pasado);
-            //$totalLinea += $numero;
-            $totalLinea += $multi;
+            $pasado = number_format((float) $multi , 2, '.', ',');
+            $numero = (float) str_replace([',', ' '], '', $pasado);
+            $totalLinea += $numero;
+            //$totalLinea += $multi;
 
             $totalGalonesMixtos += $dato->cantidad;
             $producto = '';
@@ -359,13 +359,13 @@ class ReporteV2Controller extends Controller
 
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
-            //$multi = $dato->cantidad * $dato->unitario;
-            $multi = round($dato->cantidad, 2) * $dato->unitario;
+            $multi = $dato->cantidad * $dato->unitario;
+           
                         
-            //$pasado = number_format((float) $multi , 2, '.', ',');
-            //$numero = (float) str_replace([',', ' '], '', $pasado);
-            //$totalLinea += $numero;
-            $totalLinea += $dato->total_dolares;
+            $pasado = number_format((float) $multi , 2, '.', ',');
+            $numero = (float) str_replace([',', ' '], '', $pasado);
+            $totalLinea += $numero;
+           
 
             $totalGalonesMixtos += $dato->total_galones;
             $producto = '';
