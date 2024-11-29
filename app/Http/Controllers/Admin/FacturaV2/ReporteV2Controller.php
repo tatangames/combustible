@@ -339,7 +339,7 @@ class ReporteV2Controller extends Controller
         }
 
          $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
-            ->select('id_equipo',
+            ->select('id_equipo', 'cantidad', 'unitario',
                 DB::raw('SUM(cantidad) as total_galones'), 
                 DB::raw('SUM(ROUND(cantidad, 2) * unitario) as total_dolares')
             )
@@ -442,9 +442,9 @@ class ReporteV2Controller extends Controller
             
             $totalDolares = number_format((float)$data->total_dolares, 2, '.', ',');
             //Total de dinero por todos los equipos
-            $totalLinea += $totalDolares;
+            $totalLinea += $multi;
             //Total de galones mixtos por todos los equipos
-            $totalGalonesMixtos += $data->total_galones;
+            $totalGalonesMixtos += $data->cantidad;
 
             $tabla .= "<tr>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
