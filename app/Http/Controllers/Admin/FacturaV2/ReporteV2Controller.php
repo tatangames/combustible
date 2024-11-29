@@ -115,9 +115,8 @@ class ReporteV2Controller extends Controller
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
-            //$multi = $dato->cantidad * $dato->unitario;
-            $multi =  number_format((float)$$dato->cantidad, 2, '.', ',') * $dato->unitario;
-
+            $multi = $dato->cantidad * $dato->unitario;
+            
             $pasado = number_format((float) $multi , 2, '.', ',');
             $numero = (float) str_replace([',', ' '], '', $pasado);
             $totalLinea += $numero;
