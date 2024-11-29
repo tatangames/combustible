@@ -360,15 +360,9 @@ class ReporteV2Controller extends Controller
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
-            //$multi = $dato->cantidad * $dato->unitario;
             $multi = round($dato->cantidad, 2) * $dato->unitario;
             
-            //$pasado = number_format((float) $multi , 2, '.', ',');
-            //$numero = (float) str_replace([',', ' '], '', $pasado);
-            //$totalLinea += $numero;
-            $totalLinea += $multi;
-
-            $totalGalonesMixtos += $dato->cantidad;
+            
             $producto = '';
 
             if($dato->id_tipocombustible == 2){ // REGULAR
@@ -445,7 +439,12 @@ class ReporteV2Controller extends Controller
                 </tr>";
 
         foreach ($arrayFactura as $data){
+            
             $totalDolares = number_format((float)$data->total_dolares, 2, '.', ',');
+            //Total de dinero por todos los equipos
+            $totalLinea += $totalDolares;
+            //Total de galones mixtos por todos los equipos
+            $totalGalonesMixtos += $data->total_galones;
 
             $tabla .= "<tr>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
