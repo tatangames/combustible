@@ -359,15 +359,9 @@ class ReporteV2Controller extends Controller
 
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
-            
-             //$multi = $dato->cantidad * $dato->unitario;
-            //$multi = round($dato->cantidad, 2) * $dato->unitario;
+       
             $multi = $dato->cantidad * $dato->unitario;
             
-            //$pasado = number_format((float) $multi , 2, '.', ',');
-            //$numero = (float) str_replace([',', ' '], '', $pasado);
-            //$totalLinea += $numero;
-           
             $totalLinea += $multi;
            
             $totalGalonesMixtos += $dato->total_galones;
@@ -394,7 +388,7 @@ class ReporteV2Controller extends Controller
 
         $totalLinea = round($totalLinea, 2);
 
-        $totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 3, '.', ',');
+        //$totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 3, '.', ',');
 
 
         $infoExtra = Extras::where('id', 1)->first();
