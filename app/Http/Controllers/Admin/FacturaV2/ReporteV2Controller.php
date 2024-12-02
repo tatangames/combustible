@@ -604,9 +604,9 @@ class ReporteV2Controller extends Controller
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
         $totalEspecial = number_format((float)$totalEspecial, 2, '.', ',');
-        $totalGalonRegular = number_format((float)$totalGalonRegular, 2, '.', ',');
-        $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
-        $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
+        //$totalGalonRegular = number_format((float)$totalGalonRegular, 2, '.', ',');
+        //$totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
+        //$totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
         //$totalDineroMixto = number_format((float)$totalDineroMixto, 2, '.', ',');
         $totalDineroMixto = round($totalDineroMixto, 2);
 
