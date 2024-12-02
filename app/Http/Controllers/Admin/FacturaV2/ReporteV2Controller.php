@@ -341,7 +341,8 @@ class ReporteV2Controller extends Controller
          $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
             ->select('id_equipo',
                 DB::raw('SUM(cantidad) as total_galones'), 
-                DB::raw('SUM(ROUND(cantidad, 2) * unitario)  as total_dolares')
+              //  DB::raw('SUM(ROUND(cantidad, 2) * unitario)  as total_dolares')
+                DB::raw('SUM(cantidad, 2 * unitario)  as total_dolares')
             )
             ->when($boolEquipoTodos, function($query) use ($idequipo) {
                 return $query->where('id_equipo', $idequipo);
@@ -546,12 +547,13 @@ class ReporteV2Controller extends Controller
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
             //$multi = $dato->cantidad * $dato->unitario;
-            $multi = round($dato->cantidad, 2) * $dato->unitario;
+            //$multi = round($dato->cantidad, 2) * $dato->unitario;
+            $multi = $dato->cantidad * $dato->unitario;
             
-            //$pasado = number_format((float) $multi , 2, '.', ',');
-            //$numero = (float) str_replace([',', ' '], '', $pasado);
-            //$totalDineroMixto += $numero;
-            $totalDineroMixto += $multi;
+            $pasado = number_format((float) $multi , 2, '.', ',');
+            $numero = (float) str_replace([',', ' '], '', $pasado);
+            $totalDineroMixto += $numero;
+            //$totalDineroMixto += $multi;
 
             $totalGalonajeColumna += $dato->cantidad;
 
