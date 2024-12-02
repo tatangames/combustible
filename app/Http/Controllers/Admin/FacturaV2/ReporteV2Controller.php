@@ -678,7 +678,7 @@ class ReporteV2Controller extends Controller
                  <td style='font-size:10px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalDineroMixto</td> 
-            </tr>";// Revertí
+            </tr>";
 
         $tabla .= "</tbody></table>";
 
