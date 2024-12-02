@@ -550,10 +550,10 @@ class ReporteV2Controller extends Controller
             //$multi = round($dato->cantidad, 2) * $dato->unitario;
             $multi = $dato->cantidad * $dato->unitario;
             
-            $pasado = number_format((float) $multi , 2, '.', ',');
-            $numero = (float) str_replace([',', ' '], '', $pasado);
-            $totalDineroMixto += $numero;
-            //$totalDineroMixto += $multi;
+            //$pasado = number_format((float) $multi , 2, '.', ',');
+            //$numero = (float) str_replace([',', ' '], '', $pasado);
+            //$totalDineroMixto += $numero;
+            $totalDineroMixto += $multi;
 
             $totalGalonajeColumna += $dato->cantidad;
 
@@ -607,7 +607,7 @@ class ReporteV2Controller extends Controller
         $totalGalonRegular = number_format((float)$totalGalonRegular, 2, '.', ',');
         $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
         $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
-        $totalDineroMixto = number_format((float)$totalDineroMixto, 2, '.', ',');
+        //$totalDineroMixto = number_format((float)$totalDineroMixto, 2, '.', ',');
 
 
         $infoExtra = Extras::where('id', 1)->first();
