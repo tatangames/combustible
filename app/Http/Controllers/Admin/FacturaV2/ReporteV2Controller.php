@@ -150,7 +150,8 @@ class ReporteV2Controller extends Controller
 
             $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
-
+        $totaldinerotodo = $totalRegular + $totalDiesel + $totalEspecial;
+        $totaldinerotodo = number_format((float)$totaldinerotodo, 2, '.', ',');
 
         $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
@@ -240,8 +241,8 @@ class ReporteV2Controller extends Controller
                 <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
-                <td style='font-size:11px; text-align: center; font-weight: bold'>$$totalLinea</td>
-            </tr>";
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totaldinerotodo</td> 
+            </tr>";// Cambie $totalLinea para que cuadre con la gasolinera, hice la variable yo.
 
         $tabla .= "</tbody></table>";
 
