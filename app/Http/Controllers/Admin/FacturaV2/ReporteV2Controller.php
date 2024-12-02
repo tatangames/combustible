@@ -150,8 +150,8 @@ class ReporteV2Controller extends Controller
 
             $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
-        $totaldinerotodo = $totalRegular + $totalDiesel + $totalEspecial;
-        $totaldinerotodo = number_format((float)$totaldinerotodo, 2, '.', ',');
+        //$totaldinerotodo = $totalRegular + $totalDiesel + $totalEspecial;
+        //$totaldinerotodo = number_format((float)$totaldinerotodo, 2, '.', ',');
 
         $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
@@ -241,8 +241,8 @@ class ReporteV2Controller extends Controller
                 <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totaldinerotodo</td> 
-            </tr>";// Cambie $totalLinea para que cuadre con la gasolinera, hice la variable yo.
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalLinea</td> 
+            </tr>";// Revertí
 
         $tabla .= "</tbody></table>";
 
@@ -253,7 +253,7 @@ class ReporteV2Controller extends Controller
 
         $tabla .= "<br>";
         $tabla .= "<div style='margin-left: 18px'>";
-        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL $$totaldinerotodo</p>";
+        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL $$totalLinea</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN REGULAR: $$totalRegular</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN DIESEL: $$totalDiesel</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN ESPECIAL: $$totalEspecial</p>";
@@ -597,8 +597,8 @@ class ReporteV2Controller extends Controller
 
             $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
-        $totaldinerotodo = $totalRegular + $totalDiesel + $totalEspecial;
-        $totaldinerotodo = number_format((float)$totaldinerotodo, 2, '.', ',');
+        //$totaldinerotodo = $totalRegular + $totalDiesel + $totalEspecial;
+        //$totaldinerotodo = number_format((float)$totaldinerotodo, 2, '.', ',');
         
 
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
@@ -684,8 +684,8 @@ class ReporteV2Controller extends Controller
                  <td style='font-size:10px; text-align: center; font-weight: bold'>$totalGalonajeColumna</td>
                  <td style='font-size:10px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'></td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totaldinerotodo</td> 
-            </tr>";// Cambie $totalDineroMixto para que cuadre con la gasolinera, hice la variable yo.
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalDineroMixto</td> 
+            </tr>";// Revertí
 
         $tabla .= "</tbody></table>";
 
@@ -693,7 +693,7 @@ class ReporteV2Controller extends Controller
 
         $tabla .= "<br>";
         $tabla .= "<div style='margin-left: 18px'>";
-        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL $$totaldinerotodo</p>";
+        $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL $$totalDineroMixto</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN REGULAR: $$totalRegular</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN DIESEL: $$totalDiesel</p>";
         $tabla .= "<p style='font-weight: bold; color: #0c525d; font-size: 16px'>TOTAL EN ESPECIAL: $$totalEspecial</p>";
