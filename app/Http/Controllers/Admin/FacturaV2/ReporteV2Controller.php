@@ -608,6 +608,7 @@ class ReporteV2Controller extends Controller
         $totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
         $totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
         //$totalDineroMixto = number_format((float)$totalDineroMixto, 2, '.', ',');
+        $totalDineroMixto = round($totalDineroMixto, 2);
 
 
         $infoExtra = Extras::where('id', 1)->first();
