@@ -163,13 +163,13 @@ class ReporteV2Controller extends Controller
             $totalGalonDiesel = $totalDiesel / $unitario;
             $totalGalonDiesel = number_format((float)$totalGalonDiesel, 4, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            $unitario = Facturacion::where('numero_factura', $numfactura)
+            $unitario = Facturacion::whereBetween('fecha', [$start, $end])
                 ->where('id_tipocombustible', 2)
                 ->value('unitario');
             $totalGalonRegular = $totalRegular / $unitario;
             $totalGalonRegular = number_format((float)$totalGalonRegular, 4, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            $unitario = Facturacion::where('numero_factura', $numfactura)
+            $unitario = Facturacion::whereBetween('fecha', [$start, $end])
                 ->where('id_tipocombustible', 3)
                 ->value('unitario');
             $totalGalonEspecial = $totalEspecial / $unitario;
