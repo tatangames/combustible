@@ -158,7 +158,6 @@ class ReporteV2Controller extends Controller
 
          //Para reparar problema de centavo y 4 decimales en factura de gasolinera, se hizo de esta manera para cuadrar el calculo inverso que hace la gasolinera
          $unitario1 = Facturacion::whereBetween('fecha', [$start, $end])
-         ->where('id_tipocombustible', 1)
          ->when($boolEquipoTodos, function($query) use ($idequipo) {
                 return $query->where('id_equipo', $idequipo);
             })
@@ -168,6 +167,7 @@ class ReporteV2Controller extends Controller
             ->when($boolFondosTodos, function($query) use ($idfondo) {
                 return $query->where('id_fondos', $idfondo);
             })
+         ->where('id_tipocombustible', 1)
          ->value('unitario');
 
             if($unitario1){$totalGalonDiesel = $totalDiesel / $unitario1;
@@ -177,7 +177,6 @@ class ReporteV2Controller extends Controller
             $totalGalonDiesel = number_format((float)$totalGalonDiesel, 4, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             $unitario2 = Facturacion::whereBetween('fecha', [$start, $end])
-                ->where('id_tipocombustible', 2)
                 ->when($boolEquipoTodos, function($query) use ($idequipo) {
                     return $query->where('id_equipo', $idequipo);
                 })
@@ -187,6 +186,7 @@ class ReporteV2Controller extends Controller
                 ->when($boolFondosTodos, function($query) use ($idfondo) {
                     return $query->where('id_fondos', $idfondo);
                 })
+                ->where('id_tipocombustible', 2)
                 ->value('unitario');
                 if($unitario2){$totalGalonRegular = $totalRegular / $unitario2;
                 }else{
@@ -195,7 +195,6 @@ class ReporteV2Controller extends Controller
             $totalGalonRegular = number_format((float)$totalGalonRegular, 4, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             $unitario3 = Facturacion::whereBetween('fecha', [$start, $end])
-                ->where('id_tipocombustible', 3)
                 ->when($boolEquipoTodos, function($query) use ($idequipo) {
                     return $query->where('id_equipo', $idequipo);
                 })
@@ -205,6 +204,7 @@ class ReporteV2Controller extends Controller
                 ->when($boolFondosTodos, function($query) use ($idfondo) {
                     return $query->where('id_fondos', $idfondo);
                 })
+                ->where('id_tipocombustible', 3)
                 ->value('unitario');
                 if($unitario3){$totalGalonEspecial = $totalEspecial / $unitario3;
                 }else{
