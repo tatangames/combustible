@@ -182,7 +182,7 @@ class ReporteV2Controller extends Controller
                 }else{
                     $totalGalonEspecial = 0.0;
             }
-            $totalGalonEspecial = number_format((float)$totalGalonEspecial, 3, '.', ',');
+            $totalGalonEspecial = round($totalGalonEspecial, 3);
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             //Galonaje con aproximación "reparada"
             $nuevototalGalonajeColumna = (float)$totalGalonDiesel + (float)$totalGalonRegular + (float)$totalGalonEspecial;
