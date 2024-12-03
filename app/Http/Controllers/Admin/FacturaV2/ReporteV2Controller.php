@@ -556,22 +556,19 @@ class ReporteV2Controller extends Controller
             if($dato->id_tipocombustible == 2){ // REGULAR
                 //$totalRegular += $multi;
                 $totalRegular += $newnum;
-                //$totalGalonRegular += $dato->cantidad;
-                $totalGalonRegular += ($totalRegular / $dato->unitario);
+                $totalGalonRegular += $dato->cantidad;
                 $producto = "R";
             }
             else if($dato->id_tipocombustible == 1){ // DIESEL
                 //$totalDiesel += $multi;
                 $totalDiesel += $newnum;
-                //$totalGalonDiesel += $dato->cantidad;
-                $totalGalonDiesel += ($totalDiesel / $dato->unitario);
+                $totalGalonDiesel += $dato->cantidad;
                 $producto = "D";
             }
             else if($dato->id_tipocombustible == 3){ // ESPECIAL
                 //$totalEspecial += $multi;
                 $totalEspecial += $newnum;
-                //$totalGalonEspecial += $dato->cantidad;
-                $totalGalonEspecial += ($totalEspecial / $dato->unitario);
+                $totalGalonEspecial += $dato->cantidad;
                 $producto = "E";
             }
 
@@ -597,6 +594,10 @@ class ReporteV2Controller extends Controller
 
            $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
+        $unitario = Facturacion::where('numero_factura', $numeroFactura)
+            ->where('id_tipocombustible', 1)
+            ->value('unitario');
+        $totalGalonDiesel = $totalDiesel / $unitario;
 
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
