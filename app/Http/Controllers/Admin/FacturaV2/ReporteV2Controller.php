@@ -185,7 +185,7 @@ class ReporteV2Controller extends Controller
             $totalGalonEspecial = number_format((float)$totalGalonEspecial, 4, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             //Galonaje con aproximación "reparada"
-            $nuevototalGalonajeColumna = $totalGalonDiesel + $totalGalonRegular + $totalGalonEspecial;
+            $nuevototalGalonajeColumna = (float)$totalGalonDiesel + (float)$totalGalonRegular + (float)$totalGalonEspecial;
             $nuevototalGalonajeColumna = number_format((float)$nuevototalGalonajeColumna, 3, '.', ',');
 
         
