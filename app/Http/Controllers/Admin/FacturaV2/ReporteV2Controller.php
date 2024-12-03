@@ -544,9 +544,10 @@ class ReporteV2Controller extends Controller
             //$multi = round($dato->cantidad, 2) * $dato->unitario;
             $multi = $dato->cantidad * $dato->unitario;
             
-            //$pasado = number_format((float) $multi , 2, '.', ',');
-            //$numero = (float) str_replace([',', ' '], '', $pasado);
-            $totalDineroMixto += $multi;
+            $formateado = number_format((float) $multi , 2, '.', ',');
+            $newnum = (float) str_replace([',', ' '], '', $formateado);
+            //$totalDineroMixto += $multi;
+            $totalDineroMixto += $newnum;
 
             $totalGalonajeColumna += $dato->cantidad;
 
