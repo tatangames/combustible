@@ -165,6 +165,7 @@ class ReporteV2Controller extends Controller
                 $totalGalonDiesel = 0.0;
             }
             $totalGalonDiesel = round($totalGalonDiesel, 3);
+            $totalGalonDiesel = number_format((float)$totalGalonDiesel, 3, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             $unitario2 = Facturacion::whereBetween('fecha', [$start, $end])
                 ->where('id_tipocombustible', 2)
@@ -174,6 +175,7 @@ class ReporteV2Controller extends Controller
                     $totalGalonRegular = 0.0;
             }
             $totalGalonRegular = round($totalGalonRegular, 3);
+            $totalGalonRegular = number_format((float)$totalGalonRegular, 3, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             $unitario3 = Facturacion::whereBetween('fecha', [$start, $end])
                 ->where('id_tipocombustible', 3)
@@ -183,6 +185,7 @@ class ReporteV2Controller extends Controller
                     $totalGalonEspecial = 0.0;
             }
             $totalGalonEspecial = round($totalGalonEspecial, 3);
+            $totalGalonEspecial = number_format((float)$totalGalonEspecial, 3, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             //Galonaje con aproximación "reparada"
             $nuevototalGalonajeColumna = (float)$totalGalonDiesel + (float)$totalGalonRegular + (float)$totalGalonEspecial;
