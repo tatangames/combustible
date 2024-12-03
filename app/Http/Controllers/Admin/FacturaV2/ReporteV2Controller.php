@@ -160,7 +160,8 @@ class ReporteV2Controller extends Controller
          $unitario1 = Facturacion::whereBetween('fecha', [$start, $end])
             ->where('id_tipocombustible', 1)
             ->value('unitario');
-            if($unitario1){$totalGalonDiesel = $totalDiesel / $unitario1;
+            //if($unitario1){$totalGalonDiesel = $totalDiesel / $unitario1;
+                if($unitario1){$totalGalonDiesel = $totalDiesel / 3.42;
             }else{
                 $totalGalonDiesel = 0.0;
             }
