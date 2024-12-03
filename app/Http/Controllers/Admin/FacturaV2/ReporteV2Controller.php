@@ -594,11 +594,25 @@ class ReporteV2Controller extends Controller
 
            $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
+        //Para reparar problema de centavo y 4 decimales en factura de gasolinera, se hizo de esta manera para cuadrar el calculo inverso que hace la gasolinera
         $unitario = Facturacion::where('numero_factura', $numfactura)
             ->where('id_tipocombustible', 1)
             ->value('unitario');
         $totalGalonDiesel = $totalDiesel / $unitario;
         $totalGalonDiesel = number_format((float)$totalGalonDiesel, 4, '.', ',');
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        $unitario = Facturacion::where('numero_factura', $numfactura)
+            ->where('id_tipocombustible', 2)
+            ->value('unitario');
+        $totalGalonRegular = $totalRegular / $unitario;
+        $totalGalonRegular = number_format((float)$totalGalonRegular, 4, '.', ',');
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        $unitario = Facturacion::where('numero_factura', $numfactura)
+            ->where('id_tipocombustible', 3)
+            ->value('unitario');
+        $totalGalonEspecial = $totalEspecial / $unitario;
+        $totalGalonEspecial = number_format((float)$totalGalonEspecial, 4, '.', ',');
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
