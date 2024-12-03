@@ -541,13 +541,11 @@ class ReporteV2Controller extends Controller
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
-            //$multi = $dato->cantidad * $dato->unitario;
             //$multi = round($dato->cantidad, 2) * $dato->unitario;
-            $multi = round($dato->cantidad,4) * $dato->unitario;
+            $multi = $dato->cantidad * $dato->unitario;
             
             //$pasado = number_format((float) $multi , 2, '.', ',');
             //$numero = (float) str_replace([',', ' '], '', $pasado);
-            //$totalDineroMixto += $numero;
             $totalDineroMixto += $multi;
 
             $totalGalonajeColumna += $dato->cantidad;
@@ -590,8 +588,7 @@ class ReporteV2Controller extends Controller
             $dato->placa = $infoEquipo->placa;
             $dato->equipo = $infoEquipo->nombre;
 
-           // $dato->multi = number_format((float)$multi, 2, '.', ',');
-            $dato->multi = number_format((float)$multi, 2, '.', ',');
+           $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
 
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
@@ -601,7 +598,6 @@ class ReporteV2Controller extends Controller
         //$totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
         //$totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
         //$totalDineroMixto = number_format((float)$totalDineroMixto, 2, '.', ',');
-       // $totalDineroMixto = round($totalDineroMixto, 2);
 
 
         $infoExtra = Extras::where('id', 1)->first();
