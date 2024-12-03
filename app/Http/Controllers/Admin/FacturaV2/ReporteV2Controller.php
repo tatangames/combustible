@@ -157,22 +157,32 @@ class ReporteV2Controller extends Controller
         $totalLinea = round($totalLinea, 2);
 
          //Para reparar problema de centavo y 4 decimales en factura de gasolinera, se hizo de esta manera para cuadrar el calculo inverso que hace la gasolinera
-         $unitario = Facturacion::whereBetween('fecha', [$start, $end])
+         $unitario1 = Facturacion::whereBetween('fecha', [$start, $end])
          ->where('id_tipocombustible', 1)
          ->value('unitario');
-            $totalGalonDiesel = $totalDiesel / $unitario;
+
+            if($unitario1){$totalGalonDiesel = $totalDiesel / $unitario1;
+            }else{
+                $totalGalonDiesel = 0.0;
+            }
             $totalGalonDiesel = number_format((float)$totalGalonDiesel, 4, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            $unitario = Facturacion::whereBetween('fecha', [$start, $end])
+            $unitario2 = Facturacion::whereBetween('fecha', [$start, $end])
                 ->where('id_tipocombustible', 2)
                 ->value('unitario');
-            $totalGalonRegular = $totalRegular / $unitario;
+                if($unitario2){$totalGalonRegular = $totalRegular / $unitario2;
+                }else{
+                    $totalGalonRegular = 0.0;
+            }
             $totalGalonRegular = number_format((float)$totalGalonRegular, 4, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            $unitario = Facturacion::whereBetween('fecha', [$start, $end])
+            $unitario3 = Facturacion::whereBetween('fecha', [$start, $end])
                 ->where('id_tipocombustible', 3)
                 ->value('unitario');
-            $totalGalonEspecial = $totalEspecial / $unitario;
+                if($unitario3){$totalGalonEspecial = $totalEspecial / $unitario3;
+                }else{
+                    $totalGalonEspecial = 0.0;
+            }
             $totalGalonEspecial = number_format((float)$totalGalonEspecial, 4, '.', ',');
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             //Galonaje con aproximación "reparada"
