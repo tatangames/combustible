@@ -591,7 +591,7 @@ class ReporteV2Controller extends Controller
             $dato->equipo = $infoEquipo->nombre;
 
            // $dato->multi = number_format((float)$multi, 2, '.', ',');
-            $dato->multi = $multi;
+            $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
 
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
