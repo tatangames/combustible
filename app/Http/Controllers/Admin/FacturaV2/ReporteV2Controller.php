@@ -117,27 +117,31 @@ class ReporteV2Controller extends Controller
 
             //$multi = round($dato->cantidad, 2) * $dato->unitario;
             $multi = $dato->cantidad * $dato->unitario;
-            
-            //$pasado = number_format((float) $multi , 2, '.', ',');
-            //$numero = (float) str_replace([',', ' '], '', $pasado);
-            $totalLinea += $multi;
+
+            $formateado = number_format((float) $multi , 2, '.', ',');
+            $newnum = (float) str_replace([',', ' '], '', $formateado);
+            //$totalLinea += $multi;
+            $totalLinea += $newnum;
           
 
             $totalGalonesMixtos += $dato->cantidad;
             $producto = '';
 
             if($dato->id_tipocombustible == 2){ // REGULAR
-                $totalRegular += $multi;
+                //$totalRegular += $multi;
+                $totalRegular += $newnum;
                 $totalGalonRegular += $dato->cantidad;
                 $producto = "R";
             }
             else if($dato->id_tipocombustible == 1){ // DIESEL
-                $totalDiesel += $multi;
+                //$totalDiesel += $multi;
+                $totalDiesel += $newnum;
                 $totalGalonDiesel += $dato->cantidad;
                 $producto = "D";
             }
             else if($dato->id_tipocombustible == 3){ // ESPECIAL
-                $totalEspecial += $multi;
+                //$totalEspecial += $multi;
+                $totalEspecial += $newnum;
                 $totalGalonEspecial += $dato->cantidad;
                 $producto = "E";
             }
@@ -151,6 +155,29 @@ class ReporteV2Controller extends Controller
             $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
         $totalLinea = round($totalLinea, 2);
+
+         //Para reparar problema de centavo y 4 decimales en factura de gasolinera, se hizo de esta manera para cuadrar el calculo inverso que hace la gasolinera
+         $unitario = Facturacion::whereBetween('fecha', [$start, $end])
+         ->where('id_tipocombustible', 1)
+         ->value('unitario');
+            $totalGalonDiesel = $totalDiesel / $unitario;
+            $totalGalonDiesel = number_format((float)$totalGalonDiesel, 4, '.', ',');
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            $unitario = Facturacion::where('numero_factura', $numfactura)
+                ->where('id_tipocombustible', 2)
+                ->value('unitario');
+            $totalGalonRegular = $totalRegular / $unitario;
+            $totalGalonRegular = number_format((float)$totalGalonRegular, 4, '.', ',');
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            $unitario = Facturacion::where('numero_factura', $numfactura)
+                ->where('id_tipocombustible', 3)
+                ->value('unitario');
+            $totalGalonEspecial = $totalEspecial / $unitario;
+            $totalGalonEspecial = number_format((float)$totalGalonEspecial, 4, '.', ',');
+            //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+            //Galonaje con aproximación "reparada"
+            $nuevototalGalonajeColumna = $totalGalonDiesel + $totalGalonRegular + $totalGalonEspecial;
+            $nuevototalGalonajeColumna = number_format((float)$nuevototalGalonajeColumna, 3, '.', ',');
 
         
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
@@ -237,7 +264,7 @@ class ReporteV2Controller extends Controller
 
         $tabla .= "<tr>
                 <td colspan='6' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
-                <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
+                <td style='font-size:11px; text-align: center; font-weight: bold'>$nuevototalGalonajeColumna</td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalLinea</td> 
