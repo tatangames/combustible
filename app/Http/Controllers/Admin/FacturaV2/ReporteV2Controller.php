@@ -639,7 +639,7 @@ class ReporteV2Controller extends Controller
         }else{
             $totalGalonRegular = 0.0;
         }
-        $totalGalonRegular = $totalRegular / $unitario;
+        
         $totalGalonRegular = number_format((float)$totalGalonRegular, 4, '.', ',');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         $unitario3 = Facturacion::where('numero_factura', $numfactura)
@@ -649,7 +649,7 @@ class ReporteV2Controller extends Controller
         }else{
             $totalGalonEspecial = 0.0;
         }
-        $totalGalonEspecial = $totalEspecial / $unitario;
+        
         $totalGalonEspecial = number_format((float)$totalGalonEspecial, 4, '.', ',');
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         //Galonaje con aproximación "reparada"
