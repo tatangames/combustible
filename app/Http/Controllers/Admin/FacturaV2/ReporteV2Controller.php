@@ -556,15 +556,18 @@ class ReporteV2Controller extends Controller
             if($dato->id_tipocombustible == 2){ // REGULAR
                 //$totalRegular += $multi;
                 $totalRegular += $newnum;
-                $totalGalonRegular += $dato->cantidad;
+                //$totalGalonRegular += $dato->cantidad;
+                $totalGalonRegular += ($totalRegular / $dato->unitario);
                 $producto = "R";
             }
             else if($dato->id_tipocombustible == 1){ // DIESEL
+                //$totalDiesel += $multi;
                 $totalDiesel += $newnum;
                 $totalGalonDiesel += $dato->cantidad;
                 $producto = "D";
             }
             else if($dato->id_tipocombustible == 3){ // ESPECIAL
+                //$totalEspecial += $multi;
                 $totalEspecial += $newnum;
                 $totalGalonEspecial += $dato->cantidad;
                 $producto = "E";
