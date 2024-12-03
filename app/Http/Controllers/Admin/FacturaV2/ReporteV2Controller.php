@@ -178,6 +178,15 @@ class ReporteV2Controller extends Controller
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             $unitario2 = Facturacion::whereBetween('fecha', [$start, $end])
                 ->where('id_tipocombustible', 2)
+                ->when($boolEquipoTodos, function($query) use ($idequipo) {
+                    return $query->where('id_equipo', $idequipo);
+                })
+                ->when($boolDistritoTodos, function($query) use ($iddistrito) {
+                    return $query->where('id_distrito', $iddistrito);
+                })
+                ->when($boolFondosTodos, function($query) use ($idfondo) {
+                    return $query->where('id_fondos', $idfondo);
+                })
                 ->value('unitario');
                 if($unitario2){$totalGalonRegular = $totalRegular / $unitario2;
                 }else{
@@ -187,6 +196,15 @@ class ReporteV2Controller extends Controller
             //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             $unitario3 = Facturacion::whereBetween('fecha', [$start, $end])
                 ->where('id_tipocombustible', 3)
+                ->when($boolEquipoTodos, function($query) use ($idequipo) {
+                    return $query->where('id_equipo', $idequipo);
+                })
+                ->when($boolDistritoTodos, function($query) use ($iddistrito) {
+                    return $query->where('id_distrito', $iddistrito);
+                })
+                ->when($boolFondosTodos, function($query) use ($idfondo) {
+                    return $query->where('id_fondos', $idfondo);
+                })
                 ->value('unitario');
                 if($unitario3){$totalGalonEspecial = $totalEspecial / $unitario3;
                 }else{
