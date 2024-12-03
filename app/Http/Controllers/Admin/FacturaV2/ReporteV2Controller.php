@@ -600,19 +600,22 @@ class ReporteV2Controller extends Controller
             ->value('unitario');
         $totalGalonDiesel = $totalDiesel / $unitario;
         $totalGalonDiesel = number_format((float)$totalGalonDiesel, 4, '.', ',');
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         $unitario = Facturacion::where('numero_factura', $numfactura)
             ->where('id_tipocombustible', 2)
             ->value('unitario');
         $totalGalonRegular = $totalRegular / $unitario;
         $totalGalonRegular = number_format((float)$totalGalonRegular, 4, '.', ',');
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
         $unitario = Facturacion::where('numero_factura', $numfactura)
             ->where('id_tipocombustible', 3)
             ->value('unitario');
         $totalGalonEspecial = $totalEspecial / $unitario;
         $totalGalonEspecial = number_format((float)$totalGalonEspecial, 4, '.', ',');
-        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+        //Galonaje con aproximación "reparada"
+        $nuevototalGalonajeColumna = $totalGalonDiesel + $totalGalonRegular + $totalGalonEspecial;
+        $nuevototalGalonajeColumna = number_format((float)$totalGalonEspecial, 4, '.', ',');
 
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
@@ -694,7 +697,7 @@ class ReporteV2Controller extends Controller
         
         $tabla .= "<tr>
                 <td colspan='6' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
-                 <td style='font-size:10px; text-align: center; font-weight: bold'>$totalGalonajeColumna</td>
+                 <td style='font-size:10px; text-align: center; font-weight: bold'>$nuevototalGalonajeColumna</td>
                  <td style='font-size:10px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalDineroMixto</td> 
