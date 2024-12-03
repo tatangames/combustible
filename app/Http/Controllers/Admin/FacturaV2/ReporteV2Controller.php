@@ -159,6 +159,15 @@ class ReporteV2Controller extends Controller
          //Para reparar problema de centavo y 4 decimales en factura de gasolinera, se hizo de esta manera para cuadrar el calculo inverso que hace la gasolinera
          $unitario1 = Facturacion::whereBetween('fecha', [$start, $end])
          ->where('id_tipocombustible', 1)
+         ->when($boolEquipoTodos, function($query) use ($idequipo) {
+                return $query->where('id_equipo', $idequipo);
+            })
+            ->when($boolDistritoTodos, function($query) use ($iddistrito) {
+                return $query->where('id_distrito', $iddistrito);
+            })
+            ->when($boolFondosTodos, function($query) use ($idfondo) {
+                return $query->where('id_fondos', $idfondo);
+            })
          ->value('unitario');
 
             if($unitario1){$totalGalonDiesel = $totalDiesel / $unitario1;
