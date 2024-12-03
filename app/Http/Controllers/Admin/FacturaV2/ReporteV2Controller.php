@@ -543,7 +543,7 @@ class ReporteV2Controller extends Controller
 
             //$multi = $dato->cantidad * $dato->unitario;
             //$multi = round($dato->cantidad, 2) * $dato->unitario;
-            $multi = $dato->cantidad * $dato->unitario;
+            $multi = round($dato->cantidad,2) * $dato->unitario;
             
             //$pasado = number_format((float) $multi , 2, '.', ',');
             //$numero = (float) str_replace([',', ' '], '', $pasado);
