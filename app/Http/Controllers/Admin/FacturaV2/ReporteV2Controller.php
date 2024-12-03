@@ -594,7 +594,7 @@ class ReporteV2Controller extends Controller
 
            $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
-        $unitario = Facturacion::where('numero_factura', $numeroFactura)
+        $unitario = Facturacion::where('numero_factura', $numfactura)
             ->where('id_tipocombustible', 1)
             ->value('unitario');
         $totalGalonDiesel = $totalDiesel / $unitario;
