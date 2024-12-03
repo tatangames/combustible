@@ -598,6 +598,7 @@ class ReporteV2Controller extends Controller
             ->where('id_tipocombustible', 1)
             ->value('unitario');
         $totalGalonDiesel = $totalDiesel / $unitario;
+        $totalGalonDiesel = number_format((float)$totalGalonDiesel, 4, '.', ',');
 
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
