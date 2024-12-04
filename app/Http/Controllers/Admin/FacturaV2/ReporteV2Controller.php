@@ -240,7 +240,7 @@ class ReporteV2Controller extends Controller
 
         $tabla .= "<tr>
                 <td colspan='6' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
-                <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonajeColumna</td>
+                <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalLinea</td> 
