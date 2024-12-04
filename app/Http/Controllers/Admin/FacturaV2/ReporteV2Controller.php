@@ -118,9 +118,10 @@ class ReporteV2Controller extends Controller
             //$multi = round($dato->cantidad, 2) * $dato->unitario;
             $multi = $dato->cantidad * $dato->unitario;
 
-            //$formateado = number_format((float) $multi , 2, '.', ',');
-            //$newnum = (float) str_replace([',', ' '], '', $formateado);
-            $totalLinea += $multi;
+            $formateado = number_format((float) $multi , 2, '.', ',');
+            $newnum = (float) str_replace([',', ' '], '', $formateado);
+            //$totalLinea += $multi;
+            $totalLinea += $newnum;
            
           
 
@@ -128,17 +129,20 @@ class ReporteV2Controller extends Controller
             $producto = '';
 
             if($dato->id_tipocombustible == 2){ // REGULAR
-                $totalRegular += $multi;
+                //$totalRegular += $multi;
+                $totalRegular += $newnum;
                 $totalGalonRegular += $dato->cantidad;
                 $producto = "R";
             }
             else if($dato->id_tipocombustible == 1){ // DIESEL
-                $totalDiesel += $multi;
+                //$totalDiesel += $multi;
+                $totalDiesel += $newnum;
                 $totalGalonDiesel += $dato->cantidad;
                 $producto = "D";
             }
             else if($dato->id_tipocombustible == 3){ // ESPECIAL
-                $totalEspecial += $multi;
+                //$totalEspecial += $multi;
+                $totalEspecial += $newnum;
                 $totalGalonEspecial += $dato->cantidad;
                 $producto = "E";
             }
@@ -544,9 +548,10 @@ class ReporteV2Controller extends Controller
             //$multi = round($dato->cantidad, 2) * $dato->unitario;
             $multi = $dato->cantidad * $dato->unitario;
             
-            //$formateado = number_format((float) $multi , 2, '.', ',');
-            //$newnum = (float) str_replace([',', ' '], '', $formateado);
-            $totalDineroMixto += $multi;
+            $formateado = number_format((float) $multi , 2, '.', ',');
+            $newnum = (float) str_replace([',', ' '], '', $formateado);
+            //$totalDineroMixto += $multi;
+            $totalDineroMixto += $newnum;
             
 
             $totalGalonajeColumna += $dato->cantidad;
@@ -554,17 +559,20 @@ class ReporteV2Controller extends Controller
             $producto = '';
 
             if($dato->id_tipocombustible == 2){ // REGULAR
-                $totalRegular += $multi;
+                //$totalRegular += $multi;
+                $totalRegular += $newnum;
                 $totalGalonRegular += $dato->cantidad;
                 $producto = "R";
             }
             else if($dato->id_tipocombustible == 1){ // DIESEL
-                $totalDiesel += $multi;
+                //$totalDiesel += $multi;
+                $totalDiesel += $newnum;
                 $totalGalonDiesel += $dato->cantidad;
                 $producto = "D";
             }
             else if($dato->id_tipocombustible == 3){ // ESPECIAL
-                $totalEspecial += $multi;
+                //$totalEspecial += $multi;
+                $totalEspecial += $newnum;
                 $totalGalonEspecial += $dato->cantidad;
                 $producto = "E";
             }
