@@ -7,7 +7,7 @@
                         <table id="tabla" class="table table-bordered table-striped">
                             <thead>
                             <tr>
-                                <th>Nombre</th>
+                                <th>Nombre </th>
                                 <th>Placa</th>
                                 <th>Opciones</th>
                             </tr>
@@ -16,7 +16,6 @@
 
                             @foreach($listado as $dato)
                                 <tr>
-
                                     <td>{{ $dato->nombre }}</td>
                                     <td>{{ $dato->placa }}</td>
                                     <td>
