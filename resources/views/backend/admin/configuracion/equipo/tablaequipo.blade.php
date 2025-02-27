@@ -7,9 +7,9 @@
                         <table id="tabla" class="table table-bordered table-striped">
                             <thead>
                             <tr>
-                                <th>Nombre </th>
-                                <th>Placa</th>
-                                <th>Opciones</th>
+                                <th style="width: 50%">Nombre </th>
+                                <th style="width: 25%">Placa</th>
+                                <th style="width: 10%">Opciones</th>
                             </tr>
                             </thead>
                             <tbody>

@@ -4,19 +4,18 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateTipocombustibleTable extends Migration
+class CreateUnidadMedidaTable extends Migration
 {
     /**
-     * TIPO DE COMBUSTIBLE
+     * Run the migrations.
      *
      * @return void
      */
     public function up()
     {
-        Schema::create('tipocombustible', function (Blueprint $table) {
+        Schema::create('unidad_medida', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 50);
-            $table->string('descripcion', 100)->nullable();
         });
     }
 
@@ -27,6 +26,6 @@ class CreateTipocombustibleTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('tipocombustible');
+        Schema::dropIfExists('unidad_medida');
     }
 }

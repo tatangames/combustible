@@ -17,7 +17,7 @@
     <div class="container-fluid" style="margin-left: 15px">
         <div class="row">
             <div class="col-md-6">
-                <div class="card card-green">
+                <div class="card card-gray-dark">
                     <div class="card-header">
                         <h3 class="card-title">Reporte por Equipo</h3>
                     </div>

@@ -7,19 +7,30 @@
                         <table id="tabla" class="table table-bordered table-striped">
                             <thead>
                             <tr>
-                                <th style="width: 60%">Nombre</th>
-                                <th style="width: 15%">Opciones</th>
+                                <th style="width: 15%">Proveedor </th>
+                                <th style="width: 25%">Proceso Ref.</th>
+                                <th style="width: 30%">Nombre Proceso</th>
+                                <th style="width: 20%">Fecha Desde</th>
+                                <th style="width: 20%">Fecha Hasta</th>
+                                <th style="width: 16%">Opciones</th>
                             </tr>
                             </thead>
                             <tbody>
 
                             @foreach($listado as $dato)
                                 <tr>
-
-                                    <td>{{ $dato->nombre }}</td>
+                                    <td>{{ $dato->proveedor }}</td>
+                                    <td>{{ $dato->proceso_ref }}</td>
+                                    <td>{{ $dato->nombre_proceso }}</td>
+                                    <td>{{ $dato->fechaDesdeFormat }}</td>
+                                    <td>{{ $dato->fechaHastaFormat }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-success btn-xs" onclick="informacion({{ $dato->id }})">
+                                        <button type="button" class="btn btn-success btn-xs" onclick="infoEditar({{ $dato->id }})">
                                             <i class="fas fa-eye" title="Editar"></i>&nbsp; Editar
+                                        </button>
+
+                                        <button type="button" style="margin: 5px" class="btn btn-info btn-xs" onclick="infoDetalle({{ $dato->id }})">
+                                            <i class="fas fa-eye" title="Detalle"></i>&nbsp; Detalle
                                         </button>
                                     </td>
 
@@ -41,6 +52,7 @@
         $("#tabla").DataTable({
             "paging": true,
             "lengthChange": true,
+            "order": [[0, 'asc']],
             "searching": true,
             "ordering": true,
             "info": true,
