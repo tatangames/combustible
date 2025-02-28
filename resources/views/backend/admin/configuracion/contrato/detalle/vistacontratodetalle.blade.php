@@ -98,8 +98,14 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label>Código</label>
+                                        <label>Código Presupuestario</label>
                                         <input type="text" id="codigo-nuevo" value="54110" autocomplete="off" class="form-control" maxlength="50" />
+                                    </div>
+
+                                    <hr>
+                                    <div class="form-group">
+                                        <label>Cantidad</label>
+                                        <input type="number" id="cantidad-nuevo" autocomplete="off" class="form-control" />
                                     </div>
 
                                 </div>
@@ -160,6 +166,7 @@
             var combustible = document.getElementById('select-combustible').value;
             var unidad = document.getElementById('select-unidad').value;
             var codigo = document.getElementById('codigo-nuevo').value;
+            var cantidad = document.getElementById('cantidad-nuevo').value;
 
             if(distrito === ''){
                 toastr.error('Distrito es requerido');
@@ -181,6 +188,28 @@
                 return;
             }
 
+            var reglaNumeroEntero = /^[0-9]\d*$/;
+
+            if(cantidad === ''){
+                toastr.error('cantidad es requerido');
+                return;
+            }
+
+            if(!cantidad.match(reglaNumeroEntero)) {
+                toastr.error('Cantidad debe se debe ser número Entero y no Negativo.');
+                return;
+            }
+
+            if(cantidad < 0){
+                toastr.error('cantidad no debe tener números negativos');
+                return;
+            }
+
+            if(cantidad > 9000000){
+                toastr.error('cantidad no debe superar 9 millones');
+                return;
+            }
+
             let id = {{ $id }};
 
             openLoading();
@@ -190,6 +219,7 @@
             formData.append('combustible', combustible);
             formData.append('unidad', unidad);
             formData.append('codigo', codigo);
+            formData.append('cantidad', cantidad);
 
             axios.post(url+'/contratos/detalle/nuevo', formData, {
             })
@@ -227,6 +257,47 @@
                 });
         }
 
+        function infoBorrar(id){
+            Swal.fire({
+                title: 'Borrar?',
+                text: "",
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonColor: '#28a745',
+                cancelButtonColor: '#d33',
+                cancelButtonText: 'Cancelar',
+                confirmButtonText: 'Si'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    solicitarBorrar(id);
+                }
+            })
+        }
+
+        function solicitarBorrar(id){
+
+            openLoading();
+            var formData = new FormData();
+            formData.append('id', id);
+
+            axios.post(url+'/contratos/detalle/borrar', formData, {
+            })
+                .then((response) => {
+                    closeLoading();
+
+                    if(response.data.success === 1){
+                        toastr.success('Borrado');
+                        recargar();
+                    }
+                    else {
+                        toastr.error('Error al borrar');
+                    }
+                })
+                .catch((error) => {
+                    toastr.error('Error al borrar');
+                    closeLoading();
+                });
+        }
 
     </script>
 

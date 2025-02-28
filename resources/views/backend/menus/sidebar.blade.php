@@ -160,6 +160,13 @@
                                     </a>
                                 </li>
 
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.reporte.contrato') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Contrato</p>
+                                    </a>
+                                </li>
+
                             </ul>
                         </li>
 

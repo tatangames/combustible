@@ -91,35 +91,10 @@ Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}/{distrito}
 Route::get('/admin/reportev2/factura/index', [ReporteV2Controller::class,'vistaReporteFactura'])->name('admin.reporte.facturacion.factura');
 Route::get('/admin/reportev2/pdf/factura/{numfactura}/{distrito}/{fondo}', [ReporteV2Controller::class,'reporteFacturaPDF']);
 
+// REPORTE DE CONTRATO
+Route::get('/admin/reportev2/contrato/index', [ReporteV2Controller::class,'vistaReporteContrato'])->name('admin.reporte.contrato');
+Route::get('/admin/reportev2/contrato/info/{desde}/{hasta}/{idcontrato}/{iddistrito}', [ReporteV2Controller::class,'reporteContratoDistrito']);
 
-//******************** PARTE DEL SISTEMA ANTERIOR ***************************************
-
-
-// FACTURA
-Route::get('/admin/factura/index', [FacturaController::class,'indexFactura'])->name('admin.factura.index');
-Route::get('/admin/factura/tabla', [FacturaController::class, 'tablaFactura']);
-Route::get('/admin/factura/tabla/tipo/{valor}', [FacturaController::class, 'tablaFacturaTodos']);
-Route::post('/admin/factura/informacion', [FacturaController::class, 'informacionFactura']);
-Route::post('/admin/factura/actualizar', [FacturaController::class, 'actualizarFactura']);
-Route::post('/admin/factura/borrar', [FacturaController::class, 'borrarFactura']);
-
-
-// REGISTRO NUEVA FACTURA
-Route::get('/admin/nuevafactura/index', [FacturaController::class,'indexNuevaFactura'])->name('admin.nuevafactura.index');
-Route::post('/admin/nuevafactura/nuevo', [FacturaController::class,'nuevaFactura']);
-
-// CAMBIO DE NOMBRE PARA REPORTES
-Route::get('/admin/cambio/nombres/index', [ReportesController::class,'indexCambioNombre'])->name('admin.nombres.index');
-Route::post('/admin/cambio/nombres/actualizar', [ReportesController::class,'actualizarBloqueNombre']);
-
-
-// REPORTE - POR FECHAS
-Route::get('/admin/reportev1/fechas/index', [ReportesController::class,'vistaReporteFechas'])->name('admin.reporte.fechas.index');
-Route::get('/admin/reportev1/generar/fecha/{desde}/{hasta}/{factura}', [ReportesController::class,'reporteFacturaFecha']);
-
-// REPORTE - POR EQUIPOS
-Route::get('/admin/reportev1/equipos/index', [ReportesController::class,'vistaReporteEquipos'])->name('admin.reporte.equipos.index');
-Route::get('/admin/reportev1/generar/equipos/{desde}/{hasta}/{texto}', [ReportesController::class,'reporteFacturaEquipos']);
 
 
 //***************************************************************
@@ -150,11 +125,61 @@ Route::post('/admin/contratos/editar', [ContratoController::class, 'editarContra
 Route::get('/admin/contratos/detalle/index/{id}', [ContratoController::class,'indexContratoDetalle']);
 Route::get('/admin/contratos/detalle/tabla/{id}', [ContratoController::class, 'tablaContratoDetalle']);
 Route::post('/admin/contratos/detalle/nuevo', [ContratoController::class, 'nuevoContratoDetalle']);
+Route::post('/admin/contratos/detalle/borrar', [ContratoController::class, 'borrarContratoDetalle']);
 
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//******************** PARTE DEL SISTEMA ANTERIOR ***************************************
+
+
+// FACTURA
+Route::get('/admin/factura/index', [FacturaController::class,'indexFactura'])->name('admin.factura.index');
+Route::get('/admin/factura/tabla', [FacturaController::class, 'tablaFactura']);
+Route::get('/admin/factura/tabla/tipo/{valor}', [FacturaController::class, 'tablaFacturaTodos']);
+Route::post('/admin/factura/informacion', [FacturaController::class, 'informacionFactura']);
+Route::post('/admin/factura/actualizar', [FacturaController::class, 'actualizarFactura']);
+Route::post('/admin/factura/borrar', [FacturaController::class, 'borrarFactura']);
+
+
+// REGISTRO NUEVA FACTURA
+Route::get('/admin/nuevafactura/index', [FacturaController::class,'indexNuevaFactura'])->name('admin.nuevafactura.index');
+Route::post('/admin/nuevafactura/nuevo', [FacturaController::class,'nuevaFactura']);
+
+// CAMBIO DE NOMBRE PARA REPORTES
+Route::get('/admin/cambio/nombres/index', [ReportesController::class,'indexCambioNombre'])->name('admin.nombres.index');
+Route::post('/admin/cambio/nombres/actualizar', [ReportesController::class,'actualizarBloqueNombre']);
+
+
+// REPORTE - POR FECHAS
+Route::get('/admin/reportev1/fechas/index', [ReportesController::class,'vistaReporteFechas'])->name('admin.reporte.fechas.index');
+Route::get('/admin/reportev1/generar/fecha/{desde}/{hasta}/{factura}', [ReportesController::class,'reporteFacturaFecha']);
+
+// REPORTE - POR EQUIPOS
+Route::get('/admin/reportev1/equipos/index', [ReportesController::class,'vistaReporteEquipos'])->name('admin.reporte.equipos.index');
+Route::get('/admin/reportev1/generar/equipos/{desde}/{hasta}/{texto}', [ReportesController::class,'reporteFacturaEquipos']);
 
 
 

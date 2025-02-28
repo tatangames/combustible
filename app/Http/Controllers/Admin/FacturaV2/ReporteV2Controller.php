@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin\FacturaV2;
 use App\Exports\ReporteEquipoExcel;
 use App\Exports\ReporteFacturaExcel;
 use App\Http\Controllers\Controller;
+use App\Models\Contratos;
+use App\Models\ContratosDetalle;
 use App\Models\Distritos;
 use App\Models\Equipo;
 use App\Models\Extras;
@@ -13,6 +15,7 @@ use App\Models\TipoFondos;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
 
@@ -122,8 +125,8 @@ class ReporteV2Controller extends Controller
             $newnum = (float) str_replace([',', ' '], '', $formateado);
             //$totalLinea += $multi;
             $totalLinea += $newnum;
-           
-          
+
+
 
             $totalGalonesMixtos += $dato->cantidad;
             $producto = '';
@@ -155,8 +158,8 @@ class ReporteV2Controller extends Controller
 
             $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
-        
-        
+
+
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
         $totalEspecial = number_format((float)$totalEspecial, 2, '.', ',');
@@ -164,8 +167,8 @@ class ReporteV2Controller extends Controller
         //$totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
         //$totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
 
-        //$totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 3, '.', ','); 
-        $totalLinea = number_format((float)$totalLinea, 2, '.', ','); 
+        //$totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 3, '.', ',');
+        $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
 
         $infoExtra = Extras::where('id', 1)->first();
 
@@ -244,7 +247,7 @@ class ReporteV2Controller extends Controller
                 <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:11px; text-align: center; font-weight: bold'></td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalLinea</td> 
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalLinea</td>
             </tr>";// Revertí
 
         $tabla .= "</tbody></table>";
@@ -344,7 +347,7 @@ class ReporteV2Controller extends Controller
 
          $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
             ->select('id_equipo',
-                DB::raw('SUM(cantidad) as total_galones'), 
+                DB::raw('SUM(cantidad) as total_galones'),
                 DB::raw('SUM(ROUND(cantidad, 2) * unitario)  as total_dolares')
             )
             ->when($boolEquipoTodos, function($query) use ($idequipo) {
@@ -363,11 +366,11 @@ class ReporteV2Controller extends Controller
 
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
-       
+
             $multi = $dato->cantidad * $dato->unitario;
-            
+
             $totalLinea += $multi;
-           
+
             $totalGalonesMixtos += $dato->total_galones;
             $producto = '';
 
@@ -444,7 +447,7 @@ class ReporteV2Controller extends Controller
                 </tr>";
 
         foreach ($arrayFactura as $data){
-            
+
             $totalDolares = number_format((float)$data->total_dolares, 2, '.', ',');
 
             $tabla .= "<tr>
@@ -547,12 +550,12 @@ class ReporteV2Controller extends Controller
 
             //$multi = round($dato->cantidad, 2) * $dato->unitario;
             $multi = $dato->cantidad * $dato->unitario;
-            
+
             $formateado = number_format((float) $multi , 2, '.', ',');
             $newnum = (float) str_replace([',', ' '], '', $formateado);
             //$totalDineroMixto += $multi;
             $totalDineroMixto += $newnum;
-            
+
 
             $totalGalonajeColumna += $dato->cantidad;
 
@@ -677,13 +680,13 @@ class ReporteV2Controller extends Controller
 
             </tr>";
         }
-        
+
         $tabla .= "<tr>
                 <td colspan='6' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
                  <td style='font-size:10px; text-align: center; font-weight: bold'>$totalGalonajeColumna</td>
                  <td style='font-size:10px; text-align: center; font-weight: bold'></td>
                 <td style='font-size:10px; text-align: center; font-weight: bold'></td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalDineroMixto</td> 
+                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalDineroMixto</td>
             </tr>";
 
         $tabla .= "</tbody></table>";
@@ -733,6 +736,189 @@ class ReporteV2Controller extends Controller
         $mpdf->Output();
     }
 
+
+
+
+    //********************* REPORTE DE CONTRATO *************************
+
+    public function vistaReporteContrato()
+    {
+        $arrayContrato = Contratos::orderBy('proceso_ref', 'ASC')->get();
+        $arrayDistrito = Distritos::orderBy('nombre', 'ASC')->get();
+
+        return view('backend.admin.configuracion.reporte.contrato.vistareportecontrato', compact(
+            'arrayContrato', 'arrayDistrito'));
+    }
+
+
+    public function reporteContratoDistrito($desde, $hasta, $idcontrato, $iddistrito)
+    {
+
+        $hayRegistro = false;
+        if(ContratosDetalle::where('id_contratos', $idcontrato)->where('id_distrito', $iddistrito)->first()){
+            $hayRegistro = true;
+        }
+
+
+        //$mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+        $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER']);
+        // mostrar errores
+        $mpdf->showImageErrors = false;
+
+        $logoalcaldia = 'images/gobiernologo.jpg';
+        $logosantaana = 'images/logo.png';
+        $mpdf->SetTitle('Contrato');
+
+
+        $tabla = "
+        <table style='width: 100%; border-collapse: collapse;'>
+            <tr>
+                <!-- Logo izquierdo -->
+                <td style='width: 15%; text-align: left;'>
+                    <img src='$logosantaana' alt='Santa Ana Norte' style='max-width: 100px; height: auto;'>
+                </td>
+                <!-- Texto centrado -->
+                <td style='width: 60%; text-align: center;'>
+                    <h1 style='font-size: 16px; margin: 0; color: #003366; text-transform: uppercase;'>ALCALDÍA MUNICIPAL DE SANTA ANA NORTE</h1>
+                </td>
+                <!-- Logo derecho -->
+                <td style='width: 10%; text-align: right;'>
+                    <img src='$logoalcaldia' alt='Gobierno de El Salvador' style='max-width: 60px; height: auto;'>
+                </td>
+            </tr>
+        </table>
+        <hr style='border: none; border-top: 2px solid #003366; margin: 0;'>
+        ";
+
+
+        $tabla .= "
+                <div style='text-align: center; margin-top: 20px;'>
+                    <p style='font-size: 16px; margin: 0; color: #000;'>ACTA DE ENTREGA PARCIAL</p>
+                </div>
+                <div style='text-align: center; margin-top: 10px;'>
+                </div><br>
+              ";
+
+        if($hayRegistro){
+
+            $infoContrato = Contratos::where('id', $idcontrato)->first();
+            $infoDistrito = Distritos::where('id', $iddistrito)->first();
+            setlocale(LC_TIME, 'es_ES.UTF-8'); // Configurar el idioma a español
+            Carbon::setLocale('es'); // Para asegurarnos en Laravel
+
+            $fechaInicio = Carbon::createFromFormat('Y-m-d', $desde);
+            $fechaFin = Carbon::createFromFormat('Y-m-d', $hasta);
+
+            $textoFecha = strtoupper($fechaInicio->translatedFormat('j F')) . ' AL ' . strtoupper($fechaFin->translatedFormat('j \\D\\E F Y'));
+
+
+            $tabla .= "
+                <div style='text-align: left; margin-top: 10px;'>
+                 <p style='font-size: 15px; margin: 0; color: #000;'><strong>METODO DE CONTRATACIÓN:</strong> LICITACIÓN COMPETITIVA DE BIENES</p>
+                 <p style='font-size: 15px; margin: 0; color: #000;'><strong>PROCESO REF. N°:</strong> $infoContrato->proceso_ref</p>
+                 <br>
+                     <div style='text-align: left; margin-top: 10px;'>
+                 <p style='font-size: 15px; margin: 0; color: #000;'><strong>NOMBRE DEL PROCESO:</strong> COMPRA DE COMBUSTIBLE PARA
+                 LOS DIFERENTES EQUIPOS DE LA MUNICIPALIDAD DE SANTA ANA NORTE.</p>
+                 </div>
+                 ";
+
+
+            $tabla .= "
+                <div style='text-align: left; margin-top: 25px;'>
+                 <p style='font-size: 15px; margin: 0; color: #000;'>REUNIDOS EN LAS INSTALACIONES DEL <strong>DISTRITO DE METAPAN DE LA
+                 ALCALDIA MUNICIPAL DE SANTA ANA NORTE DURANTE LA SEMANA DEL</strong> $textoFecha CON EL PROPÓSITO DE HACER ENTREGA
+                 FORMAL DE COMBUSTIBLE</p>";
+
+            $tabla .= "
+                <div style='text-align: left; margin-top: 25px;'>
+                 <p style='font-size: 15px; margin: 0; color: #000;'>DE FORMA PARCIAL SE RECIBE LO SIGUIENTE: DISTRITO $infoDistrito->nombre</p>
+                 ";
+
+
+            //** TABLA */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            $infoExtra = Extras::where('id', 1)->first();
+
+            $tabla .= "
+                <div style='text-align: left; margin-top: 25px;'>
+                 <p style='font-size: 15px; margin: 0; color: #000;'>CON BASE A LO SOLICITADO; PRESENTE EL SEÑOR: <strong>$infoContrato->proveedor</strong>
+                 POR PARTE DEL PROVEEDOR Y <strong>$infoExtra->nombre3</strong> EN CALIDAD DE ADMINISTRADOR DE CONTRATOS.</p>
+                 ";
+
+            $tabla .= "
+                <div style='text-align: left; margin-top: 25px;'>
+                 <p style='font-size: 15px; margin: 0; color: #000;'>CABE MENCIONAR QUE DICHOS BIENES CUMPLEN CON LAS
+                 ESPECIFICACIONES PREVIAMENTE DEFINIDAS EN EL CONTRATO.</p>
+                 ";
+
+            $tabla .= "
+                <div style='text-align: left; margin-top: 10px;'>
+                 <p style='font-size: 15px; margin: 0; color: #000;'>Y NO HABIENDO MÁS QUE HACER CONSTAR, FIRMAMOS Y RATIFICAMOS LA PRESENTE ACA.</p>
+                 ";
+
+
+
+            $tabla .= "
+            <table style='width: 100%; margin-top: 40px; font-family: \"Times New Roman\", Times, serif; font-size: 14px; color: #000;'>
+                <!-- Fila para los títulos -->
+                <tr>
+                    <td style='width: 50%; text-align: left; padding-bottom: 50px;'>
+                        <p style='margin: 0; font-weight: normal; font-size: 16px;  margin-left: 15px'>ENTREGA:</p>
+                    </td>
+                    <td style='width: 50%; text-align: right; padding-bottom: 50px;'>
+                        <p style='margin: 0; font-weight: normal; font-size: 16px; margin-right: 30px'>RECIBE:</p>
+                    </td>
+                </tr>
+                <!-- Fila para los contenidos -->
+                <tr>
+                    <td style='width: 50%; text-align: center; padding: 20px;'>
+                        <p style='margin: 10px 0;'>f.____________________________</p>
+                        <p style='margin: 10px 0;'></p>
+                        <p style='margin: 10px 0;'>PROVEEDOR</p>
+                        <p style='margin: 10px 0;'></p>
+                    </td>
+                    <td style='width: 50%; text-align: center; padding: 20px;'>
+                        <p style='margin: 10px 0;'>f.____________________________</p>
+                        <p style='margin: 10px 0;'></p>
+                        <p style='margin: 10px 0;'>ADMINISTRADOR DE CONTRATO</p>
+                        <p style='margin: 10px 0;'></p>
+                    </td>
+                </tr>
+            </table>
+            ";
+
+
+
+
+
+
+        } // end-hayregistros
+
+
+
+
+
+        $stylesheet = file_get_contents('css/csscontrato.css');
+        $mpdf->WriteHTML($stylesheet,1);
+
+        //$mpdf->setFooter("Página: " . '{PAGENO}' . "/" . '{nb}');
+        $mpdf->WriteHTML($tabla,2);
+        $mpdf->Output();
+    }
 
 
 }

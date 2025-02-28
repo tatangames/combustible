@@ -7,11 +7,10 @@
                         <table id="tabla" class="table table-bordered table-striped">
                             <thead>
                             <tr>
-                                <th style="width: 15%">Distrito </th>
-                                <th style="width: 25%">Combustible</th>
-                                <th style="width: 30%">Unidad</th>
-                                <th style="width: 20%">Codigo</th>
-                                <th style="width: 20%">Proceso</th>
+                                <th style="width: 20%">Distrito </th>
+                                <th style="width: 15%">Combustible</th>
+                                <th style="width: 15%">Unidad</th>
+                                <th style="width: 15%">Cantidad</th>
                                 <th style="width: 16%">Opciones</th>
                             </tr>
                             </thead>
@@ -20,13 +19,12 @@
                             @foreach($listado as $dato)
                                 <tr>
                                     <td>{{ $dato->nombreDistrito }}</td>
-                                    <td>{{ $dato->tipoCombustible }}</td>
+                                    <td>{{ $dato->nombreCombustible }}</td>
                                     <td>{{ $dato->nombreUnidad }}</td>
-                                    <td>{{ $dato->codigo }}</td>
-                                    <td>{{ $dato->nombre }}</td>
+                                    <td>{{ $dato->cantidad }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-success btn-xs" onclick="infoEditar({{ $dato->id }})">
-                                            <i class="fas fa-eye" title="Editar"></i>&nbsp; Editar
+                                        <button type="button" class="btn btn-danger btn-xs" onclick="infoBorrar({{ $dato->id }})">
+                                            <i class="fas fa-trash" title="Borrar"></i>&nbsp; Borrar
                                         </button>
 
                                     </td>

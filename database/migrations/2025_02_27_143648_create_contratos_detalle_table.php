@@ -21,6 +21,7 @@ class CreateContratosDetalleTable extends Migration
             $table->bigInteger('id_unidad')->unsigned();
 
             $table->string('codigo', 50)->nullable();
+            $table->integer('cantidad');
 
             $table->foreign('id_contratos')->references('id')->on('contratos');
             $table->foreign('id_distrito')->references('id')->on('distritos');

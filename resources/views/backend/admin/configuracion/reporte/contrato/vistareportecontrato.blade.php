@@ -19,7 +19,7 @@
             <div class="col-md-6">
                 <div class="card card-gray-dark">
                     <div class="card-header">
-                        <h3 class="card-title">Reporte por Equipo CONSOLIDADO</h3>
+                        <h3 class="card-title">Reporte por Contrato</h3>
                     </div>
                     <form id="formulario-nuevo">
                         <div class="card-body">
@@ -37,34 +37,26 @@
                             </div>
 
                             <div class="form-group" style="width: 50%">
-                                <label>Equipo</label>
-                                <select class="form-control" id="select-equipos">
-                                    <option value="0">TODOS</option>
+                                <label>Contrato</label>
+
+                                <select class="form-control" id="select-contrato" onchange="infoContrato(this)">
+                                    <option value="" selected>Seleccionar Contrato</option>
+                                    @foreach($arrayContrato as $dato)
+                                        <option value="{{ $dato->id }}">{{ $dato->proceso_ref }}</option>
+                                    @endforeach
                                 </select>
                             </div>
 
                             <div class="form-group" style="width: 50%">
                                 <label>Distrito</label>
+
                                 <select class="form-control" id="select-distrito">
-                                    <option value="0">TODOS</option>
                                     @foreach($arrayDistrito as $dato)
                                         <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
                                     @endforeach
                                 </select>
                             </div>
-
-                            <div class="form-group" style="width: 50%">
-                                <label>Fondos</label>
-                                <select class="form-control" id="select-fondos">
-                                    <option value="0">TODOS</option>
-                                    @foreach($arrayFondos as $dato)
-                                        <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
                         </div>
-
 
                         <div class="card-footer" style="float: right;">
                             <button type="button" onclick="reportePdf()" class="btn" style="margin-left: 15px; border-color: black; border-radius: 0.1px;">
@@ -74,8 +66,40 @@
                         </div>
                     </form>
                 </div>
-
             </div>
+
+            <div class="col-md-6">
+                <div class="card card-gray-dark">
+                    <div class="card-header">
+                        <h3 class="card-title">Información Contrato</h3>
+                    </div>
+                    <form id="formulario-info-contrato">
+                        <div class="card-body">
+
+                            <div class="row">
+                                <div class="form-group">
+                                    <label>Desde</label>
+                                    <input type="date" disabled class="form-control" id="fecha-desde-contrato">
+                                </div>
+
+                                <div class="form-group" style="margin-left: 15px">
+                                    <label>Hasta</label>
+                                    <input type="date" disabled class="form-control" id="fecha-hasta-contrato">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>Proveedor</label>
+                                <input type="text" disabled class="form-control" id="proveedor-contrato">
+                            </div>
+                        </div>
+
+
+                    </form>
+                </div>
+            </div>
+
+
 
         </div>
     </div>
@@ -97,27 +121,53 @@
     <script>
         $(document).ready(function() {
 
-            $('#select-equipos').select2({
-                theme: "bootstrap-5",
-                "language": {
-                    "noResults": function(){
-                        return "Búsqueda no encontrada";
-                    }
-                },
-            });
+
         });
 
     </script>
 
     <script>
 
+        function infoContrato(e){
+            let id = $(e).val();
+            document.getElementById("formulario-info-contrato").reset();
+
+            if(id === ''){
+                return
+            }
+
+            openLoading();
+
+            axios.post(url+'/contratos/informacion',{
+                'id': id
+            })
+                .then((response) => {
+                    closeLoading();
+                    if(response.data.success === 1){
+
+                        $('#fecha-desde-contrato').val(response.data.info.fecha_desde);
+                        $('#fecha-hasta-contrato').val(response.data.info.fecha_hasta);
+                        $('#proveedor-contrato').val(response.data.info.proveedor);
+
+                    }else{
+                        toastr.error('Información no encontrada');
+                    }
+
+                })
+                .catch((error) => {
+                    closeLoading();
+                    toastr.error('Información no encontrada');
+                });
+        }
+
+
+
         function reportePdf(){
 
             var fechadesde = document.getElementById('fecha-desde').value;
             var fechahasta = document.getElementById('fecha-hasta').value;
-            var equipo = document.getElementById('select-equipos').value;
             var distrito = document.getElementById('select-distrito').value;
-            var fondos = document.getElementById('select-fondos').value;
+            var contrato = document.getElementById('select-contrato').value;
 
             if(fechadesde === ''){
                 toastr.error('Fecha desde es requerido');
@@ -129,8 +179,22 @@
                 return;
             }
 
-            window.open("{{ URL::to('/admin/reportev2/generar/equipos/consolidado') }}/" +
-                fechadesde + "/" + fechahasta + "/" + equipo + "/" + distrito + "/" + fondos);
+            if(contrato === ''){
+                toastr.error('Contrato es requerido');
+                return
+            }
+
+            // Convertir a objetos Date para comparar
+            let dateDesde = new Date(fechadesde);
+            let dateHasta = new Date(fechahasta);
+
+            if (dateHasta < dateDesde) {
+                toastr.error('La Fecha Hasta no puede ser menor que la Fecha Desde');
+                return;
+            }
+
+            window.open("{{ URL::to('admin/reportev2/contrato/info') }}/" +
+                fechadesde + "/" + fechahasta + "/" + contrato + "/" + distrito);
         }
 
 

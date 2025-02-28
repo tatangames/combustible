@@ -145,6 +145,8 @@ class ContratoController extends Controller
 
             $infoUnidad = UnidadMedida::where('id', $item->id_unidad)->first();
             $item->nombreUnidad = $infoUnidad->nombre;
+
+            $item->cantidad = number_format((float)$item->cantidad, 2, '.', ',');
         }
 
         return view('backend.admin.configuracion.contrato.detalle.tablacontratodetalle', compact('listado'));
@@ -159,6 +161,7 @@ class ContratoController extends Controller
             'combustible' => 'required',
             'unidad' => 'required',
             'codigo' => 'required',
+            'cantidad' => 'required'
         );
 
         $validar = Validator::make($request->all(), $regla);
@@ -182,6 +185,7 @@ class ContratoController extends Controller
             $registro->id_combustible = $request->combustible;
             $registro->id_unidad = $request->unidad;
             $registro->codigo = $request->codigo;
+            $registro->cantidad = $request->cantidad;
             $registro->save();
 
             DB::commit();
@@ -195,7 +199,20 @@ class ContratoController extends Controller
     }
 
 
+    public function borrarContratoDetalle(Request $request)
+    {
+        $regla = array(
+            'id' => 'required',
+        );
 
+        $validar = Validator::make($request->all(), $regla);
+
+        if ($validar->fails()){ return ['success' => 0];}
+
+        ContratosDetalle::where('id', $request->id)->delete();
+
+        return ['success' => 1];
+    }
 
 
 
