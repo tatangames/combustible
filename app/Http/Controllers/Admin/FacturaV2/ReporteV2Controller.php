@@ -10,6 +10,7 @@ use App\Models\ContratosDetalle;
 use App\Models\Distritos;
 use App\Models\Equipo;
 use App\Models\Extras;
+use App\Models\Factura;
 use App\Models\Facturacion;
 use App\Models\TipoFondos;
 use Carbon\Carbon;
@@ -760,8 +761,8 @@ class ReporteV2Controller extends Controller
         }
 
 
-        //$mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
-        $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER']);
+        $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+        //$mpdf = new \Mpdf\Mpdf(['format' => 'LETTER']);
         // mostrar errores
         $mpdf->showImageErrors = false;
 
@@ -838,12 +839,154 @@ class ReporteV2Controller extends Controller
 
             //** TABLA */
 
+            // TOMAR LOS REGISTROS EQUIVALENTES A LA FECHA
+            $inicioC = Carbon::parse($infoContrato->fecha_desde); // fecha inicio contrato
+            $finC = Carbon::parse($infoContrato->fecha_hasta); // fecha fin contrato
+
+            $fechaDesde = Carbon::parse($desde); // fecha inicio de acta
+            $fechaHasta = Carbon::parse($hasta); // fecha fin de acta
+
+            $registrosTotalContrato = Facturacion::where('id_distrito', $iddistrito)
+            ->whereBetween('fecha', [$inicioC, $finC])->get();
+
+
+            // Filtrar dentro de los registros obtenidos
+            $registroFecha = $registrosTotalContrato->whereBetween('fecha', [$fechaDesde, $fechaHasta]);
+
+            // Registro desde inicio contrato hasta fin de acta
+            $registroInicioCHastaFActa = $registrosTotalContrato->whereBetween('fecha', [$inicioC, $fechaHasta]);
+
+            $sumaDiesel = 0;
+            $sumaRegular = 0;
+            $sumaEspecial = 0;
+            // Sumar galonaje
+            foreach ($registroInicioCHastaFActa as $item){
+                if($item->id_tipocombustible == 1){ // DIESEL
+                    $sumaDiesel += $item->cantidad;
+                }
+                else if($item->id_tipocombustible == 2){ // REGULAR
+                    $sumaRegular += $item->cantidad;
+                }
+                else if($item->id_tipocombustible == 3){ // ESPECIAL
+                    $sumaEspecial += $item->cantidad;
+                }
+            }
+
+
+
+
+
+            $totalGalonDiesel = 0;
+            $totalDineroDiesel = 0;
+
+            $totalGalonRegular = 0;
+            $totalDineroRegular = 0;
+
+            $totalGalonEspecial = 0;
+            $totalDineroEspecial = 0;
+
+
+            foreach ($registroFecha as $item) {
+                if($item->id_tipocombustible == 1){ // DIESEL
+                    $totalGalonDiesel += $item->cantidad;
+                    $multi = $item->cantidad * $item->unitario;
+                    $totalDineroDiesel += $multi;
+                }
+                else if($item->id_tipocombustible == 2){ // REGULAR
+                    $totalGalonRegular += $item->cantidad;
+                    $multi = $item->cantidad * $item->unitario;
+                    $totalDineroRegular += $multi;
+                }
+                else if($item->id_tipocombustible == 3){ // ESPECIAL
+                    $totalGalonEspecial += $item->cantidad;
+                    $multi = $item->cantidad * $item->unitario;
+                    $totalDineroEspecial += $multi;
+                }
+            }
+
+            $totalMontoDinero = ($totalDineroDiesel + $totalDineroRegular + $totalDineroEspecial);
+
+
+            $totalDineroDiesel = round($totalDineroDiesel, 2);
+            $totalDineroRegular = round($totalDineroRegular, 2);
+            $totalDineroEspecial = round($totalDineroEspecial, 2);
+            $totalMontoDinero = round($totalMontoDinero, 2);
+
+            // SACAR RESTANTES
+
+            $totalContratoDiesel = 0;
+            $totalContratoRegular = 0;
+            $totalContratoEspecial = 0;
+            $arrayContratoDetalle = ContratosDetalle::where('id_contratos', $idcontrato)
+                ->where('id_distrito', $iddistrito)->get();
+
+            foreach ($arrayContratoDetalle as $item){
+                if($item->id_combustible == 1){ // DIESEL
+                    $totalContratoDiesel = $item->cantidad;
+                }
+                else if($item->id_combustible == 2){ // REGULAR
+                    $totalContratoRegular = $item->cantidad;
+                }
+                else if($item->id_combustible == 3){ // ESPECIAL
+                    $totalContratoEspecial = $item->cantidad;
+                }
+            }
+
+
+            // CONTRATO DIESEL (210,000) - ENTREGADO FECHA DESDE AL HASTA (2706.402)
+            $totalRestanteDiesel = $totalContratoDiesel - $sumaDiesel;
+            $totalRestanteRegular = $totalContratoRegular - $sumaRegular;
+            $totalRestanteEspecial = $totalContratoEspecial - $sumaEspecial;
+
+
+            // CONVERTIR EN TEXTO
+            $totalDineroDiesel = number_format($totalDineroDiesel, 2, '.', ',');
+            $totalDineroRegular = number_format($totalDineroRegular, 2, '.', ',');
+            $totalDineroEspecial = number_format($totalDineroEspecial, 2, '.', ',');
+            $totalMontoDinero = number_format($totalMontoDinero, 2, '.', ',');
 
 
 
 
 
 
+
+
+            $tabla .= "<table width='100%' id='tablaFor' style='margin-top: 20px'>
+                <tbody>";
+
+            $tabla .= "<tr>
+                    <td width='8%' style='font-weight: normal; font-size: 12px'>GALONES DIESEL</td>
+                    <td width='8%' style='font-weight: normal; font-size: 12px'>MONTO DINERO</td>
+                    <td width='8%' style='font-weight: normal; font-size: 12px'>GALONES REGULAR</td>
+                    <td width='8%' style='font-weight: normal; font-size: 12px'>MONTO DINERO</td>
+                    <td width='8%' style='font-weight: normal; font-size: 12px'>GALONES ESPECIAL</td>
+                    <td width='8%' style='font-weight: normal; font-size: 12px'>MONTO DINERO</td>
+                    <td width='8%' style='font-weight: normal; font-size: 12px'>MONTO TOTAL DINERO</td>
+                </tr>";
+
+
+                $tabla .= "<tr>
+                        <td style='font-size: 12px'>$totalGalonDiesel</td>
+                        <td style='font-size: 12px'>$$totalDineroDiesel</td>
+                        <td style='font-size: 12px'>$totalGalonRegular</td>
+                        <td style='font-size: 12px'>$$totalDineroRegular</td>
+                        <td style='font-size: 12px'>$totalGalonEspecial</td>
+                        <td style='font-size: 12px'>$$totalDineroEspecial</td>
+                        <td style='font-size: 12px'>$$totalMontoDinero</td>
+                    </tr>";
+
+
+            $tabla .= "</tbody></table>";
+
+
+            $tabla .= "
+                <div style='text-align: left; margin-top: 10px;'>
+                 <p style='font-size: 15px; margin: 0; color: #000;'><strong>RESTANTE GALONES</strong></p>
+                 <p style='font-size: 15px; margin: 0; color: #000;'><strong>DIESEL:</strong> $totalRestanteDiesel</p>
+                 <p style='font-size: 15px; margin: 0; color: #000;'><strong>REGULAR:</strong> $totalRestanteRegular</p>
+                 <p style='font-size: 15px; margin: 0; color: #000;'><strong>ESPECIAL:</strong> $totalRestanteEspecial</p>
+                 ";
 
 
 

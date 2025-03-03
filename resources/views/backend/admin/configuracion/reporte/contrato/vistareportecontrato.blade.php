@@ -19,7 +19,7 @@
             <div class="col-md-6">
                 <div class="card card-gray-dark">
                     <div class="card-header">
-                        <h3 class="card-title">Reporte por Contrato</h3>
+                        <h3 class="card-title">Generar Acta de Recepción</h3>
                     </div>
                     <form id="formulario-nuevo">
                         <div class="card-body">
@@ -37,7 +37,7 @@
                             </div>
 
                             <div class="form-group" style="width: 50%">
-                                <label>Contrato</label>
+                                <label>Proceso Referencia</label>
 
                                 <select class="form-control" id="select-contrato" onchange="infoContrato(this)">
                                     <option value="" selected>Seleccionar Contrato</option>
@@ -71,7 +71,7 @@
             <div class="col-md-6">
                 <div class="card card-gray-dark">
                     <div class="card-header">
-                        <h3 class="card-title">Información Contrato</h3>
+                        <h3 class="card-title">Información de Contrato</h3>
                     </div>
                     <form id="formulario-info-contrato">
                         <div class="card-body">
@@ -192,6 +192,23 @@
                 toastr.error('La Fecha Hasta no puede ser menor que la Fecha Desde');
                 return;
             }
+
+            var fechadesdeContrato = document.getElementById('fecha-desde-contrato').value;
+            var fechahastaContrato = document.getElementById('fecha-hasta-contrato').value;
+            let fechadesdeContratoDate = new Date(fechadesdeContrato);
+            let fechahastaContratoDate = new Date(fechahastaContrato);
+            // LA FECHA DESDE NO PUEDE SER MENOR A LA DEL CONTRATO
+           if(dateDesde < fechadesdeContratoDate){
+               toastr.error('Fecha DESDE no puede ser menor a la del Contrato');
+               return
+           }
+
+            // LA FECHA HASTA NO PUEDE SER MAYOR A LA DEL CONTRATO
+            if(dateHasta > fechahastaContratoDate){
+                toastr.error('Fecha HASTA no puede ser menor a la del fecha HASTA del Contrato');
+                return
+            }
+
 
             window.open("{{ URL::to('admin/reportev2/contrato/info') }}/" +
                 fechadesde + "/" + fechahasta + "/" + contrato + "/" + distrito);
