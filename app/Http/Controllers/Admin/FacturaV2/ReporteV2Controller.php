@@ -814,7 +814,7 @@ class ReporteV2Controller extends Controller
 
 
             $tabla .= "
-                <div style='text-align: left; margin-top: 10px;'>
+                <div style='text-align: left; margin-top: 0px;'>
                  <p style='font-size: 15px; margin: 0; color: #000;'><strong>METODO DE CONTRATACIÓN:</strong> LICITACIÓN COMPETITIVA DE BIENES</p>
                  <p style='font-size: 15px; margin: 0; color: #000;'><strong>PROCESO REF. N°:</strong> $infoContrato->proceso_ref</p>
                  <br>
@@ -1016,13 +1016,13 @@ class ReporteV2Controller extends Controller
 
 
             $tabla .= "
-            <table style='width: 100%; margin-top: 40px; font-family: \"Times New Roman\", Times, serif; font-size: 14px; color: #000;'>
+            <table style='width: 100%; margin-top: 20px; font-family: \"Times New Roman\", Times, serif; font-size: 14px; color: #000;'>
                 <!-- Fila para los títulos -->
                 <tr>
-                    <td style='width: 50%; text-align: left; padding-bottom: 50px;'>
+                    <td style='width: 50%; text-align: left; padding-bottom: 40px;'>
                         <p style='margin: 0; font-weight: normal; font-size: 16px;  margin-left: 15px'>ENTREGA:</p>
                     </td>
-                    <td style='width: 50%; text-align: right; padding-bottom: 50px;'>
+                    <td style='width: 50%; text-align: right; padding-bottom: 40px;'>
                         <p style='margin: 0; font-weight: normal; font-size: 16px; margin-right: 30px'>RECIBE:</p>
                     </td>
                 </tr>
