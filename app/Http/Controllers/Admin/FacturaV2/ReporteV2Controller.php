@@ -119,33 +119,27 @@ class ReporteV2Controller extends Controller
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
-            //$multi = round($dato->cantidad, 2) * $dato->unitario;
             $multi = $dato->cantidad * $dato->unitario;
 
             $formateado = number_format((float) $multi , 2, '.', ',');
             $newnum = (float) str_replace([',', ' '], '', $formateado);
-            //$totalLinea += $multi;
+
             $totalLinea += $newnum;
-
-
 
             $totalGalonesMixtos += $dato->cantidad;
             $producto = '';
 
             if($dato->id_tipocombustible == 2){ // REGULAR
-                //$totalRegular += $multi;
                 $totalRegular += $newnum;
                 $totalGalonRegular += $dato->cantidad;
                 $producto = "R";
             }
             else if($dato->id_tipocombustible == 1){ // DIESEL
-                //$totalDiesel += $multi;
                 $totalDiesel += $newnum;
                 $totalGalonDiesel += $dato->cantidad;
                 $producto = "D";
             }
             else if($dato->id_tipocombustible == 3){ // ESPECIAL
-                //$totalEspecial += $multi;
                 $totalEspecial += $newnum;
                 $totalGalonEspecial += $dato->cantidad;
                 $producto = "E";
@@ -161,14 +155,11 @@ class ReporteV2Controller extends Controller
         }
 
 
+
         $totalRegular = number_format((float)$totalRegular, 2, '.', ',');
         $totalDiesel = number_format((float)$totalDiesel, 2, '.', ',');
         $totalEspecial = number_format((float)$totalEspecial, 2, '.', ',');
-        //$totalGalonRegular = number_format((float)$totalGalonRegular, 2, '.', ',');
-        //$totalGalonDiesel = number_format((float)$totalGalonDiesel, 2, '.', ',');
-        //$totalGalonEspecial = number_format((float)$totalGalonEspecial, 2, '.', ',');
 
-        //$totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 3, '.', ',');
         $totalLinea = number_format((float)$totalLinea, 2, '.', ',');
 
         $infoExtra = Extras::where('id', 1)->first();
@@ -310,16 +301,6 @@ class ReporteV2Controller extends Controller
         $desdeFormat = date("d-m-Y", strtotime($desde));
         $hastaFormat = date("d-m-Y", strtotime($hasta));
 
-
-        $totalLinea = 0;
-        $totalRegular = 0;
-        $totalDiesel = 0;
-        $totalEspecial = 0;
-        $totalGalonRegular = 0;
-        $totalGalonDiesel = 0;
-        $totalGalonEspecial = 0;
-        $totalGalonesMixtos = 0;
-
         $nombreDistrito = "TODOS";
         if($infoDistrito = Distritos::where('id', $iddistrito)->first()){
             $nombreDistrito = $infoDistrito->nombre;
@@ -364,15 +345,11 @@ class ReporteV2Controller extends Controller
             ->orderBy('id_equipo', 'ASC')
             ->get();
 
-
         foreach ($arrayFactura as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
             $multi = $dato->cantidad * $dato->unitario;
 
-            $totalLinea += $multi;
-
-            $totalGalonesMixtos += $dato->total_galones;
             $producto = '';
 
             if($dato->id_tipocombustible == 2){ // REGULAR
@@ -388,16 +365,10 @@ class ReporteV2Controller extends Controller
             $dato->producto = $producto;
             $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
 
-           // $dato->placa = $infoEquipo->placa;
             $dato->equipo = $infoEquipo->nombre;
 
             $dato->multi = number_format((float)$multi, 2, '.', ',');
         }
-
-        $totalLinea = round($totalLinea, 2);
-
-        //$totalGalonesMixtos = number_format((float)$totalGalonesMixtos, 3, '.', ',');
-
 
         $infoExtra = Extras::where('id', 1)->first();
 
@@ -408,8 +379,6 @@ class ReporteV2Controller extends Controller
         }
 
         $mpdf->SetTitle('Combustible');
-
-        // mostrar errores
         $mpdf->showImageErrors = false;
 
         $stylesheet = file_get_contents('css/cssreporte.css');
@@ -459,11 +428,6 @@ class ReporteV2Controller extends Controller
             </tr>";
         }
 
-        //$tabla .= "<tr>
-        //        <td colspan='1' style='font-size:11px; text-align: center; font-weight: bold'>TOTAL</td>
-        //        <td style='font-size:11px; text-align: center; font-weight: bold'>$totalGalonesMixtos</td>
-        //        <td style='font-size:11px; text-align: center; font-weight: bold'>$$totalLinea</td>
-        //    </tr>";
 
         $tabla .= "</tbody></table>";
 
@@ -472,8 +436,7 @@ class ReporteV2Controller extends Controller
 
         // ************* FOOTER ***************
 
-        $footer = "<table width='100%' id='tablaForTranspa'>
-            <tbody>";
+        $footer = "<table width='100%' id='tablaForTranspa'><tbody>";
 
         $footer .= "</tbody></table>";
 
@@ -483,7 +446,6 @@ class ReporteV2Controller extends Controller
         $footer .= "<tr>
                     <td width='25%' style='font-weight: normal; font-size: 14px'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ______________________________ <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoExtra->nombre1 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoExtra->nombre2</td>
                     <td width='25%' style='font-weight: normal; font-size: 14px'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _________________________________________<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoExtra->nombre3 <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $infoExtra->nombre4
-
                     </td>
                     </tr>";
 
@@ -754,22 +716,23 @@ class ReporteV2Controller extends Controller
 
     public function reporteContratoDistrito($desde, $hasta, $idcontrato, $iddistrito)
     {
-
         $hayRegistro = false;
         if(ContratosDetalle::where('id_contratos', $idcontrato)->where('id_distrito', $iddistrito)->first()){
             $hayRegistro = true;
         }
 
-
-        $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
-        //$mpdf = new \Mpdf\Mpdf(['format' => 'LETTER']);
+        $infoExtra = Extras::where('id', 1)->first();
+        if($infoExtra->reporte == 1){
+            $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+        }else{
+            $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
+        }
         // mostrar errores
         $mpdf->showImageErrors = false;
 
         $logoalcaldia = 'images/gobiernologo.jpg';
         $logosantaana = 'images/logo.png';
         $mpdf->SetTitle('Contrato');
-
 
         $tabla = "
         <table style='width: 100%; border-collapse: collapse;'>
@@ -840,21 +803,26 @@ class ReporteV2Controller extends Controller
             //** TABLA */
 
             // TOMAR LOS REGISTROS EQUIVALENTES A LA FECHA
-            $inicioC = Carbon::parse($infoContrato->fecha_desde); // fecha inicio contrato
-            $finC = Carbon::parse($infoContrato->fecha_hasta); // fecha fin contrato
+            $inicioC = Carbon::parse($infoContrato->fecha_desde)->startOfDay(); // fecha inicio contrato
+            $finC = Carbon::parse($infoContrato->fecha_hasta)->endOfDay(); // fecha fin contrato
 
-            $fechaDesde = Carbon::parse($desde); // fecha inicio de acta
-            $fechaHasta = Carbon::parse($hasta); // fecha fin de acta
+            $fechaDesde = Carbon::parse($desde)->startOfDay(); // fecha inicio de acta
+            $fechaHasta = Carbon::parse($hasta)->endOfDay(); // fecha fin de acta
 
             $registrosTotalContrato = Facturacion::where('id_distrito', $iddistrito)
             ->whereBetween('fecha', [$inicioC, $finC])->get();
 
-
             // Filtrar dentro de los registros obtenidos
-            $registroFecha = $registrosTotalContrato->whereBetween('fecha', [$fechaDesde, $fechaHasta]);
+           // $registroFecha = $registrosTotalContrato->whereBetween('fecha', [$fechaDesde, $fechaHasta]);
+
+            $registroFecha = Facturacion::where('id_distrito', $iddistrito)
+                ->whereBetween('fecha', [$inicioC, $finC])
+                ->whereBetween('fecha', [$fechaDesde, $fechaHasta]) // Filtra directamente en la BD
+                ->get();
 
             // Registro desde inicio contrato hasta fin de acta
             $registroInicioCHastaFActa = $registrosTotalContrato->whereBetween('fecha', [$inicioC, $fechaHasta]);
+
 
             $sumaDiesel = 0;
             $sumaRegular = 0;
@@ -873,9 +841,6 @@ class ReporteV2Controller extends Controller
             }
 
 
-
-
-
             $totalGalonDiesel = 0;
             $totalDineroDiesel = 0;
 
@@ -887,30 +852,31 @@ class ReporteV2Controller extends Controller
 
 
             foreach ($registroFecha as $item) {
+
+                $multi = $item->cantidad * $item->unitario;
+                $formateado = number_format((float) $multi , 2, '.', ',');
+                $newnum = (float) str_replace([',', ' '], '', $formateado);
+
+
                 if($item->id_tipocombustible == 1){ // DIESEL
                     $totalGalonDiesel += $item->cantidad;
-                    $multi = $item->cantidad * $item->unitario;
-                    $totalDineroDiesel += $multi;
+                    $totalDineroDiesel += $newnum;
                 }
                 else if($item->id_tipocombustible == 2){ // REGULAR
                     $totalGalonRegular += $item->cantidad;
-                    $multi = $item->cantidad * $item->unitario;
-                    $totalDineroRegular += $multi;
+                    $totalDineroRegular += $newnum;
                 }
                 else if($item->id_tipocombustible == 3){ // ESPECIAL
                     $totalGalonEspecial += $item->cantidad;
-                    $multi = $item->cantidad * $item->unitario;
-                    $totalDineroEspecial += $multi;
+                    $totalDineroEspecial += $newnum;
                 }
             }
+
+
 
             $totalMontoDinero = ($totalDineroDiesel + $totalDineroRegular + $totalDineroEspecial);
 
 
-            $totalDineroDiesel = round($totalDineroDiesel, 2);
-            $totalDineroRegular = round($totalDineroRegular, 2);
-            $totalDineroEspecial = round($totalDineroEspecial, 2);
-            $totalMontoDinero = round($totalMontoDinero, 2);
 
             // SACAR RESTANTES
 
@@ -942,12 +908,10 @@ class ReporteV2Controller extends Controller
             // CONVERTIR EN TEXTO
             $totalDineroDiesel = number_format($totalDineroDiesel, 2, '.', ',');
             $totalDineroRegular = number_format($totalDineroRegular, 2, '.', ',');
-            $totalDineroEspecial = number_format($totalDineroEspecial, 2, '.', ',');
+
+            $totalDineroEspecial = number_format((float)$totalDineroEspecial, 2, '.', ',');
+
             $totalMontoDinero = number_format($totalMontoDinero, 2, '.', ',');
-
-
-
-
 
 
 
@@ -1043,14 +1007,7 @@ class ReporteV2Controller extends Controller
                 </tr>
             </table>
             ";
-
-
-
-
-
-
         } // end-hayregistros
-
 
 
 
