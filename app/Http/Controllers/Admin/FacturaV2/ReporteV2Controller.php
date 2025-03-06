@@ -812,8 +812,6 @@ class ReporteV2Controller extends Controller
             $registrosTotalContrato = Facturacion::where('id_distrito', $iddistrito)
             ->whereBetween('fecha', [$inicioC, $finC])->get();
 
-            // Filtrar dentro de los registros obtenidos
-           // $registroFecha = $registrosTotalContrato->whereBetween('fecha', [$fechaDesde, $fechaHasta]);
 
             $registroFecha = Facturacion::where('id_distrito', $iddistrito)
                 ->whereBetween('fecha', [$inicioC, $finC])
@@ -821,8 +819,9 @@ class ReporteV2Controller extends Controller
                 ->get();
 
             // Registro desde inicio contrato hasta fin de acta
-            $registroInicioCHastaFActa = $registrosTotalContrato->whereBetween('fecha', [$inicioC, $fechaHasta]);
-
+            $registroInicioCHastaFActa = Facturacion::where('id_distrito', $iddistrito)
+            ->whereBetween('fecha', [$inicioC, $fechaHasta])
+                ->get();
 
             $sumaDiesel = 0;
             $sumaRegular = 0;
@@ -839,7 +838,6 @@ class ReporteV2Controller extends Controller
                     $sumaEspecial += $item->cantidad;
                 }
             }
-
 
             $totalGalonDiesel = 0;
             $totalDineroDiesel = 0;
@@ -908,12 +906,18 @@ class ReporteV2Controller extends Controller
             // CONVERTIR EN TEXTO
             $totalDineroDiesel = number_format($totalDineroDiesel, 2, '.', ',');
             $totalDineroRegular = number_format($totalDineroRegular, 2, '.', ',');
-
             $totalDineroEspecial = number_format((float)$totalDineroEspecial, 2, '.', ',');
-
             $totalMontoDinero = number_format($totalMontoDinero, 2, '.', ',');
 
 
+            $totalGalonDiesel = number_format($totalGalonDiesel, 3, '.', ',');
+            $totalGalonRegular = number_format($totalGalonRegular, 3, '.', ',');
+            $totalGalonEspecial = number_format($totalGalonEspecial, 3, '.', ',');
+
+
+            $totalRestanteDiesel = number_format($totalRestanteDiesel, 3, '.', ',');
+            $totalRestanteRegular = number_format($totalRestanteRegular, 3, '.', ',');
+            $totalRestanteEspecial = number_format($totalRestanteEspecial, 3, '.', ',');
 
 
             $tabla .= "<table width='100%' id='tablaFor' style='margin-top: 20px'>
@@ -974,7 +978,7 @@ class ReporteV2Controller extends Controller
 
             $tabla .= "
                 <div style='text-align: left; margin-top: 10px;'>
-                 <p style='font-size: 15px; margin: 0; color: #000;'>Y NO HABIENDO MÁS QUE HACER CONSTAR, FIRMAMOS Y RATIFICAMOS LA PRESENTE ACA.</p>
+                 <p style='font-size: 15px; margin: 0; color: #000;'>Y NO HABIENDO MÁS QUE HACER CONSTAR, FIRMAMOS Y RATIFICAMOS LA PRESENTE ACTA.</p>
                  ";
 
 
