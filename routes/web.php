@@ -99,6 +99,7 @@ Route::get('/admin/reportev2/pdf/factura/{numfactura}/{distrito}/{fondo}', [Repo
 // REPORTE DE CONTRATO
 Route::get('/admin/reportev2/contrato/index', [ReporteV2Controller::class,'vistaReporteContrato'])->name('admin.reporte.contrato');
 Route::get('/admin/reportev2/contrato/info/{desde}/{hasta}/{idcontrato}/{iddistrito}', [ReporteV2Controller::class,'reporteContratoDistrito']);
+Route::get('/admin/reportev2/contrato/infotodos/{desde}/{hasta}/{idcontrato}', [ReporteV2Controller::class,'reporteContratoDistritoTodos']);
 
 
 

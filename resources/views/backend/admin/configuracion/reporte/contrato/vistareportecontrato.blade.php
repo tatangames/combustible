@@ -6,6 +6,7 @@
     <link href="{{ asset('css/toastr.min.css') }}" type="text/css" rel="stylesheet" />
     <link href="{{ asset('css/select2.min.css') }}" type="text/css" rel="stylesheet">
     <link href="{{ asset('css/select2-bootstrap-5-theme.min.css') }}" type="text/css" rel="stylesheet">
+    <link href="{{ asset('css/estiloToggle.css') }}" type="text/css" rel="stylesheet" />
 @stop
 
 <section class="content-header">
@@ -47,6 +48,7 @@
                                 </select>
                             </div>
 
+
                             <div class="form-group" style="width: 50%">
                                 <label>Distrito</label>
 
@@ -56,6 +58,22 @@
                                     @endforeach
                                 </select>
                             </div>
+
+
+
+                            <div class="form-group">
+                                <label>Todos los Distritos</label><br>
+                                <label class="switch" style="margin-top:10px">
+                                    <input type="checkbox" id="check-distritos">
+                                    <div class="slider round">
+                                        <span class="on">SI</span>
+                                        <span class="off">NO</span>
+                                    </div>
+                                </label>
+                            </div>
+
+
+
                         </div>
 
                         <div class="card-footer" style="float: right;">
@@ -169,6 +187,12 @@
             var distrito = document.getElementById('select-distrito').value;
             var contrato = document.getElementById('select-contrato').value;
 
+            var checkboxDistrito = document.getElementById('check-distritos');
+            var valorCheckboxDistrito = checkboxDistrito.checked ? 1 : 0;
+
+
+
+
             if(fechadesde === ''){
                 toastr.error('Fecha desde es requerido');
                 return;
@@ -209,9 +233,13 @@
                 return
             }
 
-
-            window.open("{{ URL::to('admin/reportev2/contrato/info') }}/" +
-                fechadesde + "/" + fechahasta + "/" + contrato + "/" + distrito);
+            if(valorCheckboxDistrito === 1){
+                window.open("{{ URL::to('admin/reportev2/contrato/infotodos') }}/" +
+                    fechadesde + "/" + fechahasta + "/" + contrato);
+            }else{
+                window.open("{{ URL::to('admin/reportev2/contrato/info') }}/" +
+                    fechadesde + "/" + fechahasta + "/" + contrato + "/" + distrito);
+            }
         }
 
 
