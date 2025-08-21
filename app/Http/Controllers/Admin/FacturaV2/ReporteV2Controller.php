@@ -1251,13 +1251,13 @@ class ReporteV2Controller extends Controller
 
             foreach ($arrayContratoDetalle as $item){
                 if($item->id_combustible == 1){ // DIESEL
-                    $totalContratoDiesel = $item->cantidad;
+                    $totalContratoDiesel += $item->cantidad;
                 }
                 else if($item->id_combustible == 2){ // REGULAR
-                    $totalContratoRegular = $item->cantidad;
+                    $totalContratoRegular += $item->cantidad;
                 }
                 else if($item->id_combustible == 3){ // ESPECIAL
-                    $totalContratoEspecial = $item->cantidad;
+                    $totalContratoEspecial += $item->cantidad;
                 }
             }
 
