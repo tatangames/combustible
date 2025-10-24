@@ -1034,8 +1034,8 @@ class ReporteV2Controller extends Controller
     public function reporteContratoDistritoTodos($desde, $hasta, $idcontrato)
     {
 
-        //$mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
-        $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+        $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
+        //$mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
 
 
 

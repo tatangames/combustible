@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\FacturaV2;
 use App\Http\Controllers\Controller;
 use App\Models\Distritos;
 use App\Models\Equipo;
+use App\Models\Extras;
 use App\Models\Facturacion;
 use App\Models\TipoCombustible;
 use App\Models\TipoFondos;
@@ -53,8 +54,12 @@ class FacturaV2Controller extends Controller
 
         if ($validar->fails()){ return ['success' => 0];}
 
+
         DB::beginTransaction();
         try {
+
+            $infoExtras = Extras::where('id', 1)->first();
+
 
             $registro = new Facturacion();
             $registro->id_equipo = $request->equipo;
@@ -67,6 +72,15 @@ class FacturaV2Controller extends Controller
             $registro->descripcion = $request->descripcion;
             $registro->id_fondos = $request->fondos;
             $registro->id_distrito = $request->distrito;
+
+            $registro->encargado_nombre = $infoExtras->nombre1;
+            $registro->encargado_cargo = $infoExtras->nombre2;
+
+            $registro->jefe_nombre = $infoExtras->nombre3;
+            $registro->jefe_cargo = $infoExtras->nombre4;
+            $registro->gasolinera = $infoExtras->nombre_gasolinera;
+
+
             $registro->save();
 
             DB::commit();

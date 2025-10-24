@@ -17,6 +17,6 @@
 
     <!-- combustible.com/ -->
 
-    <script type="text/javascript"> var url = "/combustible.com/admin"; </script>
+    <script type="text/javascript"> var url = "/admin"; </script>
 </head>
 <body class="hold-transition sidebar-mini">

@@ -49,7 +49,7 @@
                             </div>
 
 
-                            <div class="form-group" style="width: 50%">
+                            <div class="form-group" style="width: 50%" id="bloque-select">
                                 <label>Distrito</label>
 
                                 <select class="form-control" id="select-distrito">
@@ -61,7 +61,7 @@
 
 
 
-                            <div class="form-group">
+                            <div class="form-group" id="bloque-toggle">
                                 <label>Todos los Distritos</label><br>
                                 <label class="switch" style="margin-top:10px">
                                     <input type="checkbox" id="check-distritos">
@@ -146,6 +146,9 @@
 
     <script>
 
+        // EL CONTRATO (ACTA GENERAL) VA A DECIR: ALCALDIA SANTA ANA NORTE
+
+
         function infoContrato(e){
             let id = $(e).val();
             document.getElementById("formulario-info-contrato").reset();
@@ -153,7 +156,6 @@
             if(id === ''){
                 return
             }
-
             openLoading();
 
             axios.post(url+'/contratos/informacion',{
@@ -166,7 +168,6 @@
                         $('#fecha-desde-contrato').val(response.data.info.fecha_desde);
                         $('#fecha-hasta-contrato').val(response.data.info.fecha_hasta);
                         $('#proveedor-contrato').val(response.data.info.proveedor);
-
                     }else{
                         toastr.error('Información no encontrada');
                     }
@@ -182,15 +183,26 @@
 
         function reportePdf(){
 
+            // DIVISION PARA SEGUN TIPO DE REPORTE
+            var contrato = document.getElementById('select-contrato').value;
+
+            if(contrato === '1'){
+                reportePdfContratoID1()
+            }else if(contrato === '2'){
+                reportePdfContratoID2()
+            }
+        }
+
+
+        function reportePdfContratoID1(){
+            var contrato = document.getElementById('select-contrato').value;
             var fechadesde = document.getElementById('fecha-desde').value;
             var fechahasta = document.getElementById('fecha-hasta').value;
             var distrito = document.getElementById('select-distrito').value;
-            var contrato = document.getElementById('select-contrato').value;
+
 
             var checkboxDistrito = document.getElementById('check-distritos');
             var valorCheckboxDistrito = checkboxDistrito.checked ? 1 : 0;
-
-
 
 
             if(fechadesde === ''){
@@ -222,10 +234,10 @@
             let fechadesdeContratoDate = new Date(fechadesdeContrato);
             let fechahastaContratoDate = new Date(fechahastaContrato);
             // LA FECHA DESDE NO PUEDE SER MENOR A LA DEL CONTRATO
-           if(dateDesde < fechadesdeContratoDate){
-               toastr.error('Fecha DESDE no puede ser menor a la del Contrato');
-               return
-           }
+            if(dateDesde < fechadesdeContratoDate){
+                toastr.error('Fecha DESDE no puede ser menor a la del Contrato');
+                return
+            }
 
             // LA FECHA HASTA NO PUEDE SER MAYOR A LA DEL CONTRATO
             if(dateHasta > fechahastaContratoDate){
@@ -242,6 +254,58 @@
             }
         }
 
+        function reportePdfContratoID2(){
+            var fechadesde = document.getElementById('fecha-desde').value;
+            var fechahasta = document.getElementById('fecha-hasta').value;
+            var distrito = document.getElementById('select-distrito').value;
+
+            var checkboxDistrito = document.getElementById('check-distritos');
+            var valorCheckboxDistrito = checkboxDistrito.checked ? 1 : 0;
+
+
+            if(fechadesde === ''){
+                toastr.error('Fecha desde es requerido');
+                return;
+            }
+
+            if(fechahasta === ''){
+                toastr.error('Fecha hasta es requerido');
+                return;
+            }
+
+            // Convertir a objetos Date para comparar
+            let dateDesde = new Date(fechadesde);
+            let dateHasta = new Date(fechahasta);
+
+            if (dateHasta < dateDesde) {
+                toastr.error('La Fecha Hasta no puede ser menor que la Fecha Desde');
+                return;
+            }
+
+            var fechadesdeContrato = document.getElementById('fecha-desde-contrato').value;
+            var fechahastaContrato = document.getElementById('fecha-hasta-contrato').value;
+            let fechadesdeContratoDate = new Date(fechadesdeContrato);
+            let fechahastaContratoDate = new Date(fechahastaContrato);
+            // LA FECHA DESDE NO PUEDE SER MENOR A LA DEL CONTRATO
+            if(dateDesde < fechadesdeContratoDate){
+                toastr.error('Fecha DESDE no puede ser menor a la del Contrato');
+                return
+            }
+
+            // LA FECHA HASTA NO PUEDE SER MAYOR A LA DEL CONTRATO
+            if(dateHasta > fechahastaContratoDate){
+                toastr.error('Fecha HASTA no puede ser menor a la del fecha HASTA del Contrato');
+                return
+            }
+
+            if(valorCheckboxDistrito === 1){
+                window.open("{{ URL::to('admin/reportev2/contrato/infotodos') }}/" +
+                    fechadesde + "/" + fechahasta + "/" + 2);
+            }else{
+                window.open("{{ URL::to('admin/reportev2/contrato/info') }}/" +
+                    fechadesde + "/" + fechahasta + "/" + 2 + "/" + distrito);
+            }
+        }
 
 
 
