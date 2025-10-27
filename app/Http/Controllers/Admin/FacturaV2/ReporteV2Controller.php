@@ -1612,6 +1612,7 @@ HTML;
     {
 
 
+
         /* ==== MPDF ==== */
         $infoExtra = Extras::find(1);
         $mpdfOpts  = ['format' => 'LETTER'];
@@ -1622,12 +1623,13 @@ HTML;
         $mpdf->showImageErrors = false;
         $mpdf->SetTitle('Acta General');
 
-        /* ==== Distritos (para filtrar Facturación a S.A. Norte) ==== */
-        $arrayDistritos   = Distritos::orderBy('nombre', 'ASC')->get();
-        $pilaIdDistritos  = $arrayDistritos->pluck('id')->all();
+        /* ==== Distritos (S.A. Norte) ==== */
+        $arrayDistritos  = Distritos::orderBy('nombre', 'ASC')->get();
+        $pilaIdDistritos = $arrayDistritos->pluck('id')->all();
 
-        /* ==== Contrato y fechas ==== */
-        $infoContrato   = Contratos::findOrFail(2); // tu contrato general
+        /* ==== Contrato y Fechas ==== */
+        $infoContrato   = Contratos::findOrFail(2); // contrato general
+
         setlocale(LC_TIME, 'es_ES.UTF-8');
         Carbon::setLocale('es');
 
@@ -1645,9 +1647,12 @@ HTML;
         $textoFecha = strtoupper($rangoIni->translatedFormat('j F')) . ' AL ' .
             strtoupper($rangoFin->translatedFormat('j \\D\\E F Y'));
 
-        /* ==== Recursos (imgs) ==== */
+        /* ==== Imágenes ==== */
         $logoGob = 'file://' . public_path('images/gobiernologo.jpg');
         $logoSAN = 'file://' . public_path('images/logo.png');
+
+
+
 
         /* ==== HEADER HTML ==== */
         $tabla = <<<HTML
@@ -1699,25 +1704,27 @@ HTML;
 </div>
 HTML;
 
-        /* ==== QUERIES OPTIMIZADAS ==== */
-
-        // Totales del PERÍODO (intersección) SOLO S.A. Norte (todos sus distritos)
+        /* ==== QUERIES ==== */
+        // Totales del PERÍODO (todos los distritos de S.A. Norte, con redondeo por línea y DECIMAL)
         $totPeriodo = Facturacion::whereIn('id_distrito', $pilaIdDistritos)
             ->whereBetween('fecha', [$rangoIni, $rangoFin])
             ->selectRaw("
-            SUM(CASE WHEN id_tipocombustible = 1 THEN cantidad ELSE 0 END)            AS gal_diesel,
-            SUM(CASE WHEN id_tipocombustible = 2 THEN cantidad ELSE 0 END)            AS gal_regular,
-            SUM(CASE WHEN id_tipocombustible = 3 THEN cantidad ELSE 0 END)            AS gal_especial,
-            SUM(CASE WHEN id_tipocombustible = 1 THEN cantidad * unitario ELSE 0 END) AS dinero_diesel,
-            SUM(CASE WHEN id_tipocombustible = 2 THEN cantidad * unitario ELSE 0 END) AS dinero_regular,
-            SUM(CASE WHEN id_tipocombustible = 3 THEN cantidad * unitario ELSE 0 END) AS dinero_especial
+            /* galones por tipo */
+            SUM(CASE WHEN id_tipocombustible = 1 THEN cantidad ELSE 0 END) AS gal_diesel,
+            SUM(CASE WHEN id_tipocombustible = 2 THEN cantidad ELSE 0 END) AS gal_regular,
+            SUM(CASE WHEN id_tipocombustible = 3 THEN cantidad ELSE 0 END) AS gal_especial,
+
+            /* dinero por tipo (ROUND por línea) */
+            CAST(SUM(ROUND(CASE WHEN id_tipocombustible = 1 THEN cantidad * unitario ELSE 0 END, 2)) AS DECIMAL(18,2)) AS dinero_diesel,
+            CAST(SUM(ROUND(CASE WHEN id_tipocombustible = 2 THEN cantidad * unitario ELSE 0 END, 2)) AS DECIMAL(18,2)) AS dinero_regular,
+            CAST(SUM(ROUND(CASE WHEN id_tipocombustible = 3 THEN cantidad * unitario ELSE 0 END, 2)) AS DECIMAL(18,2)) AS dinero_especial,
+
+            /* total dinero del período (ROUND por línea) */
+            CAST(SUM(ROUND(cantidad * unitario, 2)) AS DECIMAL(18,2)) AS dinero_total
         ")
             ->first();
 
-
-
-
-        // Totales del contrato por combustible (IDs FIJOS 11=Diésel, 12=Regular, 13=Especial)
+        // Totales del contrato (IDs fijos 11=Diésel, 12=Regular, 13=Especial)
         $detalles = ContratosDetalle::where('id_contratos', 2)
             ->whereIn('id', [11, 12, 13])
             ->pluck('cantidad', 'id');
@@ -1731,56 +1738,53 @@ HTML;
         $galRegular  = (float)($totPeriodo->gal_regular ?? 0);
         $galEspecial = (float)($totPeriodo->gal_especial ?? 0);
 
-        $dinDiesel   = (float)($totPeriodo->dinero_diesel ?? 0);
-        $dinRegular  = (float)($totPeriodo->dinero_regular ?? 0);
-        $dinEspecial = (float)($totPeriodo->dinero_especial ?? 0);
+        // Dinero (ya es DECIMAL string)
+        $dinDiesel   = (string)($totPeriodo->dinero_diesel ?? '0.00');
+        $dinRegular  = (string)($totPeriodo->dinero_regular ?? '0.00');
+        $dinEspecial = (string)($totPeriodo->dinero_especial ?? '0.00');
+        $montoTotal  = (string)($totPeriodo->dinero_total  ?? '0.00');
 
-        $montoTotal  = $dinDiesel + $dinRegular + $dinEspecial;
-
-        // Restantes = contrato - consumo DEL PERÍODO (lo que ya muestra la tabla)
-        $consPeriodoDiesel   = (float)($totPeriodo->gal_diesel   ?? 0);
-        $consPeriodoRegular  = (float)($totPeriodo->gal_regular  ?? 0);
-        $consPeriodoEspecial = (float)($totPeriodo->gal_especial ?? 0);
-
-// Evita negativos por redondeos
-        $restDiesel   = max(0, $contratoDiesel   - $consPeriodoDiesel);
-        $restRegular  = max(0, $contratoRegular  - $consPeriodoRegular);
-        $restEspecial = max(0, $contratoEspecial - $consPeriodoEspecial);
+        // Restantes = contrato - consumo DEL PERÍODO (todos los distritos)
+        $restDiesel   = max(0, $contratoDiesel   - $galDiesel);
+        $restRegular  = max(0, $contratoRegular  - $galRegular);
+        $restEspecial = max(0, $contratoEspecial - $galEspecial);
 
         /* ==== FORMATEOS ==== */
-        $f = fn($n, $d = 2) => number_format((float)$n, $d, '.', ',');
-        $galDieselF   = $f($galDiesel,   3);
-        $galRegularF  = $f($galRegular,  3);
-        $galEspecialF = $f($galEspecial, 3);
+        $fmt3 = fn($n) => number_format((float)$n, 3, '.', ','); // galones
+        $fmt2 = fn($n) => number_format((float)$n, 2, '.', ','); // dinero
 
-        $dinDieselF   = $f($dinDiesel,   2);
-        $dinRegularF  = $f($dinRegular,  2);
-        $dinEspecialF = $f($dinEspecial, 2);
-        $montoTotalF  = $f($montoTotal,  2);
+        $galDieselF   = $fmt3($galDiesel);
+        $galRegularF  = $fmt3($galRegular);
+        $galEspecialF = $fmt3($galEspecial);
 
-        $restDieselF   = $f($restDiesel,   3);
-        $restRegularF  = $f($restRegular,  3);
-        $restEspecialF = $f($restEspecial, 3);
+        $dinDieselF   = $fmt2($dinDiesel);
+        $dinRegularF  = $fmt2($dinRegular);
+        $dinEspecialF = $fmt2($dinEspecial);
+        $montoTotalF  = $fmt2($montoTotal);
+
+        $restDieselF   = $fmt3($restDiesel);
+        $restRegularF  = $fmt3($restRegular);
+        $restEspecialF = $fmt3($restEspecial);
 
         /* ==== TABLA RESUMEN ==== */
         $tabla .= <<<HTML
 <table width="100%" style="margin-top:20px; border-collapse:collapse; border:1px solid #000;">
   <tbody>
     <tr>
-      <td style="font-weight:normal; font-size:12px;">GALONES DIESEL</td>
-      <td style="font-weight:normal; font-size:12px;">MONTO DINERO</td>
-      <td style="font-weight:normal; font-size:12px;">GALONES REGULAR</td>
-      <td style="font-weight:normal; font-size:12px;">MONTO DINERO</td>
-      <td style="font-weight:normal; font-size:12px;">GALONES ESPECIAL</td>
-      <td style="font-weight:normal; font-size:12px;">MONTO DINERO</td>
-      <td style="font-weight:normal; font-size:12px;">MONTO TOTAL DINERO</td>
+      <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">GALONES DIESEL</td>
+      <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">MONTO DINERO</td>
+      <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">GALONES REGULAR</td>
+      <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">MONTO DINERO</td>
+      <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">GALONES ESPECIAL</td>
+      <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">MONTO DINERO</td>
+      <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">MONTO TOTAL DINERO</td>
     </tr>
     <tr>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galDieselF</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">{$galDieselF}</td>
       <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinDieselF}</td>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galRegularF</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">{$galRegularF}</td>
       <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinRegularF}</td>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galEspecialF</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">{$galEspecialF}</td>
       <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinEspecialF}</td>
       <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$montoTotalF}</td>
     </tr>
@@ -1789,9 +1793,9 @@ HTML;
 
 <div style="text-align:left; margin-top:10px;">
   <p style="font-size:15px; margin:0; color:#000;"><strong>RESTANTE GALONES</strong></p>
-  <p style="font-size:15px; margin:0; color:#000;"><strong>DIESEL:</strong> $restDieselF</p>
-  <p style="font-size:15px; margin:0; color:#000;"><strong>REGULAR:</strong> $restRegularF</p>
-  <p style="font-size:15px; margin:0; color:#000;"><strong>ESPECIAL:</strong> $restEspecialF</p>
+  <p style="font-size:15px; margin:0; color:#000;"><strong>DIESEL:</strong> {$restDieselF}</p>
+  <p style="font-size:15px; margin:0; color:#000;"><strong>REGULAR:</strong> {$restRegularF}</p>
+  <p style="font-size:15px; margin:0; color:#000;"><strong>ESPECIAL:</strong> {$restEspecialF}</p>
 </div>
 HTML;
 
@@ -1844,6 +1848,7 @@ HTML;
         $mpdf->WriteHTML($tabla, 2);
         $mpdf->Output();
     }
+
 
 
 
