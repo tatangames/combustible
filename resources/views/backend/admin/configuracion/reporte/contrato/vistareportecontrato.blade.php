@@ -186,9 +186,9 @@
             // DIVISION PARA SEGUN TIPO DE REPORTE
             var contrato = document.getElementById('select-contrato').value;
 
-            if(contrato === '1'){
+            if(contrato === '1'){ // ID CONTRATO
                 reportePdfContratoID1()
-            }else if(contrato === '2'){
+            }else if(contrato === '2'){ // ID CONTRATO
                 reportePdfContratoID2()
             }
         }
@@ -254,10 +254,13 @@
             }
         }
 
+
+        // CONTRATO ID 2
         function reportePdfContratoID2(){
+            var contrato = document.getElementById('select-contrato').value;
             var fechadesde = document.getElementById('fecha-desde').value;
             var fechahasta = document.getElementById('fecha-hasta').value;
-            var distrito = document.getElementById('select-distrito').value;
+            var distrito = document.getElementById('select-distrito').value; // metapan/masahuat/textis
 
             var checkboxDistrito = document.getElementById('check-distritos');
             var valorCheckboxDistrito = checkboxDistrito.checked ? 1 : 0;
@@ -298,13 +301,8 @@
                 return
             }
 
-            if(valorCheckboxDistrito === 1){
-                window.open("{{ URL::to('admin/reportev2/contrato/infotodos') }}/" +
-                    fechadesde + "/" + fechahasta + "/" + 2);
-            }else{
-                window.open("{{ URL::to('admin/reportev2/contrato/info') }}/" +
-                    fechadesde + "/" + fechahasta + "/" + 2 + "/" + distrito);
-            }
+            window.open("{{ URL::to('admin/reportev3/contrato') }}/" +
+                fechadesde + "/" + fechahasta + "/" + contrato + "/" + distrito);
         }
 
 

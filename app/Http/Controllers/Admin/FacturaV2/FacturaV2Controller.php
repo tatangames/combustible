@@ -24,9 +24,12 @@ class FacturaV2Controller extends Controller
 
     public function indexFactura(){
         $fechaActual = Carbon::now('America/El_Salvador');
+
         $arrayCombus = TipoCombustible::orderBy('nombre', 'ASC')->get();
         $arrayEquipos = Equipo::orderBy('nombre', 'ASC')->get();
-        $arrayDistritos = Distritos::orderBy('nombre', 'ASC')->get();
+        $arrayDistritos = Distritos::orderBy('nombre', 'ASC')
+            ->whereNotIn('id', [5]) // NO QUIERO VER DISTRITO SANTA ANA NORTE
+            ->get();
         $arrayTipoFondos = TipoFondos::orderBy('nombre', 'ASC')->get();
 
         return view('backend.admin.facturav2.nueva.nuevafacturav2',
