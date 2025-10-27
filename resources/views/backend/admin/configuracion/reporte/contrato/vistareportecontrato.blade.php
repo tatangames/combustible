@@ -301,13 +301,16 @@
                 return
             }
 
-            window.open("{{ URL::to('admin/reportev3/contrato') }}/" +
-                fechadesde + "/" + fechahasta + "/" + contrato + "/" + distrito);
+
+            if(valorCheckboxDistrito === 1){
+                // ACTA GENERAL TODOS
+                window.open("{{ URL::to('admin/reportev3/contrato/actageneral') }}/" + fechadesde + "/" + fechahasta);
+            }else{
+                // POR SEPARADO
+                window.open("{{ URL::to('admin/reportev3/contrato') }}/" +
+                    fechadesde + "/" + fechahasta + "/" + contrato + "/" + distrito);
+            }
         }
-
-
-
-
 
 
     </script>

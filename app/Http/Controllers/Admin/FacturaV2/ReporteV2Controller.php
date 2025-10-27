@@ -1033,12 +1033,12 @@ class ReporteV2Controller extends Controller
 
     public function reporteContratoDistritoTodos($desde, $hasta, $idcontrato)
     {
-
-        $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
-        //$mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
-
-
-
+        $infoExtra = Extras::where('id', 1)->first();
+        if($infoExtra->reporte == 1){
+            $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+        }else{
+            $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
+        }
 
 
         $arrayDistritos = Distritos::orderBy('nombre', 'ASC')->get();
@@ -1061,29 +1061,6 @@ class ReporteV2Controller extends Controller
         $logoalcaldia = 'images/gobiernologo.jpg';
         $logosantaana = 'images/logo.png';
         $mpdf->SetTitle('Contrato');
-
-
-        $tabla2 = "
-        <table style='width: 100%; border-collapse: collapse;'>
-            <tr>
-                <!-- Logo izquierdo -->
-                <td style='width: 15%; text-align: left;'>
-                    <img src='$logosantaana' alt='Santa Ana Norte' style='max-width: 100px; height: auto;'>
-                </td>
-                <!-- Texto centrado -->
-                <td style='width: 60%; text-align: center;'>
-                    <h1 style='font-size: 16px; margin: 0; color: #003366; text-transform: uppercase;'>ALCALDÍA MUNICIPAL DE SANTA ANA NORTE</h1>
-                </td>
-                <!-- Logo derecho -->
-                <td style='width: 10%; text-align: right;'>
-                    <img src='$logoalcaldia' alt='Gobierno de El Salvador' style='max-width: 60px; height: auto;'>
-                </td>
-            </tr>
-        </table>
-        <hr style='border: none; border-top: 2px solid #003366; margin: 0;'>
-        ";
-
-
 
 
 
@@ -1327,7 +1304,7 @@ class ReporteV2Controller extends Controller
 
 
 
-            $infoExtra = Extras::where('id', 1)->first();
+
 
             $tabla .= "
                 <div style='text-align: left; margin-top: 25px;'>
@@ -1496,22 +1473,6 @@ HTML;
     ")
             ->first();
 
-       /*
-
-       {
-              "gal_diesel": "10.000",
-              "gal_regular": "0.000",
-              "gal_especial": "0.000",
-              "dinero_diesel": "33.60000",
-              "dinero_regular": "0.00000",
-              "dinero_especial": "0.00000"
-            }
-        * */
-
-
-        // $inicioContrato   "2025-10-23T00:00:00.000000Z"
-        // $fechaFinUsr;   "2025-10-25T23:59:59.999999Z"
-
         // acumulado GLOBAL (todos los distritos)
         $consumoPeriodo = Facturacion::whereBetween('fecha', [$fechaInicio, $fechaFin]) // usa la intersección ya calculada
         ->selectRaw("
@@ -1521,17 +1482,6 @@ HTML;
     ")
             ->first();
 
-        /**
-         * {
-         * "suma_diesel": "2150.700",
-         * "suma_regular": "131.000",
-         * "suma_especial": "0.000"
-         * }
-         */
-
-
-
-
         /* Totales del contrato por combustible (IDs fijos 11,12,13 en ContratosDetalle) */
         $detalles = ContratosDetalle::where('id_contratos', $idcontrato)
             ->whereIn('id', [11, 12, 13])
@@ -1540,10 +1490,6 @@ HTML;
         $contratoDiesel   = (float)($detalles[11] ?? 0); // 11 = Diesel
         $contratoRegular  = (float)($detalles[12] ?? 0); // 12 = Regular
         $contratoEspecial = (float)($detalles[13] ?? 0); // 13 = Especial
-
-
-
-
 
         /** ==== CÁLCULOS Y FORMATEOS ==== */
         $galDiesel   = (float)($totPeriodo->gal_diesel ?? 0); // 10.000
@@ -1560,8 +1506,6 @@ HTML;
         $restDiesel   = $contratoDiesel   - (float)($consumoPeriodo->periodo_diesel   ?? 0);
         $restRegular  = $contratoRegular  - (float)($consumoPeriodo->periodo_regular  ?? 0);
         $restEspecial = $contratoEspecial - (float)($consumoPeriodo->periodo_especial ?? 0);
-
-
 
         /* Formateos (miles y 2/3 decimales) */
         $f = fn($n, $d = 2) => number_format((float)$n, $d, '.', ',');
@@ -1580,7 +1524,7 @@ HTML;
 
         /** ==== TABLA DE TOTALES ==== */
         $tabla .= <<<HTML
-<table width="100%" style="margin-top:20px;">
+<table width="100%" style="margin-top:20px; border-collapse:collapse; border:1px solid #000;">
   <tbody>
     <tr>
       <td style="font-weight:normal; font-size:12px;">GALONES DIESEL</td>
@@ -1592,13 +1536,13 @@ HTML;
       <td style="font-weight:normal; font-size:12px;">MONTO TOTAL DINERO</td>
     </tr>
     <tr>
-      <td style="font-size:12px;">$galDieselF</td>
-      <td style="font-size:12px;">\${$dinDieselF}</td>
-      <td style="font-size:12px;">$galRegularF</td>
-      <td style="font-size:12px;">\${$dinRegularF}</td>
-      <td style="font-size:12px;">$galEspecialF</td>
-      <td style="font-size:12px;">\${$dinEspecialF}</td>
-      <td style="font-size:12px;">\${$montoTotalF}</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galDieselF</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinDieselF}</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galRegularF</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinRegularF}</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galEspecialF</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinEspecialF}</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$montoTotalF}</td>
     </tr>
   </tbody>
 </table>
@@ -1664,6 +1608,242 @@ HTML;
 
 
 
+    public function reporteContratoDistritoTodosSantaAnaNorte($desde, $hasta)
+    {
+
+
+        /* ==== MPDF ==== */
+        $infoExtra = Extras::find(1);
+        $mpdfOpts  = ['format' => 'LETTER'];
+        if ($infoExtra && (int)$infoExtra->reporte === 1) {
+            $mpdfOpts['tempDir'] = sys_get_temp_dir();
+        }
+        $mpdf = new \Mpdf\Mpdf($mpdfOpts);
+        $mpdf->showImageErrors = false;
+        $mpdf->SetTitle('Acta General');
+
+        /* ==== Distritos (para filtrar Facturación a S.A. Norte) ==== */
+        $arrayDistritos   = Distritos::orderBy('nombre', 'ASC')->get();
+        $pilaIdDistritos  = $arrayDistritos->pluck('id')->all();
+
+        /* ==== Contrato y fechas ==== */
+        $infoContrato   = Contratos::findOrFail(2); // tu contrato general
+        setlocale(LC_TIME, 'es_ES.UTF-8');
+        Carbon::setLocale('es');
+
+        $fechaDesde     = Carbon::parse($desde)->startOfDay();
+        $fechaHasta     = Carbon::parse($hasta)->endOfDay();
+
+        $inicioContrato = Carbon::parse($infoContrato->fecha_desde)->startOfDay();
+        $finContrato    = Carbon::parse($infoContrato->fecha_hasta)->endOfDay();
+
+        // Intersección contrato ∩ rango solicitado
+        $rangoIni = $inicioContrato->greaterThan($fechaDesde) ? $inicioContrato : $fechaDesde;
+        $rangoFin = $finContrato->lessThan($fechaHasta) ? $finContrato : $fechaHasta;
+
+        // Texto de fecha
+        $textoFecha = strtoupper($rangoIni->translatedFormat('j F')) . ' AL ' .
+            strtoupper($rangoFin->translatedFormat('j \\D\\E F Y'));
+
+        /* ==== Recursos (imgs) ==== */
+        $logoGob = 'file://' . public_path('images/gobiernologo.jpg');
+        $logoSAN = 'file://' . public_path('images/logo.png');
+
+        /* ==== HEADER HTML ==== */
+        $tabla = <<<HTML
+<table style="width:100%; border-collapse:collapse;">
+  <tr>
+    <td style="width:15%;text-align:left;">
+      <img src="$logoSAN" alt="Santa Ana Norte" style="max-width:100px;height:auto;">
+    </td>
+    <td style="width:60%;text-align:center;">
+      <h1 style="font-size:16px; margin:0; color:#003366; text-transform:uppercase;">
+        ALCALDÍA MUNICIPAL DE SANTA ANA NORTE
+      </h1>
+    </td>
+    <td style="width:10%;text-align:right;">
+      <img src="$logoGob" alt="Gobierno de El Salvador" style="max-width:60px;height:auto;">
+    </td>
+  </tr>
+</table>
+<hr style="border:none; border-top:2px solid #003366; margin:0;">
+<div style="text-align:center; margin-top:20px;">
+  <p style="font-size:16px; margin:0; color:#000;">ACTA DE ENTREGA PARCIAL</p>
+</div><br>
+
+<div style="text-align:left;">
+  <p style="font-size:15px; margin:0; color:#000;">
+    <strong>MÉTODO DE CONTRATACIÓN:</strong> LICITACIÓN COMPETITIVA DE BIENES
+  </p>
+  <p style="font-size:15px; margin:0; color:#000;">
+    <strong>PROCESO REF. N°:</strong> {$infoContrato->proceso_ref}
+  </p>
+</div>
+<div style="text-align:left; margin-top:10px;">
+  <p style="font-size:15px; margin:0; color:#000;">
+    <strong>NOMBRE DEL PROCESO:</strong> COMPRA DE COMBUSTIBLE PARA LOS DIFERENTES EQUIPOS DE LA MUNICIPALIDAD DE SANTA ANA NORTE.
+  </p>
+</div>
+
+<div style="text-align:left; margin-top:25px;">
+  <p style="font-size:15px; margin:0; color:#000;">
+    REUNIDOS EN LAS INSTALACIONES DE LA <strong>ALCALDÍA MUNICIPAL DE SANTA ANA NORTE</strong>
+    DURANTE LA SEMANA DEL <strong>$textoFecha</strong> CON EL PROPÓSITO DE HACER ENTREGA FORMAL DE COMBUSTIBLE.
+  </p>
+</div>
+
+<div style="text-align:left; margin-top:25px;">
+  <p style="font-size:15px; margin:0; color:#000;">
+    DE FORMA PARCIAL SE RECIBE LO SIGUIENTE: <strong>ALCALDÍA MUNICIPAL DE SANTA ANA NORTE</strong>
+  </p>
+</div>
+HTML;
+
+        /* ==== QUERIES OPTIMIZADAS ==== */
+
+        // Totales del PERÍODO (intersección) SOLO S.A. Norte (todos sus distritos)
+        $totPeriodo = Facturacion::whereIn('id_distrito', $pilaIdDistritos)
+            ->whereBetween('fecha', [$rangoIni, $rangoFin])
+            ->selectRaw("
+            SUM(CASE WHEN id_tipocombustible = 1 THEN cantidad ELSE 0 END)            AS gal_diesel,
+            SUM(CASE WHEN id_tipocombustible = 2 THEN cantidad ELSE 0 END)            AS gal_regular,
+            SUM(CASE WHEN id_tipocombustible = 3 THEN cantidad ELSE 0 END)            AS gal_especial,
+            SUM(CASE WHEN id_tipocombustible = 1 THEN cantidad * unitario ELSE 0 END) AS dinero_diesel,
+            SUM(CASE WHEN id_tipocombustible = 2 THEN cantidad * unitario ELSE 0 END) AS dinero_regular,
+            SUM(CASE WHEN id_tipocombustible = 3 THEN cantidad * unitario ELSE 0 END) AS dinero_especial
+        ")
+            ->first();
+
+
+
+
+        // Totales del contrato por combustible (IDs FIJOS 11=Diésel, 12=Regular, 13=Especial)
+        $detalles = ContratosDetalle::where('id_contratos', 2)
+            ->whereIn('id', [11, 12, 13])
+            ->pluck('cantidad', 'id');
+
+        $contratoDiesel   = (float)($detalles[11] ?? 0);
+        $contratoRegular  = (float)($detalles[12] ?? 0);
+        $contratoEspecial = (float)($detalles[13] ?? 0);
+
+        /* ==== CÁLCULOS ==== */
+        $galDiesel   = (float)($totPeriodo->gal_diesel ?? 0);
+        $galRegular  = (float)($totPeriodo->gal_regular ?? 0);
+        $galEspecial = (float)($totPeriodo->gal_especial ?? 0);
+
+        $dinDiesel   = (float)($totPeriodo->dinero_diesel ?? 0);
+        $dinRegular  = (float)($totPeriodo->dinero_regular ?? 0);
+        $dinEspecial = (float)($totPeriodo->dinero_especial ?? 0);
+
+        $montoTotal  = $dinDiesel + $dinRegular + $dinEspecial;
+
+        // Restantes = contrato - consumo DEL PERÍODO (lo que ya muestra la tabla)
+        $consPeriodoDiesel   = (float)($totPeriodo->gal_diesel   ?? 0);
+        $consPeriodoRegular  = (float)($totPeriodo->gal_regular  ?? 0);
+        $consPeriodoEspecial = (float)($totPeriodo->gal_especial ?? 0);
+
+// Evita negativos por redondeos
+        $restDiesel   = max(0, $contratoDiesel   - $consPeriodoDiesel);
+        $restRegular  = max(0, $contratoRegular  - $consPeriodoRegular);
+        $restEspecial = max(0, $contratoEspecial - $consPeriodoEspecial);
+
+        /* ==== FORMATEOS ==== */
+        $f = fn($n, $d = 2) => number_format((float)$n, $d, '.', ',');
+        $galDieselF   = $f($galDiesel,   3);
+        $galRegularF  = $f($galRegular,  3);
+        $galEspecialF = $f($galEspecial, 3);
+
+        $dinDieselF   = $f($dinDiesel,   2);
+        $dinRegularF  = $f($dinRegular,  2);
+        $dinEspecialF = $f($dinEspecial, 2);
+        $montoTotalF  = $f($montoTotal,  2);
+
+        $restDieselF   = $f($restDiesel,   3);
+        $restRegularF  = $f($restRegular,  3);
+        $restEspecialF = $f($restEspecial, 3);
+
+        /* ==== TABLA RESUMEN ==== */
+        $tabla .= <<<HTML
+<table width="100%" style="margin-top:20px; border-collapse:collapse; border:1px solid #000;">
+  <tbody>
+    <tr>
+      <td style="font-weight:normal; font-size:12px;">GALONES DIESEL</td>
+      <td style="font-weight:normal; font-size:12px;">MONTO DINERO</td>
+      <td style="font-weight:normal; font-size:12px;">GALONES REGULAR</td>
+      <td style="font-weight:normal; font-size:12px;">MONTO DINERO</td>
+      <td style="font-weight:normal; font-size:12px;">GALONES ESPECIAL</td>
+      <td style="font-weight:normal; font-size:12px;">MONTO DINERO</td>
+      <td style="font-weight:normal; font-size:12px;">MONTO TOTAL DINERO</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galDieselF</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinDieselF}</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galRegularF</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinRegularF}</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galEspecialF</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinEspecialF}</td>
+      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$montoTotalF}</td>
+    </tr>
+  </tbody>
+</table>
+
+<div style="text-align:left; margin-top:10px;">
+  <p style="font-size:15px; margin:0; color:#000;"><strong>RESTANTE GALONES</strong></p>
+  <p style="font-size:15px; margin:0; color:#000;"><strong>DIESEL:</strong> $restDieselF</p>
+  <p style="font-size:15px; margin:0; color:#000;"><strong>REGULAR:</strong> $restRegularF</p>
+  <p style="font-size:15px; margin:0; color:#000;"><strong>ESPECIAL:</strong> $restEspecialF</p>
+</div>
+HTML;
+
+        /* ==== PÁRRAFOS FINALES ==== */
+        $tabla .= <<<HTML
+<div style="text-align:left; margin-top:25px;">
+  <p style="font-size:15px; margin:0; color:#000;">
+    CON BASE A LO SOLICITADO; PRESENTE EL SEÑOR: <strong>{$infoContrato->proveedor}</strong> POR PARTE DEL PROVEEDOR
+    Y <strong>{$infoExtra->nombre3}</strong> EN CALIDAD DE ADMINISTRADOR DE CONTRATOS.
+  </p>
+</div>
+
+<div style="text-align:left; margin-top:25px;">
+  <p style="font-size:15px; margin:0; color:#000;">
+    CABE MENCIONAR QUE DICHOS BIENES CUMPLEN CON LAS ESPECIFICACIONES PREVIAMENTE DEFINIDAS EN EL CONTRATO.
+  </p>
+</div>
+
+<div style="text-align:left; margin-top:10px;">
+  <p style="font-size:15px; margin:0; color:#000;">
+    Y NO HABIENDO MÁS QUE HACER CONSTAR, FIRMAMOS Y RATIFICAMOS LA PRESENTE ACTA.
+  </p>
+</div>
+
+<table style="width:100%; margin-top:20px; font-family:'Times New Roman', Times, serif; font-size:14px; color:#000;">
+  <tr>
+    <td style="width:50%; text-align:left; padding-bottom:40px;">
+      <p style="margin:0; font-weight:normal; font-size:16px; margin-left:15px;">ENTREGA:</p>
+    </td>
+    <td style="width:50%; text-align:right; padding-bottom:40px;">
+      <p style="margin:0; font-weight:normal; font-size:16px; margin-right:30px;">RECIBE:</p>
+    </td>
+  </tr>
+  <tr>
+    <td style="width:50%; text-align:center; padding:20px;">
+      <p style="margin:10px 0;">f.____________________________</p>
+      <p style="margin:10px 0;">PROVEEDOR</p>
+    </td>
+    <td style="width:50%; text-align:center; padding:20px;">
+      <p style="margin:10px 0;">f.____________________________</p>
+      <p style="margin:10px 0;">ADMINISTRADOR DE CONTRATO</p>
+    </td>
+  </tr>
+</table>
+HTML;
+
+        /* ==== RENDER ==== */
+        $stylesheet = file_get_contents(public_path('css/csscontrato.css'));
+        $mpdf->WriteHTML($stylesheet, 1);
+        $mpdf->WriteHTML($tabla, 2);
+        $mpdf->Output();
+    }
 
 
 

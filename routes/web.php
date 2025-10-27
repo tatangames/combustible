@@ -103,6 +103,7 @@ Route::get('/admin/reportev2/contrato/infotodos/{desde}/{hasta}/{idcontrato}', [
 
 // REPORTE DE CONTRATO PERO ALCALDIA SANTA ANA NORTE
 Route::get('/admin/reportev3/contrato/{desde}/{hasta}/{idcontrato}/{iddistrito}', [ReporteV2Controller::class,'reporteContratoDistritoSantaAnaNorte']);
+Route::get('/admin/reportev3/contrato/actageneral/{desde}/{hasta}', [ReporteV2Controller::class,'reporteContratoDistritoTodosSantaAnaNorte']);
 
 
 
