@@ -1610,9 +1610,6 @@ HTML;
 
     public function reporteContratoDistritoTodosSantaAnaNorte($desde, $hasta)
     {
-
-
-
         /* ==== MPDF ==== */
         $infoExtra = Extras::find(1);
         $mpdfOpts  = ['format' => 'LETTER'];
@@ -1650,9 +1647,6 @@ HTML;
         /* ==== Imágenes ==== */
         $logoGob = 'file://' . public_path('images/gobiernologo.jpg');
         $logoSAN = 'file://' . public_path('images/logo.png');
-
-
-
 
         /* ==== HEADER HTML ==== */
         $tabla = <<<HTML
@@ -1705,26 +1699,33 @@ HTML;
 HTML;
 
         /* ==== QUERIES ==== */
-        // Totales del PERÍODO (todos los distritos de S.A. Norte, con redondeo por línea y DECIMAL)
+        // Totales del PERÍODO (para mostrar consumo de esa semana/rango)
         $totPeriodo = Facturacion::whereIn('id_distrito', $pilaIdDistritos)
             ->whereBetween('fecha', [$rangoIni, $rangoFin])
             ->selectRaw("
-            /* galones por tipo */
             SUM(CASE WHEN id_tipocombustible = 1 THEN cantidad ELSE 0 END) AS gal_diesel,
             SUM(CASE WHEN id_tipocombustible = 2 THEN cantidad ELSE 0 END) AS gal_regular,
             SUM(CASE WHEN id_tipocombustible = 3 THEN cantidad ELSE 0 END) AS gal_especial,
 
-            /* dinero por tipo (ROUND por línea) */
             CAST(SUM(ROUND(CASE WHEN id_tipocombustible = 1 THEN cantidad * unitario ELSE 0 END, 2)) AS DECIMAL(18,2)) AS dinero_diesel,
             CAST(SUM(ROUND(CASE WHEN id_tipocombustible = 2 THEN cantidad * unitario ELSE 0 END, 2)) AS DECIMAL(18,2)) AS dinero_regular,
             CAST(SUM(ROUND(CASE WHEN id_tipocombustible = 3 THEN cantidad * unitario ELSE 0 END, 2)) AS DECIMAL(18,2)) AS dinero_especial,
-
-            /* total dinero del período (ROUND por línea) */
             CAST(SUM(ROUND(cantidad * unitario, 2)) AS DECIMAL(18,2)) AS dinero_total
         ")
             ->first();
 
-        // Totales del contrato (IDs fijos 11=Diésel, 12=Regular, 13=Especial)
+        // Totales ACUMULADOS desde el inicio del contrato hasta el FIN del rango
+        // (esto es lo que se usa para los RESTANTES)
+        $totAcumulado = Facturacion::whereIn('id_distrito', $pilaIdDistritos)
+            ->whereBetween('fecha', [$inicioContrato, $rangoFin])
+            ->selectRaw("
+            SUM(CASE WHEN id_tipocombustible = 1 THEN cantidad ELSE 0 END) AS gal_diesel,
+            SUM(CASE WHEN id_tipocombustible = 2 THEN cantidad ELSE 0 END) AS gal_regular,
+            SUM(CASE WHEN id_tipocombustible = 3 THEN cantidad ELSE 0 END) AS gal_especial
+        ")
+            ->first();
+
+        // Totales de contrato (IDs fijos 11=Diésel, 12=Regular, 13=Especial)
         $detalles = ContratosDetalle::where('id_contratos', 2)
             ->whereIn('id', [11, 12, 13])
             ->pluck('cantidad', 'id');
@@ -1734,28 +1735,34 @@ HTML;
         $contratoEspecial = (float)($detalles[13] ?? 0);
 
         /* ==== CÁLCULOS ==== */
-        $galDiesel   = (float)($totPeriodo->gal_diesel ?? 0);
-        $galRegular  = (float)($totPeriodo->gal_regular ?? 0);
-        $galEspecial = (float)($totPeriodo->gal_especial ?? 0);
 
-        // Dinero (ya es DECIMAL string)
+        // Consumos del PERÍODO (para la tabla de esa semana/rango)
+        $galDieselPeriodo   = (float)($totPeriodo->gal_diesel ?? 0);
+        $galRegularPeriodo  = (float)($totPeriodo->gal_regular ?? 0);
+        $galEspecialPeriodo = (float)($totPeriodo->gal_especial ?? 0);
+
         $dinDiesel   = (string)($totPeriodo->dinero_diesel ?? '0.00');
         $dinRegular  = (string)($totPeriodo->dinero_regular ?? '0.00');
         $dinEspecial = (string)($totPeriodo->dinero_especial ?? '0.00');
         $montoTotal  = (string)($totPeriodo->dinero_total  ?? '0.00');
 
-        // Restantes = contrato - consumo DEL PERÍODO (todos los distritos)
-        $restDiesel   = max(0, $contratoDiesel   - $galDiesel);
-        $restRegular  = max(0, $contratoRegular  - $galRegular);
-        $restEspecial = max(0, $contratoEspecial - $galEspecial);
+        // Consumos ACUMULADOS (desde inicio contrato hasta fin del rango)
+        $galDieselAcum   = (float)($totAcumulado->gal_diesel ?? 0);
+        $galRegularAcum  = (float)($totAcumulado->gal_regular ?? 0);
+        $galEspecialAcum = (float)($totAcumulado->gal_especial ?? 0);
+
+        // Restantes = contrato - consumo ACUMULADO
+        $restDiesel   = max(0, $contratoDiesel   - $galDieselAcum);
+        $restRegular  = max(0, $contratoRegular  - $galRegularAcum);
+        $restEspecial = max(0, $contratoEspecial - $galEspecialAcum);
 
         /* ==== FORMATEOS ==== */
         $fmt3 = fn($n) => number_format((float)$n, 3, '.', ','); // galones
         $fmt2 = fn($n) => number_format((float)$n, 2, '.', ','); // dinero
 
-        $galDieselF   = $fmt3($galDiesel);
-        $galRegularF  = $fmt3($galRegular);
-        $galEspecialF = $fmt3($galEspecial);
+        $galDieselF   = $fmt3($galDieselPeriodo);
+        $galRegularF  = $fmt3($galRegularPeriodo);
+        $galEspecialF = $fmt3($galEspecialPeriodo);
 
         $dinDieselF   = $fmt2($dinDiesel);
         $dinRegularF  = $fmt2($dinRegular);
@@ -1848,6 +1855,7 @@ HTML;
         $mpdf->WriteHTML($tabla, 2);
         $mpdf->Output();
     }
+
 
 
 
