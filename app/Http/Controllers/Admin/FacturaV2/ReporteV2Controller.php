@@ -1860,6 +1860,265 @@ HTML;
 
 
 
+    public function vistaReporteRendimiento()
+    {
+        $arrayEquipos = Equipo::orderBy('nombre', 'ASC')->get();
+
+        return view('backend.admin.configuracion.reporte.rendimiento.vistareporterendimiento', compact('arrayEquipos'));
+    }
+
+
+    public function generarPdfReporteRendimiento($desde, $hasta, $equipos)
+    {
+        // $equipos viene como "1,3,5"
+        $idsEquipos = array_filter(explode(',', $equipos)); // array: [1, 3, 5]
+
+        $start = Carbon::parse($desde)->startOfDay();
+        $end   = Carbon::parse($hasta)->endOfDay();
+
+        $desdeFormat = Carbon::parse($desde)->format('d/m/Y');
+        $hastaFormat = Carbon::parse($hasta)->format('d/m/Y');
+
+        // ================== CONSULTA BASE ==================
+        $rows = DB::table('facturacion as f')
+            ->join('equipos as e', 'e.id', '=', 'f.id_equipo')
+            ->leftJoin('tipocombustible as tc', 'tc.id', '=', 'f.id_tipocombustible')
+            ->select(
+                'f.id',
+                'f.id_equipo',
+                'e.nombre as equipo',
+                'f.id_tipocombustible',
+                'tc.nombre as combustible',
+                'f.fecha',
+                'f.cantidad',   // galones
+                'f.unitario',   // precio por galón
+                'f.km'
+            )
+            ->whereBetween('f.fecha', [$start, $end])
+            ->whereIn('f.id_equipo', $idsEquipos)
+            ->orderBy('f.id_equipo')
+            ->orderBy('f.fecha')
+            ->orderBy('f.id')
+            ->get();
+
+        // ================== AGRUPAR POR EQUIPO ==================
+        $equiposData = [];
+
+        foreach ($rows as $r) {
+            $idEquipo = $r->id_equipo;
+
+            // km puede venir como string, lo normalizamos
+            $km = $r->km !== null
+                ? floatval(str_replace([',', ' '], '', $r->km))
+                : null;
+
+            $galones = (float) $r->cantidad;
+            $costo   = $galones * (float) $r->unitario;
+
+            if (!isset($equiposData[$idEquipo])) {
+                $equiposData[$idEquipo] = [
+                    'equipo'         => $r->equipo,
+                    'total_galones'  => 0,
+                    'total_costo'    => 0,
+                    'km_inicio'      => $km,
+                    'km_fin'         => $km,
+                    'kms_recorridos' => 0,
+                    'rendimiento'    => 0,  // km/galón
+                    'costo_x_km'     => 0,  // $/km
+                    'combustibles'   => [], // detalle por tipo
+                ];
+            }
+
+            // Totales generales
+            $equiposData[$idEquipo]['total_galones'] += $galones;
+            $equiposData[$idEquipo]['total_costo']   += $costo;
+
+            // Km inicio / fin
+            if ($km !== null) {
+                if ($equiposData[$idEquipo]['km_inicio'] === null) {
+                    $equiposData[$idEquipo]['km_inicio'] = $km;
+                }
+                // siempre actualizamos el último
+                $equiposData[$idEquipo]['km_fin'] = $km;
+            }
+
+            // Detalle por tipo de combustible
+            if ($r->id_tipocombustible) {
+                $idComb = $r->id_tipocombustible;
+
+                if (!isset($equiposData[$idEquipo]['combustibles'][$idComb])) {
+                    $equiposData[$idEquipo]['combustibles'][$idComb] = [
+                        'nombre'  => $r->combustible, // DIESEL / REGULAR / ESPECIAL
+                        'galones' => 0,
+                        'costo'   => 0,
+                    ];
+                }
+
+                $equiposData[$idEquipo]['combustibles'][$idComb]['galones'] += $galones;
+                $equiposData[$idEquipo]['combustibles'][$idComb]['costo']   += $costo;
+            }
+        }
+
+        // Cálculos finales (km recorridos, rendimiento, costo/km)
+        foreach ($equiposData as &$eq) {
+            if ($eq['km_inicio'] !== null && $eq['km_fin'] !== null) {
+                $eq['kms_recorridos'] = max(0, $eq['km_fin'] - $eq['km_inicio']);
+            }
+
+            if ($eq['total_galones'] > 0 && $eq['kms_recorridos'] > 0) {
+                $eq['rendimiento'] = round($eq['kms_recorridos'] / $eq['total_galones'], 2);
+                $eq['costo_x_km']  = round($eq['total_costo'] / $eq['kms_recorridos'], 4);
+            }
+        }
+        unset($eq);
+
+        // ================== mPDF ==================
+        //$mpdf = new \Mpdf\Mpdf(['format' => 'LETTER-L']);
+        $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
+
+        $mpdf->SetTitle('Reporte de Rendimiento de Combustible');
+        $mpdf->showImageErrors = false;
+
+        $logoalcaldia = 'images/gobiernologo.jpg';
+        $logosantaana = 'images/logo.png'; // si lo necesitas en el header
+
+        $encabezado = "
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif;'>
+            <tr>
+                <td style='width:25%; border:0.8px solid #000; padding:6px 8px;'>
+                    <table width='100%'>
+                        <tr>
+                            <td style='width:30%; text-align:left;'>
+                                <img src='{$logoalcaldia}' style='height:38px'>
+                            </td>
+                            <td style='width:70%; text-align:left; color:#104e8c; font-size:13px; font-weight:bold; line-height:1.3;'>
+                                SANTA ANA NORTE<br>EL SALVADOR
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style='width:50%; border-top:0.8px solid #000; border-bottom:0.8px solid #000; padding:6px 8px; text-align:center; font-size:15px; font-weight:bold;'>
+                    CONTROL DE RENDIMIENTO<br>
+                </td>
+                <td style='width:25%; border:0.8px solid #000; padding:0; vertical-align:top;'>
+                    <table width='100%' style='font-size:10px;'>
+                        <tr>
+                            <td width='40%' style='border-right:0.8px solid #000; border-bottom:0.8px solid #000; padding:4px 6px;'><strong>Código:</strong></td>
+                            <td width='60%' style='border-bottom:0.8px solid #000; padding:4px 6px; text-align:center;'></td>
+                        </tr>
+                        <tr>
+                            <td style='border-right:0.8px solid #000; border-bottom:0.8px solid #000; padding:4px 6px;'><strong>Versión:</strong></td>
+                            <td style='border-bottom:0.8px solid #000; padding:4px 6px; text-align:center;'>000</td>
+                        </tr>
+                        <tr>
+                            <td style='border-right:0.8px solid #000; padding:4px 6px;'><strong>Fecha de vigencia:</strong></td>
+                            <td style='padding:4px 6px; text-align:center;'></td>
+                        </tr>
+                    </table>
+                </td>
+            </tr>
+        </table>
+        <br>
+    ";
+
+        $encabezado .= "<span style='font-weight:bold;'>Del {$desdeFormat} al {$hastaFormat}</span><br><br>";
+
+        if (file_exists(public_path('css/cssbodega.css'))) {
+            $stylesheet = file_get_contents(public_path('css/cssbodega.css'));
+            $mpdf->WriteHTML($stylesheet, \Mpdf\HTMLParserMode::HEADER_CSS);
+        }
+
+        // ================== CUERPO DEL REPORTE ==================
+        $html = $encabezado;
+
+        if (empty($equiposData)) {
+            $html .= "<p style='font-family: Arial, sans-serif; font-size:11px;'>
+                    No existen registros de combustible para el período seleccionado.
+                  </p>";
+        } else {
+            foreach ($equiposData as $eq) {
+                $html .= "
+                <div style='font-family: Arial, sans-serif; font-size:11px; margin-bottom:8px;'>
+                    <strong>Equipo:</strong> {$eq['equipo']}
+                </div>
+
+                <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:10px; margin-bottom:6px;'>
+                    <tr>
+                        <th style='border:0.7px solid #000; padding:4px; background:#f0f0f0;'>Km inicio</th>
+                        <th style='border:0.7px solid #000; padding:4px; background:#f0f0f0;'>Km fin</th>
+                        <th style='border:0.7px solid #000; padding:4px; background:#f0f0f0;'>Km recorridos</th>
+                        <th style='border:0.7px solid #000; padding:4px; background:#f0f0f0;'>Galones consumidos</th>
+                        <th style='border:0.7px solid #000; padding:4px; background:#f0f0f0;'>Rendimiento (km/galón)</th>
+                        <th style='border:0.7px solid #000; padding:4px; background:#f0f0f0;'>Costo total</th>
+                        <th style='border:0.7px solid #000; padding:4px; background:#f0f0f0;'>Costo por km</th>
+                    </tr>
+                    <tr>
+                        <td style='border:0.7px solid #000; padding:4px; text-align:right;'>".number_format($eq['km_inicio'] ?? 0, 2)."</td>
+                        <td style='border:0.7px solid #000; padding:4px; text-align:right;'>".number_format($eq['km_fin'] ?? 0, 2)."</td>
+                        <td style='border:0.7px solid #000; padding:4px; text-align:right;'>".number_format($eq['kms_recorridos'], 2)."</td>
+                        <td style='border:0.7px solid #000; padding:4px; text-align:right;'>".number_format($eq['total_galones'], 3)."</td>
+                        <td style='border:0.7px solid #000; padding:4px; text-align:right;'>".number_format($eq['rendimiento'], 2)."</td>
+                        <td style='border:0.7px solid #000; padding:4px; text-align:right;'>$".number_format($eq['total_costo'], 2)."</td>
+                        <td style='border:0.7px solid #000; padding:4px; text-align:right;'>$".number_format($eq['costo_x_km'], 4)."</td>
+                    </tr>
+                </table>
+            ";
+
+                // Detalle por tipo de combustible (DIESEL / REGULAR / ESPECIAL)
+                if (!empty($eq['combustibles'])) {
+                    $html .= "
+                    <table width='60%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:9px; margin-bottom:10px;'>
+                        <tr>
+                            <th colspan='3' style='border:0.7px solid #000; padding:3px; background:#e8e8e8; text-align:left;'>
+                                Detalle por tipo de combustible
+                            </th>
+                        </tr>
+                        <tr>
+                            <th style='border:0.7px solid #000; padding:3px; background:#f5f5f5;'>Combustible</th>
+                            <th style='border:0.7px solid #000; padding:3px; background:#f5f5f5;'>Galones</th>
+                            <th style='border:0.7px solid #000; padding:3px; background:#f5f5f5;'>Costo</th>
+                        </tr>
+                ";
+
+                    foreach ($eq['combustibles'] as $c) {
+                        $html .= "
+                        <tr>
+                            <td style='border:0.7px solid #000; padding:3px;'>{$c['nombre']}</td>
+                            <td style='border:0.7px solid #000; padding:3px; text-align:right;'>".number_format($c['galones'], 3)."</td>
+                            <td style='border:0.7px solid #000; padding:3px; text-align:right;'>$".number_format($c['costo'], 2)."</td>
+                        </tr>
+                    ";
+                    }
+
+                    $html .= "</table>";
+                }
+
+                $html .= "<br>";
+            }
+        }
+
+        $mpdf->setFooter("Página {PAGENO} de {nb}");
+        $mpdf->WriteHTML($html, \Mpdf\HTMLParserMode::HTML_BODY);
+        $mpdf->Output(); // stream
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

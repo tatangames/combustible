@@ -105,6 +105,16 @@ Route::get('/admin/reportev2/contrato/infotodos/{desde}/{hasta}/{idcontrato}', [
 Route::get('/admin/reportev3/contrato/{desde}/{hasta}/{idcontrato}/{iddistrito}', [ReporteV2Controller::class,'reporteContratoDistritoSantaAnaNorte']);
 Route::get('/admin/reportev3/contrato/actageneral/{desde}/{hasta}', [ReporteV2Controller::class,'reporteContratoDistritoTodosSantaAnaNorte']);
 
+// REPORTE DE RENDIMIENTO
+Route::get('/admin/reporte/rendimiento/index', [ReporteV2Controller::class,'vistaReporteRendimiento'])->name('admin.reporte.rendimiento');
+Route::get('/admin/reporte/pdf/rendimiento/{desde}/{hasta}/{equipo}', [ReporteV2Controller::class,'generarPdfReporteRendimiento']);
+
+
+
+
+
+
+
 
 
 

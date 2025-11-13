@@ -167,6 +167,13 @@
                                     </a>
                                 </li>
 
+                                <li class="nav-item">
+                                    <a href="{{ route('admin.reporte.rendimiento') }}" target="frameprincipal" class="nav-link">
+                                        <i class="far fa-circle nav-icon"></i>
+                                        <p>Rendimiento</p>
+                                    </a>
+                                </li>
+
                             </ul>
                         </li>
 
