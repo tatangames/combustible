@@ -1627,6 +1627,10 @@ HTML;
         /* ==== Contrato y Fechas ==== */
         $infoContrato   = Contratos::findOrFail(2); // contrato general
 
+
+        $fechaActual = Carbon::now('America/El_Salvador')->format('d-m-Y h:i A');
+
+
         setlocale(LC_TIME, 'es_ES.UTF-8');
         Carbon::setLocale('es');
 
@@ -1668,9 +1672,14 @@ HTML;
 <hr style="border:none; border-top:2px solid #003366; margin:0;">
 <div style="text-align:center; margin-top:20px;">
   <p style="font-size:16px; margin:0; color:#000;">ACTA DE ENTREGA PARCIAL</p>
-</div><br>
+</div>
+
+<br>
 
 <div style="text-align:left;">
+ <p style="font-size:15px; margin:0; color:#000;">
+    <strong>FECHA:</strong> $fechaActual
+  </p>
   <p style="font-size:15px; margin:0; color:#000;">
     <strong>MÉTODO DE CONTRATACIÓN:</strong> LICITACIÓN COMPETITIVA DE BIENES
   </p>
