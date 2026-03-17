@@ -101,16 +101,14 @@ Route::get('/admin/reportev2/contrato/index', [ReporteV2Controller::class,'vista
 Route::get('/admin/reportev2/contrato/info/{desde}/{hasta}/{idcontrato}/{iddistrito}', [ReporteV2Controller::class,'reporteContratoDistrito']);
 Route::get('/admin/reportev2/contrato/infotodos/{desde}/{hasta}/{idcontrato}', [ReporteV2Controller::class,'reporteContratoDistritoTodos']);
 
-// REPORTE DE CONTRATO PERO ALCALDIA SANTA ANA NORTE
-Route::get('/admin/reportev3/contrato/{desde}/{hasta}/{idcontrato}/{iddistrito}', [ReporteV2Controller::class,'reporteContratoDistritoSantaAnaNorte']);
-Route::get('/admin/reportev3/contrato/actageneral/{desde}/{hasta}', [ReporteV2Controller::class,'reporteContratoDistritoTodosSantaAnaNorte']);
-
 // REPORTE DE RENDIMIENTO
 Route::get('/admin/reporte/rendimiento/index', [ReporteV2Controller::class,'vistaReporteRendimiento'])->name('admin.reporte.rendimiento');
 Route::get('/admin/reporte/pdf/rendimiento/{desde}/{hasta}/{equipo}', [ReporteV2Controller::class,'generarPdfReporteRendimiento']);
 
 
-
+// REPORTE DE CONTRATO PERO ALCALDIA SANTA ANA NORTE - modificado 17/03/26
+Route::get('/admin/reportev3/contrato/{desde}/{hasta}/{idcontrato}/{iddistrito}', [ReporteV2Controller::class,'reporteContratoDistritoSantaAnaNorte']);
+Route::get('/admin/reportev3/contrato/actageneral/{desde}/{hasta}', [ReporteV2Controller::class,'reporteContratoDistritoTodosSantaAnaNorte']);
 
 
 
