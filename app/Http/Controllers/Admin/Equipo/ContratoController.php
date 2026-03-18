@@ -41,7 +41,7 @@ class ContratoController extends Controller
             'fechaHasta' => 'required',
         );
 
-        // proveedor, procesoReferencia, proceso
+        // proveedor, procesoReferencia, proceso, ordenCompra
 
         $validar = Validator::make($request->all(), $regla);
 
@@ -55,6 +55,7 @@ class ContratoController extends Controller
             $registro->nombre_proceso = $request->proceso;
             $registro->fecha_desde = $request->fechaDesde;
             $registro->fecha_hasta = $request->fechaHasta;
+            $registro->orden_compra = $request->ordenCompra;
             $registro->save();
 
             DB::commit();
@@ -93,7 +94,7 @@ class ContratoController extends Controller
             'fechaHasta' => 'required',
         );
 
-        // proveedor, procesoReferencia, proceso
+        // proveedor, procesoReferencia, proceso, ordenCompra
 
         $validar = Validator::make($request->all(), $regla);
 
@@ -107,6 +108,7 @@ class ContratoController extends Controller
                 'nombre_proceso' => $request->proceso,
                 'fecha_desde' => $request->fechaDesde,
                 'fecha_hasta' => $request->fechaHasta,
+                'orden_compra' => $request->ordenCompra,
             ]);
 
             return ['success' => 1];

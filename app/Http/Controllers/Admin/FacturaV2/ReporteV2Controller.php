@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ReporteV2Controller extends Controller
 {
@@ -1374,90 +1375,192 @@ class ReporteV2Controller extends Controller
 
     public function reporteContratoDistritoSantaAnaNorte($desde, $hasta, $idcontrato, $iddistrito)
     {
-        /** ==== CONFIG MPDF ==== */
-        $infoExtra = Extras::find(1); // una sola vez
+        /* ==== MPDF ==== */
+        $infoExtra = Extras::find(1);
         $mpdfOpts  = ['format' => 'LETTER'];
         if ($infoExtra && (int)$infoExtra->reporte === 1) {
             $mpdfOpts['tempDir'] = sys_get_temp_dir();
         }
         $mpdf = new \Mpdf\Mpdf($mpdfOpts);
         $mpdf->showImageErrors = false;
-        $mpdf->SetTitle('Contrato');
+        $mpdf->SetTitle('Acta Parcial Distrito');
 
-        /** ==== DATOS BASE ==== */
+        /* ==== DATOS BASE ==== */
         $infoContrato = Contratos::findOrFail($idcontrato);
         $infoDistrito = Distritos::findOrFail($iddistrito);
 
         setlocale(LC_TIME, 'es_ES.UTF-8');
         Carbon::setLocale('es');
 
-        $fechaInicioUsr = Carbon::parse($desde)->startOfDay();
-        $fechaFinUsr    = Carbon::parse($hasta)->endOfDay();
-
+        $fechaDesde     = Carbon::parse($desde)->startOfDay();
+        $fechaHasta     = Carbon::parse($hasta)->endOfDay();
         $inicioContrato = Carbon::parse($infoContrato->fecha_desde)->startOfDay();
         $finContrato    = Carbon::parse($infoContrato->fecha_hasta)->endOfDay();
+
+        $rangoIni = $inicioContrato->greaterThan($fechaDesde) ? $inicioContrato : $fechaDesde;
+        $rangoFin = $finContrato->lessThan($fechaHasta) ? $finContrato : $fechaHasta;
+
+        $textoFecha = strtoupper($rangoIni->translatedFormat('j F')) . ' AL ' .
+            strtoupper($rangoFin->translatedFormat('j \\D\\E F Y'));
+
+        $vigenciaDesde   = date("d-m-Y", strtotime($infoContrato->fecha_desde));
+        $vigenciaHasta   = date("d-m-Y", strtotime($infoContrato->fecha_hasta));
+        $numeroRecepcion = 'R-' . now()->format('dmy');
+        $logoalcaldia    = 'images/gobiernologo.jpg';
+
+
+
+
+
+        $fechaInicioUsr = Carbon::parse($desde)->startOfDay();
+        $fechaFinUsr    = Carbon::parse($hasta)->endOfDay();
 
         /** Intersección de rangos (contrato ∩ usuario) */
         $fechaInicio = $inicioContrato->greaterThan($fechaInicioUsr) ? $inicioContrato : $fechaInicioUsr;
         $fechaFin    = $finContrato->lessThan($fechaFinUsr) ? $finContrato : $fechaFinUsr;
 
-        /** Texto de fecha “DEL X AL Y” */
-        $textoFecha = strtoupper($fechaInicio->translatedFormat('j F')) . ' AL ' .
-            strtoupper($fechaFin->translatedFormat('j \\D\\E F Y'));
 
-        /** ==== RUTAS IMÁGENES (locales) ==== */
-        $logoGob  = 'file://' . public_path('images/gobiernologo.jpg');
-        $logoSAN  = 'file://' . public_path('images/logo.png');
 
-        /** ==== ENCABEZADO HTML ==== */
-        $tabla = <<<HTML
-<table style="width:100%; border-collapse:collapse;">
-  <tr>
-    <td style="width:15%;text-align:left;">
-      <img src="$logoSAN" alt="Santa Ana Norte" style="max-width:100px;height:auto;">
-    </td>
-    <td style="width:60%;text-align:center;">
-      <h1 style="font-size:16px; margin:0; color:#003366; text-transform:uppercase;">
-        ALCALDÍA MUNICIPAL DE SANTA ANA NORTE
-      </h1>
-    </td>
-    <td style="width:10%;text-align:right;">
-      <img src="$logoGob" alt="Gobierno de El Salvador" style="max-width:60px;height:auto;">
-    </td>
-  </tr>
-</table>
-<hr style="border:none; border-top:2px solid #003366; margin:0;">
-<div style="text-align:center; margin-top:20px;">
-  <p style="font-size:16px; margin:0; color:#000;">ACTA DE ENTREGA PARCIAL</p>
-</div><br>
 
-<div style="text-align:left;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    <strong>MÉTODO DE CONTRATACIÓN:</strong> LICITACIÓN COMPETITIVA DE BIENES
-  </p>
-  <p style="font-size:15px; margin:0; color:#000;">
-    <strong>PROCESO REF. N°:</strong> {$infoContrato->proceso_ref}
-  </p>
-</div>
-<div style="text-align:left; margin-top:10px;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    <strong>NOMBRE DEL PROCESO:</strong> COMPRA DE COMBUSTIBLE PARA LOS DIFERENTES EQUIPOS DE LA MUNICIPALIDAD DE SANTA ANA NORTE.
-  </p>
-</div>
 
-<div style="text-align:left; margin-top:25px;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    REUNIDOS EN LAS INSTALACIONES DEL <strong>DISTRITO DE METAPÁN</strong> DE LA ALCALDÍA MUNICIPAL DE SANTA ANA NORTE
-    DURANTE LA SEMANA DEL <strong>$textoFecha</strong> CON EL PROPÓSITO DE HACER ENTREGA FORMAL DE COMBUSTIBLE.
-  </p>
-</div>
 
-<div style="text-align:left; margin-top:25px;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    DE FORMA PARCIAL SE RECIBE LO SIGUIENTE: DISTRITO <strong>{$infoDistrito->nombre}</strong>
-  </p>
-</div>
-HTML;
+
+
+        /* ==== ENCABEZADO ==== */
+        $tabla = "
+    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif;'>
+        <tr>
+            <td style='width:25%; border:0.8px solid #000; padding:6px 8px;'>
+                <table width='100%'>
+                    <tr>
+                        <td style='width:30%; text-align:left;'>
+                            <img src='{$logoalcaldia}' style='height:38px'>
+                        </td>
+                        <td style='width:70%; text-align:left; color:#104e8c; font-size:13px; font-weight:bold; line-height:1.3;'>
+                            SANTA ANA NORTE<br>EL SALVADOR
+                        </td>
+                    </tr>
+                </table>
+            </td>
+            <td style='width:50%; border-top:0.8px solid #000; border-bottom:0.8px solid #000; padding:6px 8px; text-align:center; font-size:15px; font-weight:bold;'>
+                ACTA DE RECEPCIÓN PARCIAL<br>
+                <span style='font-size:13px; font-weight:normal;'>(bienes, servicios o consultorías)</span>
+            </td>
+            <td style='width:25%; border:0.8px solid #000; padding:0; vertical-align:top;'>
+                <table width='100%' style='font-size:10px;'>
+                    <tr>
+                        <td width='40%' style='border-right:0.8px solid #000; border-bottom:0.8px solid #000; padding:4px 6px;'><strong>Código:</strong></td>
+                        <td width='60%' style='border-bottom:0.8px solid #000; padding:4px 6px; text-align:center;'>UNCP-002-ACTA</td>
+                    </tr>
+                    <tr>
+                        <td style='border-right:0.8px solid #000; border-bottom:0.8px solid #000; padding:4px 6px;'><strong>Versión:</strong></td>
+                        <td style='border-bottom:0.8px solid #000; padding:4px 6px; text-align:center;'>000</td>
+                    </tr>
+                    <tr>
+                        <td style='border-right:0.8px solid #000; padding:4px 6px;'><strong>Fecha de vigencia:</strong></td>
+                        <td style='padding:4px 6px; text-align:center;'>19/02/2026</td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+    <br>";
+
+        /* ==== TÍTULO ==== */
+        $tabla .= "
+    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif;'>
+        <tr>
+            <td style='padding:6px 8px; text-align:center; font-size:15px; font-weight:bold;'>
+                ACTA DE RECEPCIÓN PARCIAL<br>
+                <span style='font-size:13px; font-weight:normal;'>(bienes, servicios o consultorías)</span>
+            </td>
+        </tr>
+    </table>
+    <br>";
+
+        /* ==== SECCIÓN 1 ==== */
+        $tabla .= "
+    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:14px;'>
+        <tr>
+            <td style='padding:8px 4px;'>
+                <strong>1. &nbsp;<u>INFORMACIÓN GENERAL DE LA CONTRATACIÓN:</u></strong>
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px;'>
+                <strong>Lugar, fecha y hora:</strong> ALCALDÍA MUNICIPAL DE SANTA ANA NORTE (DISTRITO {$infoDistrito->nombre}) $textoFecha
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px;'>
+                <strong>Referencia y nombre del Proceso de Contratación:</strong> {$infoContrato->proceso_ref}
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px;'>
+                <strong>Número de contrato u orden de compra:</strong> {$infoContrato->orden_compra}
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px;'>
+                <strong>Método de Contratación:</strong> LICITACIÓN COMPETITIVA DE BIENES
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px;'>
+                <strong>Lugar de ejecución o de entrega:</strong> DISTRITO {$infoDistrito->nombre} — ALCALDÍA MUNICIPAL DE SANTA ANA NORTE
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px;'>
+                <strong>Nombre del contratista o consultor:</strong> {$infoContrato->proveedor}
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px;'>
+                <strong>Vigencia de la contratación:</strong> $vigenciaDesde / $vigenciaHasta
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px;'>
+                <strong>Fecha de orden de inicio:</strong> <u><i>N/A</i></u>
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px;'>
+                <strong>Número de recepción:</strong> $numeroRecepcion
+            </td>
+        </tr>
+    </table>
+    <br>";
+
+        /* ==== SECCIÓN 2 ==== */
+        $tabla .= "
+    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
+        <tr>
+            <td style='padding:8px 4px;'>
+                <strong>2. &nbsp;<u>DESCRIPCIÓN DE LA RECEPCIÓN</u></strong>
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px; text-align:justify; line-height:1.6;'>
+                El Administrador de este Contrato <i>(y además cualquier otro servidor público)</i>, habiendo realizado las verificaciones respectivas establecidas en el Documento de Solicitud, el contrato u orden de compra respectiva y demás documentos contractuales, hacen constar que el contratista hace la entrega <i>(Número de entrega del bien, servicio o consultoría)</i> requerida según los documentos contractuales, por lo que realizan la recepción parcial de conformidad a lo regulado en los <u>Arts .</u> 162 literal d), 82 literal e), todos de la LCP y art. 63 del RLCP, la cual será anexada al (primer, segundo o según corresponda) informe de avance de la ejecución contractual.
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:6px 4px; text-align:justify; line-height:1.6;'>
+                Se hace constar que <i>(los bienes, servicios o consultoría)</i> cumplen con las condiciones y especificaciones técnicas descritas en el Documento de Solicitud y demás instrumentos de la contratación, los cuales se detallan a continuación <i>(Describir los bienes, servicios o consultorías recibidos según corresponda/ por lo que se reciben a conformidad.)</i>
+            </td>
+        </tr>
+    </table>
+    <br>";
+
+
+
+
+
+
+
 
         /** ==== QUERIES OPTIMIZADAS ==== */
         /* Totales del PERIODO (intersección) */
@@ -1522,83 +1625,131 @@ HTML;
         $restRegularF  = $f($restRegular,  3);
         $restEspecialF = $f($restEspecial, 3);
 
-        /** ==== TABLA DE TOTALES ==== */
-        $tabla .= <<<HTML
-<table width="100%" style="margin-top:20px; border-collapse:collapse; border:1px solid #000;">
-  <tbody>
-    <tr>
-      <td style="font-weight:normal; font-size:12px;">GALONES DIESEL</td>
-      <td style="font-weight:normal; font-size:12px;">MONTO DINERO</td>
-      <td style="font-weight:normal; font-size:12px;">GALONES REGULAR</td>
-      <td style="font-weight:normal; font-size:12px;">MONTO DINERO</td>
-      <td style="font-weight:normal; font-size:12px;">GALONES ESPECIAL</td>
-      <td style="font-weight:normal; font-size:12px;">MONTO DINERO</td>
-      <td style="font-weight:normal; font-size:12px;">MONTO TOTAL DINERO</td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galDieselF</td>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinDieselF}</td>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galRegularF</td>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinRegularF}</td>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">$galEspecialF</td>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinEspecialF}</td>
-      <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$montoTotalF}</td>
-    </tr>
-  </tbody>
-</table>
 
-<div style="text-align:left; margin-top:10px;">
-  <p style="font-size:15px; margin:0; color:#000;"><strong>RESTANTE GALONES</strong></p>
-  <p style="font-size:15px; margin:0; color:#000;"><strong>DIESEL:</strong> $restDieselF</p>
-  <p style="font-size:15px; margin:0; color:#000;"><strong>REGULAR:</strong> $restRegularF</p>
-  <p style="font-size:15px; margin:0; color:#000;"><strong>ESPECIAL:</strong> $restEspecialF</p>
-</div>
-HTML;
 
-        /** ==== PÁRRAFOS FINALES ==== */
-        $tabla .= <<<HTML
-<div style="text-align:left; margin-top:25px;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    CON BASE A LO SOLICITADO; PRESENTE EL SEÑOR: <strong>{$infoContrato->proveedor}</strong> POR PARTE DEL PROVEEDOR
-    Y <strong>{$infoExtra->nombre3}</strong> EN CALIDAD DE ADMINISTRADOR DE CONTRATOS.
-  </p>
-</div>
 
-<div style="text-align:left; margin-top:25px;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    CABE MENCIONAR QUE DICHOS BIENES CUMPLEN CON LAS ESPECIFICACIONES PREVIAMENTE DEFINIDAS EN EL CONTRATO.
-  </p>
-</div>
 
-<div style="text-align:left; margin-top:10px;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    Y NO HABIENDO MÁS QUE HACER CONSTAR, FIrmAMOS Y RATIFICAMOS LA PRESENTE ACTA.
-  </p>
-</div>
 
-<table style="width:100%; margin-top:20px; font-family:'Times New Roman', Times, serif; font-size:14px; color:#000;">
-  <tr>
-    <td style="width:50%; text-align:left; padding-bottom:40px;">
-      <p style="margin:0; font-weight:normal; font-size:16px; margin-left:15px;">ENTREGA:</p>
-    </td>
-    <td style="width:50%; text-align:right; padding-bottom:40px;">
-      <p style="margin:0; font-weight:normal; font-size:16px; margin-right:30px;">RECIBE:</p>
-    </td>
-  </tr>
-  <tr>
-    <td style="width:50%; text-align:center; padding:20px;">
-      <p style="margin:10px 0;">f.____________________________</p>
-      <p style="margin:10px 0;">PROVEEDOR</p>
-    </td>
-    <td style="width:50%; text-align:center; padding:20px;">
-      <p style="margin:10px 0;">f.____________________________</p>
-      <p style="margin:10px 0;">ADMINISTRADOR DE CONTRATO</p>
-    </td>
-  </tr>
-</table>
-HTML;
 
-        /** ==== RENDER ==== */
+
+
+
+
+
+
+
+        /* ==== TABLA DETALLE ==== */
+        $tabla .= "
+    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:12px;'>
+        <tr>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:5%;'>N°</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:12%;'>CANTIDAD</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:12%;'>UNIDAD DE MEDIDA</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:35%;'>DESCRIPCIÓN (BIENES, SERVICIOS O CONSULTORÍA)</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:18%;'>PRECIO UNITARIO</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:18%;'>MONTO TOTAL</td>
+        </tr>
+        <tr>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>1</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galDieselF}</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>DIESEL</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinDieselF}</td>
+        </tr>
+        <tr>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>2</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galRegularF}</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>REGULAR</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinRegularF}</td>
+        </tr>
+        <tr>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>3</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galEspecialF}</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>ESPECIAL</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinEspecialF}</td>
+        </tr>
+        <tr>
+            <td colspan='5' style='border:1px solid #000; padding:6px; text-align:right; font-weight:bold;'>MONTO TOTAL:</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold;'>\${$montoTotalF}</td>
+        </tr>
+    </table>
+    <br>";
+
+        /* ==== RESTANTE GALONES ==== */
+        $tabla .= "
+    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
+        <tr>
+            <td style='padding:6px 4px; font-weight:bold;'>RESTANTE GALONES</td>
+        </tr>
+        <tr>
+            <td style='padding:4px;'><strong>DIESEL:</strong> {$restDieselF}</td>
+        </tr>
+        <tr>
+            <td style='padding:4px;'><strong>REGULAR:</strong> {$restRegularF}</td>
+        </tr>
+        <tr>
+            <td style='padding:4px;'><strong>ESPECIAL:</strong> {$restEspecialF}</td>
+        </tr>
+    </table>
+    <br>";
+
+        /* ==== NOTA Y CIERRE ==== */
+        $tabla .= "
+    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
+        <tr>
+            <td style='padding:6px 4px;'>
+                *Nota: El precio unitario de cada producto no se establece debido a la variación del mismo.
+            </td>
+        </tr>
+        <tr>
+            <td style='padding:16px 4px 6px 4px; text-align:justify; line-height:1.6;'>
+                En cumplimiento al artículo 162 literal d) de la Ley de Compras Públicas (LCP) y 63 del RLCP, no habiendo más que hacer constar, firmamos y ratificamos la presente acta en <i>(cantidad de originales)</i> de igual valor y contenido.
+            </td>
+        </tr>
+    </table>
+    <br><br><br><br>";
+
+        /* ==== FIRMAS ==== */
+        $tabla .= "
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:15px;'>
+            <tr>
+                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
+                    F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
+                    Firma<br>
+                    $infoExtra->nombre3<br>
+                    Administrador de Contrato<br>
+                    Alcaldía de Santa Ana Norte
+                </td>
+                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
+                    F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
+                    Firma<br>
+                    $infoContrato->proveedor<br>
+                    Gasolinera Puma Metapán
+                </td>
+            </tr>
+        </table>
+        <br><br><br><br><br>";
+
+        $tabla .= "
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:15px;'>
+            <tr>
+                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
+                    F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
+                    Firma y Sello<br>
+                    $infoExtra->nombre1<br>
+                    Encargada de Combustible
+                </td>
+                <td style='width:50%; padding:8px 4px; vertical-align:top;'></td>
+            </tr>
+        </table>
+        <br>";
+
+        /* ==== RENDER ==== */
         $stylesheet = file_get_contents(public_path('css/csscontrato.css'));
         $mpdf->WriteHTML($stylesheet, 1);
         $mpdf->WriteHTML($tabla, 2);
@@ -1608,9 +1759,13 @@ HTML;
 
 
 
+
+
+
+
+
     public function reporteContratoDistritoTodosSantaAnaNorte($desde, $hasta)
     {
-
 
         /* ==== MPDF ==== */
         $infoExtra = Extras::find(1);
@@ -1717,6 +1872,9 @@ HTML;
         <br>";
 
 
+        $vigenciaDesde = date("d-m-Y", strtotime($infoContrato->fecha_desde));
+        $vigenciaHasta = date("d-m-Y", strtotime($infoContrato->fecha_hasta));
+        $numeroRecepcion = 'R-' . now()->format('dmy');
 
         $tabla .= "
         <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:14px;'>
@@ -1727,47 +1885,47 @@ HTML;
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Lugar, fecha y hora: <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>
+                    <strong>Lugar, fecha y hora:</strong> ALCALDÍA MUNICIPAL DE SANTA ANA NORTE $textoFecha
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Referencia y nombre del Proceso de Contratación: <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>
+                    <strong>Referencia y nombre del Proceso de Contratación:</strong> {$infoContrato->proceso_ref}
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Número de contrato u orden de compra: <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>
+                    <strong>Número de contrato u orden de compra:</strong> {$infoContrato->orden_compra}
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Método de Contratación: <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>
+                    <strong>Método de Contratación:</strong> LICITACIÓN COMPETITIVA DE BIENES
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Lugar de ejecución o de entrega: <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>
+                    <strong>Lugar de ejecución o de entrega:</strong> ALCALDIA MUNICIPAL DE SANTA ANA NORTE
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Nombre del contratista o consultor: <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>
+                    <strong>Nombre del contratista o consultor:</strong> $infoExtra->nombre3
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Vigencia de la contratación: <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>
+                    <strong>Vigencia de la contratación:</strong> $vigenciaDesde / $vigenciaHasta
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Fecha de orden de inicio: <u><i>N/A</i></u>
+                    <strong>Fecha de orden de inicio:</strong> <u><i>N/A</i></u>
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Número de recepción: <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u>
+                    <strong>Número de recepción:</strong> $numeroRecepcion
                 </td>
             </tr>
         </table>
@@ -1780,96 +1938,25 @@ HTML;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /* ==== HEADER HTML ==== */
-        $tabla .= <<<HTML
-            <table style="width:100%; border-collapse:collapse;">
-              <tr>
-                <td style="width:15%;text-align:left;">
-                  <img src="$logoSAN" alt="Santa Ana Norte" style="max-width:100px;height:auto;">
+        $tabla .= "
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
+            <tr>
+                <td style='padding:8px 4px;'>
+                    <strong>2. &nbsp;<u>DESCRIPCIÓN DE LA RECEPCIÓN</u></strong>
                 </td>
-                <td style="width:60%;text-align:center;">
-                  <h1 style="font-size:16px; margin:0; color:#003366; text-transform:uppercase;">
-                    ALCALDÍA MUNICIPAL DE SANTA ANA NORTE
-                  </h1>
+            </tr>
+            <tr>
+                <td style='padding:6px 4px; text-align:justify; line-height:1.6;'>
+                    El Administrador de este Contrato <i>(y además cualquier otro servidor público)</i>, habiendo realizado las verificaciones respectivas establecidas en el Documento de Solicitud, el contrato u orden de compra respectiva y demás documentos contractuales, hacen constar que el contratista hace la entrega <i>(Número de entrega del bien, servicio o consultoría)</i> requerida según los documentos contractuales, por lo que realizan la recepción parcial de conformidad a lo regulado en los <u>Arts .</u> 162 literal d), 82 literal e), todos de la LCP y art. 63 del RLCP, la cual será anexada al (primer, segundo o según corresponda) informe de avance de la ejecución contractual.
                 </td>
-                <td style="width:10%;text-align:right;">
-                  <img src="$logoGob" alt="Gobierno de El Salvador" style="max-width:60px;height:auto;">
+            </tr>
+            <tr>
+                <td style='padding:6px 4px; text-align:justify; line-height:1.6;'>
+                    Se hace constar que <i>(los bienes, servicios o consultoría)</i> cumplen con las condiciones y especificaciones técnicas descritas en el Documento de Solicitud y demás instrumentos de la contratación, los cuales se detallan a continuación <i>(Describir los bienes, servicios o consultorías recibidos según corresponda/ por lo que se reciben a conformidad.)</i>
                 </td>
-              </tr>
-            </table>
-            <hr style="border:none; border-top:2px solid #003366; margin:0;">
-            <div style="text-align:center; margin-top:20px;">
-              <p style="font-size:16px; margin:0; color:#000;">ACTA DE ENTREGA PARCIAL</p>
-            </div>
-
-            <br>
-
-            <div style="text-align:left;">
-             <p style="font-size:15px; margin:0; color:#000;">
-                <strong>FECHA:</strong> $fechaActual
-              </p>
-              <p style="font-size:15px; margin:0; color:#000;">
-                <strong>MÉTODO DE CONTRATACIÓN:</strong> LICITACIÓN COMPETITIVA DE BIENES
-              </p>
-              <p style="font-size:15px; margin:0; color:#000;">
-                <strong>PROCESO REF. N°:</strong> {$infoContrato->proceso_ref}
-              </p>
-            </div>
-            <div style="text-align:left; margin-top:10px;">
-              <p style="font-size:15px; margin:0; color:#000;">
-                <strong>NOMBRE DEL PROCESO:</strong> COMPRA DE COMBUSTIBLE PARA LOS DIFERENTES EQUIPOS DE LA MUNICIPALIDAD DE SANTA ANA NORTE.
-              </p>
-            </div>
-
-            <div style="text-align:left; margin-top:25px;">
-              <p style="font-size:15px; margin:0; color:#000;">
-                REUNIDOS EN LAS INSTALACIONES DE LA <strong>ALCALDÍA MUNICIPAL DE SANTA ANA NORTE</strong>
-                DURANTE LA SEMANA DEL <strong>$textoFecha</strong> CON EL PROPÓSITO DE HACER ENTREGA FORMAL DE COMBUSTIBLE.
-              </p>
-            </div>
-
-            <div style="text-align:left; margin-top:25px;">
-              <p style="font-size:15px; margin:0; color:#000;">
-                DE FORMA PARCIAL SE RECIBE LO SIGUIENTE: <strong>ALCALDÍA MUNICIPAL DE SANTA ANA NORTE</strong>
-              </p>
-            </div>
-        HTML;
+            </tr>
+        </table>
+        <br>";
 
 
 
@@ -1960,81 +2047,145 @@ HTML;
         $restRegularF  = $fmt3($restRegular);
         $restEspecialF = $fmt3($restEspecial);
 
-        /* ==== TABLA RESUMEN ==== */
-        $tabla .= <<<HTML
-        <table width="100%" style="margin-top:20px; border-collapse:collapse; border:1px solid #000;">
-          <tbody>
+        $tabla .= "
+    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:12px;'>
+        <tr>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:5%;'>N°</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:12%;'>CANTIDAD</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:12%;'>UNIDAD DE MEDIDA</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:35%;'>DESCRIPCIÓN (BIENES, SERVICIOS O CONSULTORÍA)</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:18%;'>PRECIO UNITARIO</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold; width:18%;'>MONTO TOTAL</td>
+        </tr>
+        <tr>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>1</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galDieselF}</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>DIESEL</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinDieselF}</td>
+        </tr>
+        <tr>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>2</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galRegularF}</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>REGULAR</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinRegularF}</td>
+        </tr>
+        <tr>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>3</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galEspecialF}</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>ESPECIAL</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinEspecialF}</td>
+        </tr>
+        <tr>
+            <td colspan='5' style='border:1px solid #000; padding:6px; text-align:right; font-weight:bold;'>MONTO TOTAL:</td>
+            <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold;'>\${$montoTotalF}</td>
+        </tr>
+    </table>
+    <br>";
+
+
+
+
+
+        $tabla .= "
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
             <tr>
-              <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">GALONES DIESEL</td>
-              <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">MONTO DINERO</td>
-              <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">GALONES REGULAR</td>
-              <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">MONTO DINERO</td>
-              <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">GALONES ESPECIAL</td>
-              <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">MONTO DINERO</td>
-              <td style="border:1px solid #000; padding:4px; font-weight:bold; font-size:12px;">MONTO TOTAL DINERO</td>
+                <td style='padding:6px 4px; font-weight:bold;'>
+                    RESTANTE GALONES
+                </td>
             </tr>
             <tr>
-              <td style="border:1px solid #000; padding:4px; font-size:12px;">{$galDieselF}</td>
-              <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinDieselF}</td>
-              <td style="border:1px solid #000; padding:4px; font-size:12px;">{$galRegularF}</td>
-              <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinRegularF}</td>
-              <td style="border:1px solid #000; padding:4px; font-size:12px;">{$galEspecialF}</td>
-              <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$dinEspecialF}</td>
-              <td style="border:1px solid #000; padding:4px; font-size:12px;">\${$montoTotalF}</td>
+                <td style='padding:4px;'>
+                    <strong>DIESEL:</strong> {$restDieselF}
+                </td>
             </tr>
-          </tbody>
+            <tr>
+                <td style='padding:4px;'>
+                    <strong>REGULAR:</strong> {$restRegularF}
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:4px;'>
+                    <strong>ESPECIAL:</strong> {$restEspecialF}
+                </td>
+            </tr>
         </table>
+        <br>";
 
-        <div style="text-align:left; margin-top:10px;">
-          <p style="font-size:15px; margin:0; color:#000;"><strong>RESTANTE GALONES</strong></p>
-          <p style="font-size:15px; margin:0; color:#000;"><strong>DIESEL:</strong> {$restDieselF}</p>
-          <p style="font-size:15px; margin:0; color:#000;"><strong>REGULAR:</strong> {$restRegularF}</p>
-          <p style="font-size:15px; margin:0; color:#000;"><strong>ESPECIAL:</strong> {$restEspecialF}</p>
-        </div>
-        HTML;
 
-        /* ==== PÁRRAFOS FINALES ==== */
-        $tabla .= <<<HTML
-<div style="text-align:left; margin-top:25px;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    CON BASE A LO SOLICITADO; PRESENTE EL SEÑOR: <strong>{$infoContrato->proveedor}</strong> POR PARTE DEL PROVEEDOR
-    Y <strong>{$infoExtra->nombre3}</strong> EN CALIDAD DE ADMINISTRADOR DE CONTRATOS.
-  </p>
-</div>
 
-<div style="text-align:left; margin-top:25px;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    CABE MENCIONAR QUE DICHOS BIENES CUMPLEN CON LAS ESPECIFICACIONES PREVIAMENTE DEFINIDAS EN EL CONTRATO.
-  </p>
-</div>
 
-<div style="text-align:left; margin-top:10px;">
-  <p style="font-size:15px; margin:0; color:#000;">
-    Y NO HABIENDO MÁS QUE HACER CONSTAR, FIRMAMOS Y RATIFICAMOS LA PRESENTE ACTA.
-  </p>
-</div>
 
-<table style="width:100%; margin-top:20px; font-family:'Times New Roman', Times, serif; font-size:14px; color:#000;">
-  <tr>
-    <td style="width:50%; text-align:left; padding-bottom:40px;">
-      <p style="margin:0; font-weight:normal; font-size:16px; margin-left:15px;">ENTREGA:</p>
-    </td>
-    <td style="width:50%; text-align:right; padding-bottom:40px;">
-      <p style="margin:0; font-weight:normal; font-size:16px; margin-right:30px;">RECIBE:</p>
-    </td>
-  </tr>
-  <tr>
-    <td style="width:50%; text-align:center; padding:20px;">
-      <p style="margin:10px 0;">f.____________________________</p>
-      <p style="margin:10px 0;">PROVEEDOR</p>
-    </td>
-    <td style="width:50%; text-align:center; padding:20px;">
-      <p style="margin:10px 0;">f.____________________________</p>
-      <p style="margin:10px 0;">ADMINISTRADOR DE CONTRATO</p>
-    </td>
-  </tr>
-</table>
-HTML;
+
+        $tabla .= "
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
+            <tr>
+                <td style='padding:6px 4px;'>
+                    *Nota: El precio unitario de cada producto no se establece debido a la variación del mismo.
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:16px 4px 6px 4px; text-align:justify; line-height:1.6;'>
+                    En cumplimiento al artículo 162 literal d) de la Ley de Compras Públicas (LCP) y 63 del RLCP, no habiendo más que hacer constar, firmamos y ratificamos la presente acta en <i>(cantidad de originales)</i> de igual valor y contenido.
+                </td>
+            </tr>
+        </table>
+        <br> <br> <br>  <br>";
+
+
+
+
+        $tabla .= "
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:15px;'>
+            <tr>
+                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
+                    F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
+                    Firma<br>
+                    {$infoExtra->nombre3}<br>
+                    Administrador de Contrato<br>
+                    Alcaldía de Santa Ana Norte
+                </td>
+                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
+                    F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
+                    Firma<br>
+                    {$infoContrato->proveedor}<br>
+                    Gasolinera Puma Metapán<br>
+                </td>
+            </tr>
+        </table>
+        <br><br><br><br><br>";
+
+                $tabla .= "
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:15px;'>
+            <tr>
+                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
+                    F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
+                    Firma y Sello<br>
+                    {$infoExtra->nombre1}<br>
+                    Encargada de Combustible
+                </td>
+                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
+                </td>
+            </tr>
+        </table>
+        <br>";
+
+
+
+
+
+
+
+
+
+
+
+
 
         /* ==== RENDER ==== */
         $stylesheet = file_get_contents(public_path('css/csscontrato.css'));

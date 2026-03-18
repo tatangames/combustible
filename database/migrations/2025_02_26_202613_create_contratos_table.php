@@ -20,6 +20,7 @@ class CreateContratosTable extends Migration
             $table->string('nombre_proceso', 600)->nullable();
             $table->date('fecha_desde');
             $table->date('fecha_hasta');
+            $table->string('orden_compra', 100)->nullable();
         });
     }
 

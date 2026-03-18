@@ -80,6 +80,11 @@
                                     </div>
 
                                     <div class="form-group">
+                                        <label>Orden Compra</label>
+                                        <input type="text" id="ordencompra-nuevo" autocomplete="off" class="form-control" maxlength="100" />
+                                    </div>
+
+                                    <div class="form-group">
                                         <label>Nombre Proceso</label>
                                         <input type="text" id="proceso-nuevo" autocomplete="off" class="form-control" maxlength="600" />
                                     </div>
@@ -135,6 +140,11 @@
                                     <div class="form-group">
                                         <label>Proceso Referencia</label>
                                         <input type="text" id="proceso-referencia-editar" autocomplete="off" class="form-control" maxlength="100" />
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Orden Compra</label>
+                                        <input type="text" id="ordencompra-editar" autocomplete="off" class="form-control" maxlength="100" />
                                     </div>
 
                                     <div class="form-group">
@@ -209,6 +219,7 @@
             var proceso = document.getElementById('proceso-nuevo').value;
             var fechaDesde = document.getElementById('fechadesde-nuevo').value;
             var fechaHasta = document.getElementById('fechahasta-nuevo').value;
+            var ordenCompra = document.getElementById('ordencompra-nuevo').value;
 
             if(fechaDesde === ''){
                 toastr.error('Fecha Desde es requerido');
@@ -227,6 +238,7 @@
             formData.append('proceso', proceso);
             formData.append('fechaDesde', fechaDesde);
             formData.append('fechaHasta', fechaHasta);
+            formData.append('ordenCompra', ordenCompra);
 
             axios.post(url+'/contratos/nuevo', formData, {
             })
@@ -265,6 +277,7 @@
                         $('#proceso-editar').val(response.data.info.nombre_proceso);
                         $('#fechadesde-editar').val(response.data.info.fecha_desde);
                         $('#fechahasta-editar').val(response.data.info.fecha_hasta);
+                        $('#ordencompra-editar').val(response.data.info.orden_compra);
 
                     }else{
                         toastr.error('Información no encontrada');
@@ -285,6 +298,7 @@
             var proceso = document.getElementById('proceso-editar').value;
             var fechaDesde = document.getElementById('fechadesde-editar').value;
             var fechaHasta = document.getElementById('fechahasta-editar').value;
+            var ordenCompra = document.getElementById('ordencompra-editar').value;
 
             if(fechaDesde === ''){
                 toastr.error('Fecha Desde es requerido');
@@ -305,6 +319,7 @@
             formData.append('proceso', proceso);
             formData.append('fechaDesde', fechaDesde);
             formData.append('fechaHasta', fechaHasta);
+            formData.append('ordenCompra', ordenCompra);
 
             axios.post(url+'/contratos/editar', formData, {
             })
