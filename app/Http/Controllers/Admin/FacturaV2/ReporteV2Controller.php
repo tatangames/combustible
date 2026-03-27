@@ -1400,8 +1400,17 @@ class ReporteV2Controller extends Controller
         $rangoIni = $inicioContrato->greaterThan($fechaDesde) ? $inicioContrato : $fechaDesde;
         $rangoFin = $finContrato->lessThan($fechaHasta) ? $finContrato : $fechaHasta;
 
+        //$textoFecha = strtoupper($rangoIni->translatedFormat('j F')) . ' AL ' .
+        //    strtoupper($rangoFin->translatedFormat('j \\D\\E F Y'));
+
+
+        $textoFechaHora = Carbon::now('America/El_Salvador')
+            ->translatedFormat('j \\d\\e F Y h:i A');
+
         $textoFecha = strtoupper($rangoIni->translatedFormat('j F')) . ' AL ' .
-            strtoupper($rangoFin->translatedFormat('j \\D\\E F Y'));
+            strtoupper($rangoFin->translatedFormat('j \\D\\E F Y')) .
+            ' - Generado el: '. $textoFechaHora;
+
 
         $vigenciaDesde   = date("d-m-Y", strtotime($infoContrato->fecha_desde));
         $vigenciaHasta   = date("d-m-Y", strtotime($infoContrato->fecha_hasta));
@@ -1466,17 +1475,7 @@ class ReporteV2Controller extends Controller
     </table>
     <br>";
 
-        /* ==== TÍTULO ==== */
-        $tabla .= "
-    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif;'>
-        <tr>
-            <td style='padding:6px 8px; text-align:center; font-size:15px; font-weight:bold;'>
-                ACTA DE RECEPCIÓN PARCIAL<br>
-                <span style='font-size:13px; font-weight:normal;'>(bienes, servicios o consultorías)</span>
-            </td>
-        </tr>
-    </table>
-    <br>";
+
 
         /* ==== SECCIÓN 1 ==== */
         $tabla .= "
@@ -1488,49 +1487,51 @@ class ReporteV2Controller extends Controller
         </tr>
         <tr>
             <td style='padding:6px 4px;'>
-                <strong>Lugar, fecha y hora:</strong> ALCALDÍA MUNICIPAL DE SANTA ANA NORTE (DISTRITO {$infoDistrito->nombre}) $textoFecha
+                Lugar, fecha y hora: ALCALDÍA MUNICIPAL DE SANTA ANA NORTE (DISTRITO {$infoDistrito->nombre}) $textoFecha
             </td>
         </tr>
-        <tr>
+         <tr>
             <td style='padding:6px 4px;'>
-                <strong>Referencia y nombre del Proceso de Contratación:</strong> {$infoContrato->proceso_ref}
+                Referencia y nombre del Proceso de Contratación: {$infoContrato->proceso_ref} COMPRA DE COMBUSTIBLE PARA LOS DIFERENTES EQUIPOS DE LA MUNICIPALIDAD DE SANTA ANA NORTE
             </td>
         </tr>
-        <tr>
-            <td style='padding:6px 4px;'>
-                <strong>Número de contrato u orden de compra:</strong> {$infoContrato->orden_compra}
-            </td>
-        </tr>
-        <tr>
-            <td style='padding:6px 4px;'>
-                <strong>Método de Contratación:</strong> LICITACIÓN COMPETITIVA DE BIENES
-            </td>
-        </tr>
-        <tr>
-            <td style='padding:6px 4px;'>
-                <strong>Lugar de ejecución o de entrega:</strong> DISTRITO {$infoDistrito->nombre} — ALCALDÍA MUNICIPAL DE SANTA ANA NORTE
-            </td>
-        </tr>
-        <tr>
-            <td style='padding:6px 4px;'>
-                <strong>Nombre del contratista o consultor:</strong> {$infoContrato->proveedor}
-            </td>
-        </tr>
-        <tr>
-            <td style='padding:6px 4px;'>
-                <strong>Vigencia de la contratación:</strong> $vigenciaDesde / $vigenciaHasta
-            </td>
-        </tr>
-        <tr>
-            <td style='padding:6px 4px;'>
-                <strong>Fecha de orden de inicio:</strong> <u><i>N/A</i></u>
-            </td>
-        </tr>
-        <tr>
-            <td style='padding:6px 4px;'>
-                <strong>Número de recepción:</strong> $numeroRecepcion
-            </td>
-        </tr>
+
+
+            <tr>
+                <td style='padding:6px 4px;'>
+                    Número de contrato u orden de compra: N/A
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:6px 4px;'>
+                    Método de Contratación: LICITACIÓN COMPETITIVA DE BIENES
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:6px 4px;'>
+                    Lugar de ejecución o de entrega: INSTALACIONES DE LA ALCALDIA MUNICIPAL DE SANTA ANA NORTE
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:6px 4px;'>
+                    Nombre del contratista o consultor: GICO, S.A. DE C.V.
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:6px 4px;'>
+                    Vigencia de la contratación: DOCE MESES
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:6px 4px;'>
+                    Fecha de orden de inicio: $vigenciaDesde
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:6px 4px;'>
+                    Número de recepción: N/A
+                </td>
+            </tr>
     </table>
     <br>";
 
@@ -1544,19 +1545,20 @@ class ReporteV2Controller extends Controller
         </tr>
         <tr>
             <td style='padding:6px 4px; text-align:justify; line-height:1.6;'>
-                El Administrador de este Contrato <i>(y además cualquier otro servidor público)</i>, habiendo realizado las verificaciones respectivas establecidas en el Documento de Solicitud, el contrato u orden de compra respectiva y demás documentos contractuales, hacen constar que el contratista hace la entrega <i>(Número de entrega del bien, servicio o consultoría)</i> requerida según los documentos contractuales, por lo que realizan la recepción parcial de conformidad a lo regulado en los <u>Arts .</u> 162 literal d), 82 literal e), todos de la LCP y art. 63 del RLCP, la cual será anexada al (primer, segundo o según corresponda) informe de avance de la ejecución contractual.
+                El Administrador de este Contrato $infoExtra->nombre3, habiendo realizado las verificaciones respectivas establecidas en el contrato
+                respectivo y demás documentos contractuales, hacen constar que el contratista hace la entrega requerida según los documentos contractuales, por lo que
+                realizan la recepción parcial de conformidad a lo regulado en los Arts. 162 literal d), 82 literal e), todos de la LCP y art. 63 del RLCP, la cual
+                será anexada al informe de avance de la ejecución contractual.
             </td>
         </tr>
         <tr>
             <td style='padding:6px 4px; text-align:justify; line-height:1.6;'>
-                Se hace constar que <i>(los bienes, servicios o consultoría)</i> cumplen con las condiciones y especificaciones técnicas descritas en el Documento de Solicitud y demás instrumentos de la contratación, los cuales se detallan a continuación <i>(Describir los bienes, servicios o consultorías recibidos según corresponda/ por lo que se reciben a conformidad.)</i>
+                Se hace constar que los bienes cumplen con las condiciones y especificaciones técnicas descritas en el Documento de Solicitud y demás instrumentos de la
+                contratación, los cuales se detallan a continuación los bienes, por lo que se reciben a confirmidad.
             </td>
         </tr>
     </table>
     <br>";
-
-
-
 
 
 
@@ -1654,7 +1656,7 @@ class ReporteV2Controller extends Controller
             <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galDieselF}</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>DIESEL</td>
-            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>N/A</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinDieselF}</td>
         </tr>
         <tr>
@@ -1662,7 +1664,7 @@ class ReporteV2Controller extends Controller
             <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galRegularF}</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>REGULAR</td>
-            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>N/A</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinRegularF}</td>
         </tr>
         <tr>
@@ -1670,11 +1672,11 @@ class ReporteV2Controller extends Controller
             <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galEspecialF}</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>ESPECIAL</td>
-            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>N/A</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinEspecialF}</td>
         </tr>
         <tr>
-            <td colspan='5' style='border:1px solid #000; padding:6px; text-align:right; font-weight:bold;'>MONTO TOTAL:</td>
+            <td colspan='5' style='border:1px solid #000; padding:6px; text-align:right; font-weight:bold;'>TOTAL:</td>
             <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold;'>\${$montoTotalF}</td>
         </tr>
     </table>
@@ -1682,72 +1684,65 @@ class ReporteV2Controller extends Controller
 
         /* ==== RESTANTE GALONES ==== */
         $tabla .= "
-    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
-        <tr>
-            <td style='padding:6px 4px; font-weight:bold;'>RESTANTE GALONES</td>
-        </tr>
-        <tr>
-            <td style='padding:4px;'><strong>DIESEL:</strong> {$restDieselF}</td>
-        </tr>
-        <tr>
-            <td style='padding:4px;'><strong>REGULAR:</strong> {$restRegularF}</td>
-        </tr>
-        <tr>
-            <td style='padding:4px;'><strong>ESPECIAL:</strong> {$restEspecialF}</td>
-        </tr>
-    </table>
-    <br>";
+            <br><br>
+        <p><small>*Nota: </small></p>
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
+            <tr>
+                <td style='padding:6px 4px; font-weight:bold;'>
+                    RESTANTE GALONES
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:4px;'>
+                    DIESEL: {$restDieselF}
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:4px;'>
+                    REGULAR: {$restRegularF}
+                </td>
+            </tr>
+            <tr>
+                <td style='padding:4px;'>
+                    ESPECIAL: {$restEspecialF}
+                </td>
+            </tr>
+        </table>
+        <br>";
 
         /* ==== NOTA Y CIERRE ==== */
         $tabla .= "
-    <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
-        <tr>
-            <td style='padding:6px 4px;'>
-                *Nota: El precio unitario de cada producto no se establece debido a la variación del mismo.
-            </td>
-        </tr>
-        <tr>
-            <td style='padding:16px 4px 6px 4px; text-align:justify; line-height:1.6;'>
-                En cumplimiento al artículo 162 literal d) de la Ley de Compras Públicas (LCP) y 63 del RLCP, no habiendo más que hacer constar, firmamos y ratificamos la presente acta en <i>(cantidad de originales)</i> de igual valor y contenido.
-            </td>
-        </tr>
-    </table>
-    <br><br><br><br>";
+        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
+            <tr>
+                <td style='padding:16px 4px 6px 4px; text-align:justify; line-height:1.6;'>
+                    En cumplimiento al artículo 162 literal d) de la Ley de Compras Públicas (LCP) y 63 del RLCP,
+                    no habiendo más que hacer constar, firmamos y ratificamos la presente acta en dos de igual valor y contenido.
+                </td>
+            </tr>
+        </table>
+        <br> <br> <br>  <br>  <br> <br> <br>";
 
         /* ==== FIRMAS ==== */
         $tabla .= "
         <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:15px;'>
             <tr>
-                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
+                <td style='width:55%; padding:8px 4px; vertical-align:top;'>
                     F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
                     Firma<br>
-                    $infoExtra->nombre3<br>
+                    {$infoExtra->nombre3}<br>
                     Administrador de Contrato<br>
-                    Alcaldía de Santa Ana Norte
+                    ALCALDIA MUNICIPAL DE SANTA ANA NORTE.
                 </td>
                 <td style='width:50%; padding:8px 4px; vertical-align:top;'>
                     F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
-                    Firma<br>
-                    $infoContrato->proveedor<br>
-                    Gasolinera Puma Metapán
+                    Firma y Sello<br>
+                    {$infoContrato->proveedor}<br>
+                    {$infoContrato->empresa}
+                    <br>
                 </td>
             </tr>
         </table>
         <br><br><br><br><br>";
-
-        $tabla .= "
-        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:15px;'>
-            <tr>
-                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
-                    F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
-                    Firma y Sello<br>
-                    $infoExtra->nombre1<br>
-                    Encargada de Combustible
-                </td>
-                <td style='width:50%; padding:8px 4px; vertical-align:top;'></td>
-            </tr>
-        </table>
-        <br>";
 
         /* ==== RENDER ==== */
         $stylesheet = file_get_contents(public_path('css/csscontrato.css'));
@@ -1802,8 +1797,18 @@ class ReporteV2Controller extends Controller
         $rangoFin = $finContrato->lessThan($fechaHasta) ? $finContrato : $fechaHasta;
 
         // Texto de fecha
+        //$textoFecha = strtoupper($rangoIni->translatedFormat('j F')) . ' AL ' .
+        //    strtoupper($rangoFin->translatedFormat('j \\D\\E F Y'));
+
+        $textoFechaHora = Carbon::now('America/El_Salvador')
+            ->translatedFormat('j \\d\\e F Y h:i A');
+
         $textoFecha = strtoupper($rangoIni->translatedFormat('j F')) . ' AL ' .
-            strtoupper($rangoFin->translatedFormat('j \\D\\E F Y'));
+            strtoupper($rangoFin->translatedFormat('j \\D\\E F Y')) .
+            ' - Generado el: '. $textoFechaHora;
+
+
+
 
         /* ==== Imágenes ==== */
         $logoGob = 'file://' . public_path('images/gobiernologo.jpg');
@@ -1814,62 +1819,51 @@ class ReporteV2Controller extends Controller
 
 
 
-
-
         $logoalcaldia = 'images/gobiernologo.jpg';
 
         $tabla = "
-   <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif;'>
-    <tr>
-        <td style='width:25%; border:0.8px solid #000; padding:6px 8px;'>
-            <table width='100%'>
-                <tr>
-                    <td style='width:30%; text-align:left;'>
-                        <img src='{$logoalcaldia}' style='height:38px'>
-                    </td>
-                    <td style='width:70%; text-align:left; color:#104e8c; font-size:13px; font-weight:bold; line-height:1.3;'>
-                        SANTA ANA NORTE<br>EL SALVADOR
-                    </td>
-                </tr>
-            </table>
-        </td>
-        <td style='width:50%; border-top:0.8px solid #000; border-bottom:0.8px solid #000; padding:6px 8px; text-align:center; font-size:15px; font-weight:bold;'>
-            ACTA DE RECEPCIÓN PARCIAL<br>
-            <span style='font-size:13px; font-weight:normal;'>(bienes, servicios o consultorías)</span>
-        </td>
-        <td style='width:25%; border:0.8px solid #000; padding:0; vertical-align:top;'>
-            <table width='100%' style='font-size:10px;'>
-                <tr>
-                    <td width='40%' style='border-right:0.8px solid #000; border-bottom:0.8px solid #000; padding:4px 6px;'><strong>Código:</strong></td>
-                    <td width='60%' style='border-bottom:0.8px solid #000; padding:4px 6px; text-align:center;'>UNCP-002-ACTA</td>
-                </tr>
-                <tr>
-                    <td style='border-right:0.8px solid #000; border-bottom:0.8px solid #000; padding:4px 6px;'><strong>Versión:</strong></td>
-                    <td style='border-bottom:0.8px solid #000; padding:4px 6px; text-align:center;'>000</td>
-                </tr>
-                <tr>
-                    <td style='border-right:0.8px solid #000; padding:4px 6px;'><strong>Fecha de vigencia:</strong></td>
-                    <td style='padding:4px 6px; text-align:center;'>19/02/2026</td>
-                </tr>
-            </table>
-        </td>
-    </tr>
-</table>
-<br>";
-
-
-
-
-        $tabla .= "
-        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif;'>
+           <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif;'>
             <tr>
-                <td style='padding:6px 8px; text-align:center; font-size:15px; font-weight:bold;'>
+                <td style='width:25%; border:0.8px solid #000; padding:6px 8px;'>
+                    <table width='100%'>
+                        <tr>
+                            <td style='width:30%; text-align:left;'>
+                                <img src='{$logoalcaldia}' style='height:38px'>
+                            </td>
+                            <td style='width:70%; text-align:left; color:#104e8c; font-size:13px; font-weight:bold; line-height:1.3;'>
+                                SANTA ANA NORTE<br>EL SALVADOR
+                            </td>
+                        </tr>
+                    </table>
+                </td>
+                <td style='width:50%; border-top:0.8px solid #000; border-bottom:0.8px solid #000; padding:6px 8px; text-align:center; font-size:15px; font-weight:bold;'>
                     ACTA DE RECEPCIÓN PARCIAL<br>
                     <span style='font-size:13px; font-weight:normal;'>(bienes, servicios o consultorías)</span>
+                </td>
+                <td style='width:25%; border:0.8px solid #000; padding:0; vertical-align:top;'>
+                    <table width='100%' style='font-size:10px;'>
+                        <tr>
+                            <td width='40%' style='border-right:0.8px solid #000; border-bottom:0.8px solid #000; padding:4px 6px;'><strong>Código:</strong></td>
+                            <td width='60%' style='border-bottom:0.8px solid #000; padding:4px 6px; text-align:center;'>UNCP-002-ACTA</td>
+                        </tr>
+                        <tr>
+                            <td style='border-right:0.8px solid #000; border-bottom:0.8px solid #000; padding:4px 6px;'><strong>Versión:</strong></td>
+                            <td style='border-bottom:0.8px solid #000; padding:4px 6px; text-align:center;'>000</td>
+                        </tr>
+                        <tr>
+                            <td style='border-right:0.8px solid #000; padding:4px 6px;'><strong>Fecha de vigencia:</strong></td>
+                            <td style='padding:4px 6px; text-align:center;'>19/02/2026</td>
+                        </tr>
+                    </table>
                 </td>
             </tr>
         </table>
         <br>";
+
+
+
+
+
 
 
         $vigenciaDesde = date("d-m-Y", strtotime($infoContrato->fecha_desde));
@@ -1885,47 +1879,47 @@ class ReporteV2Controller extends Controller
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    <strong>Lugar, fecha y hora:</strong> ALCALDÍA MUNICIPAL DE SANTA ANA NORTE $textoFecha
+                    Lugar, fecha y hora: ALCALDÍA MUNICIPAL DE SANTA ANA NORTE $textoFecha
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    <strong>Referencia y nombre del Proceso de Contratación:</strong> {$infoContrato->proceso_ref}
+                    Referencia y nombre del Proceso de Contratación: {$infoContrato->proceso_ref} COMPRA DE COMBUSTIBLE PARA LOS DIFERENTES EQUIPOS DE LA MUNICIPALIDAD DE SANTA ANA NORTE
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    <strong>Número de contrato u orden de compra:</strong> {$infoContrato->orden_compra}
+                    Número de contrato u orden de compra: N/A
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    <strong>Método de Contratación:</strong> LICITACIÓN COMPETITIVA DE BIENES
+                    Método de Contratación: LICITACIÓN COMPETITIVA DE BIENES
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    <strong>Lugar de ejecución o de entrega:</strong> ALCALDIA MUNICIPAL DE SANTA ANA NORTE
+                    Lugar de ejecución o de entrega: INSTALACIONES DE LA ALCALDIA MUNICIPAL DE SANTA ANA NORTE
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    <strong>Nombre del contratista o consultor:</strong> $infoExtra->nombre3
+                    Nombre del contratista o consultor: GICO, S.A. DE C.V.
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    <strong>Vigencia de la contratación:</strong> $vigenciaDesde / $vigenciaHasta
+                    Vigencia de la contratación: DOCE MESES
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    <strong>Fecha de orden de inicio:</strong> <u><i>N/A</i></u>
+                    Fecha de orden de inicio: $vigenciaDesde
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    <strong>Número de recepción:</strong> $numeroRecepcion
+                    Número de recepción: N/A
                 </td>
             </tr>
         </table>
@@ -1947,12 +1941,16 @@ class ReporteV2Controller extends Controller
             </tr>
             <tr>
                 <td style='padding:6px 4px; text-align:justify; line-height:1.6;'>
-                    El Administrador de este Contrato <i>(y además cualquier otro servidor público)</i>, habiendo realizado las verificaciones respectivas establecidas en el Documento de Solicitud, el contrato u orden de compra respectiva y demás documentos contractuales, hacen constar que el contratista hace la entrega <i>(Número de entrega del bien, servicio o consultoría)</i> requerida según los documentos contractuales, por lo que realizan la recepción parcial de conformidad a lo regulado en los <u>Arts .</u> 162 literal d), 82 literal e), todos de la LCP y art. 63 del RLCP, la cual será anexada al (primer, segundo o según corresponda) informe de avance de la ejecución contractual.
+                    El Administrador de este Contrato $infoExtra->nombre3, habiendo realizado las verificaciones respectivas establecidas en el contrato
+                    respectivo y demás documentos contractuales, hacen constar que el contratista hace la entrega requerida según los documentos contractuales, por lo que
+                    realizan la recepción parcial de conformidad a lo regulado en los Arts. 162 literal d), 82 literal e), todos de la LCP y art. 63 del RLCP, la cual
+                    será anexada al informe de avance de la ejecución contractual.
                 </td>
             </tr>
             <tr>
                 <td style='padding:6px 4px; text-align:justify; line-height:1.6;'>
-                    Se hace constar que <i>(los bienes, servicios o consultoría)</i> cumplen con las condiciones y especificaciones técnicas descritas en el Documento de Solicitud y demás instrumentos de la contratación, los cuales se detallan a continuación <i>(Describir los bienes, servicios o consultorías recibidos según corresponda/ por lo que se reciben a conformidad.)</i>
+                    Se hace constar que los bienes cumplen con las condiciones y especificaciones técnicas descritas en el Documento de Solicitud y demás instrumentos de la
+                    contratación, los cuales se detallan a continuación los bienes, por lo que se reciben a confirmidad.
                 </td>
             </tr>
         </table>
@@ -2062,7 +2060,7 @@ class ReporteV2Controller extends Controller
             <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galDieselF}</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>DIESEL</td>
-            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>N/A</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinDieselF}</td>
         </tr>
         <tr>
@@ -2070,7 +2068,7 @@ class ReporteV2Controller extends Controller
             <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galRegularF}</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>REGULAR</td>
-            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>N/A</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinRegularF}</td>
         </tr>
         <tr>
@@ -2078,11 +2076,11 @@ class ReporteV2Controller extends Controller
             <td style='border:1px solid #000; padding:6px; text-align:center;'>{$galEspecialF}</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>GALONES</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>ESPECIAL</td>
-            <td style='border:1px solid #000; padding:6px; text-align:center;'></td>
+            <td style='border:1px solid #000; padding:6px; text-align:center;'>N/A</td>
             <td style='border:1px solid #000; padding:6px; text-align:center;'>\${$dinEspecialF}</td>
         </tr>
         <tr>
-            <td colspan='5' style='border:1px solid #000; padding:6px; text-align:right; font-weight:bold;'>MONTO TOTAL:</td>
+            <td colspan='5' style='border:1px solid #000; padding:6px; text-align:right; font-weight:bold;'>TOTAL:</td>
             <td style='border:1px solid #000; padding:6px; text-align:center; font-weight:bold;'>\${$montoTotalF}</td>
         </tr>
     </table>
@@ -2093,6 +2091,8 @@ class ReporteV2Controller extends Controller
 
 
         $tabla .= "
+            <br><br>
+        <p><small>*Nota: </small></p>
         <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
             <tr>
                 <td style='padding:6px 4px; font-weight:bold;'>
@@ -2101,17 +2101,17 @@ class ReporteV2Controller extends Controller
             </tr>
             <tr>
                 <td style='padding:4px;'>
-                    <strong>DIESEL:</strong> {$restDieselF}
+                    DIESEL: {$restDieselF}
                 </td>
             </tr>
             <tr>
                 <td style='padding:4px;'>
-                    <strong>REGULAR:</strong> {$restRegularF}
+                    REGULAR: {$restRegularF}
                 </td>
             </tr>
             <tr>
                 <td style='padding:4px;'>
-                    <strong>ESPECIAL:</strong> {$restEspecialF}
+                    ESPECIAL: {$restEspecialF}
                 </td>
             </tr>
         </table>
@@ -2125,17 +2125,13 @@ class ReporteV2Controller extends Controller
         $tabla .= "
         <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:13px;'>
             <tr>
-                <td style='padding:6px 4px;'>
-                    *Nota: El precio unitario de cada producto no se establece debido a la variación del mismo.
-                </td>
-            </tr>
-            <tr>
                 <td style='padding:16px 4px 6px 4px; text-align:justify; line-height:1.6;'>
-                    En cumplimiento al artículo 162 literal d) de la Ley de Compras Públicas (LCP) y 63 del RLCP, no habiendo más que hacer constar, firmamos y ratificamos la presente acta en <i>(cantidad de originales)</i> de igual valor y contenido.
+                    En cumplimiento al artículo 162 literal d) de la Ley de Compras Públicas (LCP) y 63 del RLCP,
+                    no habiendo más que hacer constar, firmamos y ratificamos la presente acta en dos de igual valor y contenido.
                 </td>
             </tr>
         </table>
-        <br> <br> <br>  <br>";
+        <br> <br> <br>  <br>  <br> <br> <br>";
 
 
 
@@ -2143,45 +2139,23 @@ class ReporteV2Controller extends Controller
         $tabla .= "
         <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:15px;'>
             <tr>
-                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
+                <td style='width:55%; padding:8px 4px; vertical-align:top;'>
                     F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
                     Firma<br>
                     {$infoExtra->nombre3}<br>
                     Administrador de Contrato<br>
-                    Alcaldía de Santa Ana Norte
+                    ALCALDIA MUNICIPAL DE SANTA ANA NORTE.
                 </td>
                 <td style='width:50%; padding:8px 4px; vertical-align:top;'>
                     F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
-                    Firma<br>
+                    Firma y Sello<br>
                     {$infoContrato->proveedor}<br>
-                    Gasolinera Puma Metapán<br>
+                    {$infoContrato->empresa}
+                    <br>
                 </td>
             </tr>
         </table>
         <br><br><br><br><br>";
-
-                $tabla .= "
-        <table width='100%' style='border-collapse:collapse; font-family: Arial, sans-serif; font-size:15px;'>
-            <tr>
-                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
-                    F. <u>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</u><br>
-                    Firma y Sello<br>
-                    {$infoExtra->nombre1}<br>
-                    Encargada de Combustible
-                </td>
-                <td style='width:50%; padding:8px 4px; vertical-align:top;'>
-                </td>
-            </tr>
-        </table>
-        <br>";
-
-
-
-
-
-
-
-
 
 
 
