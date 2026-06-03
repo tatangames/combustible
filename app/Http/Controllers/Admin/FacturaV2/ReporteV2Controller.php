@@ -464,7 +464,7 @@ class ReporteV2Controller extends Controller
 
 
 
-    public function reporteFacturaPDF($numfactura, $iddistrito, $idfondo){
+    public function reporteFacturaPDF($numfactura, $iddistrito, $idfondo, $anio){
 
         $totalRegular = 0;
         $totalDiesel = 0;
@@ -498,12 +498,22 @@ class ReporteV2Controller extends Controller
         }
 
 
+        $anioMap = [
+            1 => 2025,
+            2 => 2026,
+        ];
+
+        $anioFiltro = $anioMap[$anio] ?? null;
+
         $arrayFactura = Facturacion::where('numero_factura', $numfactura)
             ->when($boolDistritoTodos, function($query) use ($iddistrito) {
                 return $query->where('id_distrito', $iddistrito);
             })
             ->when($boolFondosTodos, function($query) use ($idfondo) {
                 return $query->where('id_fondos', $idfondo);
+            })
+            ->when($anioFiltro, function($query) use ($anioFiltro) {
+                return $query->whereYear('fecha', $anioFiltro);
             })
             ->orderBy('fecha', 'ASC')
             ->get();

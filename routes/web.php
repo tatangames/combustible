@@ -94,7 +94,7 @@ Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}/{distrito}
 
 // REPORTE FACTURA
 Route::get('/admin/reportev2/factura/index', [ReporteV2Controller::class,'vistaReporteFactura'])->name('admin.reporte.facturacion.factura');
-Route::get('/admin/reportev2/pdf/factura/{numfactura}/{distrito}/{fondo}', [ReporteV2Controller::class,'reporteFacturaPDF']);
+Route::get('/admin/reportev2/pdf/factura/{numfactura}/{distrito}/{fondo}/{anio}', [ReporteV2Controller::class,'reporteFacturaPDF']);
 
 // REPORTE DE CONTRATO
 Route::get('/admin/reportev2/contrato/index', [ReporteV2Controller::class,'vistaReporteContrato'])->name('admin.reporte.contrato');

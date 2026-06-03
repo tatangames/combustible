@@ -24,6 +24,16 @@
                     <form id="formulario-nuevo">
                         <div class="card-body">
 
+                            <div class="form-group" style="width: 50%">
+                                <label>Año</label>
+                                <select class="form-control" id="select-anio">
+                                    <option value="1">2025</option>
+                                    <option value="2">2026</option>
+                                </select>
+                            </div>
+
+                            <hr>
+
                             <div class="row">
                                 <div class="form-group">
                                     <label>Número de Factura</label>
@@ -50,6 +60,8 @@
                                     @endforeach
                                 </select>
                             </div>
+
+
 
                         </div>
 
@@ -105,6 +117,7 @@
             var numfactura = document.getElementById('numfactura').value;
             var distrito = document.getElementById('select-distrito').value;
             var fondos = document.getElementById('select-fondos').value;
+            var anio = document.getElementById('select-anio').value;
 
             if(numfactura === ''){
                 toastr.error('Factura es requerido')
@@ -112,7 +125,7 @@
             }
 
             window.open("{{ URL::to('admin/reportev2/pdf/factura') }}/" + numfactura
-                + "/" + distrito + "/" + fondos);
+                + "/" + distrito + "/" + fondos + "/" + anio);
         }
 
 
