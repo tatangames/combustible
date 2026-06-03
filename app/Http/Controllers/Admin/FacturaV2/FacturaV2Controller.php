@@ -108,7 +108,9 @@ class FacturaV2Controller extends Controller
     public function tablaFacturacionTabla()
     {
 
-        $listado = Facturacion::orderBy('fecha', 'DESC')->get();
+        $listado = Facturacion::orderBy('fecha', 'DESC')
+            ->limit(5000)
+            ->get();
 
         foreach ($listado as $dato){
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
