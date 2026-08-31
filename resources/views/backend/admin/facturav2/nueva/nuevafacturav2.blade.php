@@ -10,11 +10,9 @@
 @stop
 
 <style>
-    table{
-        /*Ajustar tablas*/
-        table-layout:fixed;
+    table {
+        table-layout: fixed;
     }
-
     html, body {
         overflow-x: hidden;
     }
@@ -22,15 +20,12 @@
 
 <div id="divcontenedor" style="display: none">
     <section class="content-header">
-        <div class="container-fluid">
-
-        </div>
+        <div class="container-fluid"></div>
     </section>
 
     <section class="content">
         <div class="container-fluid" style="margin-left: 15px">
             <div class="row">
-
                 <div class="col-md-12">
                     <div class="card card-gray-dark">
                         <div class="card-header">
@@ -39,17 +34,20 @@
                         <form id="formulario-nuevo">
                             <div class="card-body">
 
+                                <!-- FILA 1: Datos generales -->
                                 <div class="row">
 
+                                    <!-- Columna izquierda -->
                                     <div class="col-md-3">
+
                                         <div class="form-group">
-                                            <label># de Factura</label>
+                                            <label># de Factura <span style="color: red">*</span></label>
                                             <input type="text" id="numfactura-nuevo" class="form-control" maxlength="50">
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Distrito De</label>
-                                            <select class="form-control" id="distrito-nuevo" >
+                                            <label>Distrito De <span style="color: red">*</span></label>
+                                            <select class="form-control" id="distrito-nuevo">
                                                 <option value="0">Seleccionar opción</option>
                                                 @foreach($arrayDistritos as $dato)
                                                     <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
@@ -57,12 +55,51 @@
                                             </select>
                                         </div>
 
-                                        <hr>
-                                        <br>
+                                        <div class="form-group">
+                                            <label>Lugar de Llenado <span style="color: red">*</span></label>
+                                            <select class="form-control" id="lugarllenado-nuevo">
+                                                <option value="0">Seleccionar opción</option>
+                                                @foreach($arrayLugarLlenado as $dato)
+                                                    <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                    </div>
+
+                                    <!-- Columna derecha -->
+                                    <div class="col-md-3">
 
                                         <div class="form-group">
-                                            <label>Equipo</label>
-                                            <select class="form-control" id="equipo-nuevo" >
+                                            <label>Fecha</label>
+                                            <input type="date" id="fecha-nuevo" value="{{ $fechaActual->format('Y-m-d') }}" class="form-control">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Tipo de Fondos <span style="color: red">*</span></label>
+                                            <select class="form-control" id="fondos-nuevo">
+                                                <option value="0">Seleccionar opción</option>
+                                                @foreach($arrayTipoFondos as $dato)
+                                                    <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                <hr>
+
+                                <!-- FILA 2: Equipo/Producto/KM izquierda — Galones/Precio derecha -->
+                                <div class="row">
+
+                                    <!-- Izquierda: Equipo, Producto, KM -->
+                                    <div class="col-md-3">
+
+                                        <div class="form-group">
+                                            <label>Equipo <span style="color: red">*</span></label>
+                                            <select class="form-control" id="equipo-nuevo">
                                                 <option value="0">Seleccionar opción</option>
                                                 @foreach($arrayEquipos as $dato)
                                                     <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
@@ -79,51 +116,31 @@
                                             </select>
                                         </div>
 
-
                                         <div class="form-group">
                                             <label>KM (Opcional)</label>
                                             <input type="text" id="km-nuevo" maxlength="15" class="form-control">
                                         </div>
 
-
                                     </div>
 
-
+                                    <!-- Derecha: # Galones, Precio Unitario -->
                                     <div class="col-md-3">
 
                                         <div class="form-group">
-                                            <label>Fecha</label>
-                                            <input type="date" id="fecha-nuevo" value="{{ $fechaActual->format('Y-m-d') }}" class="form-control">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label>Tipo de Fondos</label>
-                                            <select class="form-control" id="fondos-nuevo" >
-                                                <option value="0">Seleccionar opción</option>
-                                                @foreach($arrayTipoFondos as $dato)
-                                                    <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-
-
-                                        <hr>
-                                        <br>
-
-                                        <div class="form-group">
-                                            <label># Galones</label>
+                                            <label># Galones <span style="color: red">*</span></label>
                                             <input type="number" id="galones-nuevo" class="form-control">
                                         </div>
 
                                         <div class="form-group">
-                                            <label>Precio Unitario</label>
+                                            <label>Precio Unitario <span style="color: red">*</span></label>
                                             <input type="number" id="precio-nuevo" class="form-control">
                                         </div>
 
-
                                     </div>
+
                                 </div>
 
+                                <!-- FILA 3: Descripción y botón -->
                                 <div class="row">
                                     <div class="col-md-6">
 
@@ -131,7 +148,6 @@
                                             <label>Descripción</label>
                                             <input type="text" id="descripcion-nuevo" maxlength="800" placeholder="Descripción" class="form-control">
                                         </div>
-
 
                                         <div class="card-footer" style="float: right;">
                                             <button type="button" class="btn btn-primary" onclick="registrar()">Registrar</button>
@@ -141,20 +157,12 @@
                                 </div>
 
                             </div>
-
-
                         </form>
                     </div>
-
                 </div>
-
-
             </div>
         </div>
     </section>
-
-
-
 </div>
 
 @extends('backend.menus.footerjs')
@@ -162,7 +170,6 @@
 
     <script src="{{ asset('js/jquery.dataTables.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/dataTables.bootstrap4.js') }}" type="text/javascript"></script>
-
     <script src="{{ asset('js/toastr.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
@@ -170,12 +177,11 @@
     <script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
 
     <script type="text/javascript">
-        $(document).ready(function(){
-
+        $(document).ready(function () {
             $('#equipo-nuevo').select2({
                 theme: "bootstrap-5",
                 "language": {
-                    "noResults": function(){
+                    "noResults": function () {
                         return "Búsqueda no encontrada";
                     }
                 },
@@ -187,112 +193,102 @@
 
     <script>
 
+        function registrar() {
 
-        function registrar(){
+            var numfactura         = document.getElementById('numfactura-nuevo').value;
+            var equipo             = document.getElementById('equipo-nuevo').value;
+            var producto           = document.getElementById('producto-nuevo').value;
+            var fecha              = document.getElementById('fecha-nuevo').value;
+            var galones            = document.getElementById('galones-nuevo').value;
+            var unitario           = document.getElementById('precio-nuevo').value;
+            var km                 = document.getElementById('km-nuevo').value;
+            var descripcion        = document.getElementById('descripcion-nuevo').value;
+            var selectFondos       = document.getElementById('fondos-nuevo').value;
+            var selectDistritos    = document.getElementById('distrito-nuevo').value;
+            var selectLugarLlenado = document.getElementById('lugarllenado-nuevo').value;
 
-            var numfactura = document.getElementById('numfactura-nuevo').value;
-            var equipo = document.getElementById('equipo-nuevo').value;
-            var producto = document.getElementById('producto-nuevo').value;
-            var fecha = document.getElementById('fecha-nuevo').value;
-            var galones = document.getElementById('galones-nuevo').value;
-            var unitario = document.getElementById('precio-nuevo').value;
-            var km = document.getElementById('km-nuevo').value;
-            var descripcion = document.getElementById('descripcion-nuevo').value;
-
-            var selectFondos = document.getElementById('fondos-nuevo').value;
-            var selectDistritos = document.getElementById('distrito-nuevo').value;
-
-
-            if(numfactura === ''){
+            if (numfactura === '') {
                 toastr.error('# Factura es requerido');
-                return
+                return;
             }
 
-            if(equipo == '0'){
+            if (equipo == '0') {
                 toastr.error('Seleccionar equipo');
-                return
+                return;
             }
 
-            if(selectFondos === '0'){
+            if (selectFondos === '0') {
                 toastr.error('Seleccionar Fondos');
-                return
+                return;
             }
 
-            if(selectDistritos === '0'){
+            if (selectDistritos === '0') {
                 toastr.error('Seleccionar Distrito');
-                return
+                return;
             }
 
-            if(fecha === ''){
+            if (selectLugarLlenado === '0') {
+                toastr.error('Seleccionar Lugar de Llenado');
+                return;
+            }
+
+            if (fecha === '') {
                 toastr.error('Fecha es requerido');
-                return
+                return;
             }
 
-            if(galones === ''){
+            if (galones === '') {
                 toastr.error('# de Galones es requerido');
-                return
+                return;
             }
 
-            if(unitario === ''){
+            if (unitario === '') {
                 toastr.error('Precio Unitario es requerido');
-                return
+                return;
             }
 
             openLoading();
-            var formData = new FormData();
-            formData.append('numfactura', numfactura);
-            formData.append('fecha', fecha);
-            formData.append('equipo', equipo);
-            formData.append('producto', producto);
-            formData.append('galones', galones);
-            formData.append('unitario', unitario);
-            formData.append('km', km);
-            formData.append('descripcion', descripcion);
-            formData.append('fondos', selectFondos);
-            formData.append('distrito', selectDistritos);
 
-            axios.post(url+'/facturav2/nuevo', formData, {
-            })
+            var formData = new FormData();
+            formData.append('numfactura',   numfactura);
+            formData.append('fecha',        fecha);
+            formData.append('equipo',       equipo);
+            formData.append('producto',     producto);
+            formData.append('galones',      galones);
+            formData.append('unitario',     unitario);
+            formData.append('km',           km);
+            formData.append('descripcion',  descripcion);
+            formData.append('fondos',       selectFondos);
+            formData.append('distrito',     selectDistritos);
+            formData.append('lugarllenado', selectLugarLlenado);
+
+            axios.post(url + '/facturav2/nuevo', formData, {})
                 .then((response) => {
                     closeLoading();
 
-                    if(response.data.success === 0) {
+                    if (response.data.success === 0) {
                         toastr.error('Faltan campos para Registrar');
-                    }
-                    else if(response.data.success === 1){
+                    } else if (response.data.success === 1) {
                         toastr.success('Registrado');
                         resetear();
-
-
-                    }
-                    else {
-                        toastr.error('error al registrar');
+                    } else {
+                        toastr.error('Error al registrar');
                     }
                 })
                 .catch((error) => {
-                    toastr.error('error al registrar');
+                    toastr.error('Error al registrar');
                     closeLoading();
                 });
         }
 
-
-        function resetear(){
-
+        function resetear() {
             $('#equipo-nuevo').val(0).trigger('change');
-
-            //$('#numfactura-nuevo').val("");
-
             $('#galones-nuevo').val("");
             $('#precio-nuevo').val("");
             $('#km-nuevo').val("");
             $('#descripcion-nuevo').val("");
         }
 
-
-
-
-
     </script>
-
 
 @endsection

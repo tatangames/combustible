@@ -32,12 +32,17 @@ class CreateFacturacionTable extends Migration
             $table->bigInteger('id_fondos')->unsigned()->nullable();
             $table->bigInteger('id_distrito')->unsigned()->nullable();
 
+            // 31/08/2026
+            // Lugar de llenado
+            $table->bigInteger('id_lugarllenado')->unsigned()->nullable();
+
             $table->foreign('id_equipo')->references('id')->on('equipos');
             $table->foreign('id_tipocombustible')->references('id')->on('tipocombustible');
 
-
             $table->foreign('id_fondos')->references('id')->on('tipo_fondos');
             $table->foreign('id_distrito')->references('id')->on('distritos');
+
+            $table->foreign('id_lugarllenado')->references('id')->on('lugar_llenado');
         });
     }
 

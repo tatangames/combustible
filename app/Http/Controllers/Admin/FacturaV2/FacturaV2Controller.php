@@ -7,6 +7,7 @@ use App\Models\Distritos;
 use App\Models\Equipo;
 use App\Models\Extras;
 use App\Models\Facturacion;
+use App\Models\LugarLLenado;
 use App\Models\TipoCombustible;
 use App\Models\TipoFondos;
 use Carbon\Carbon;
@@ -31,10 +32,11 @@ class FacturaV2Controller extends Controller
             ->whereNotIn('id', [5]) // NO QUIERO VER DISTRITO SANTA ANA NORTE
             ->get();
         $arrayTipoFondos = TipoFondos::orderBy('nombre', 'ASC')->get();
+        $arrayLugarLlenado = LugarLlenado::orderBy('nombre', 'ASC')->get();
 
         return view('backend.admin.facturav2.nueva.nuevafacturav2',
             compact('fechaActual', 'arrayCombus', 'arrayEquipos',
-            'arrayDistritos', 'arrayTipoFondos'));
+            'arrayDistritos', 'arrayTipoFondos', 'arrayLugarLlenado'));
     }
 
 
@@ -83,6 +85,7 @@ class FacturaV2Controller extends Controller
             $registro->jefe_cargo = $infoExtras->nombre4;
             $registro->gasolinera = $infoExtras->nombre_gasolinera;
 
+            $registro->id_lugarllenado = $request->lugarllenado;
 
             $registro->save();
 
