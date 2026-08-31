@@ -9,8 +9,7 @@
 @stop
 
 <section class="content-header">
-    <div class="container-fluid">
-    </div>
+    <div class="container-fluid"></div>
 </section>
 
 <section class="content">
@@ -29,7 +28,6 @@
                                     <label>Desde</label>
                                     <input type="date" class="form-control" id="fecha-desde">
                                 </div>
-
                                 <div class="form-group" style="margin-left: 15px">
                                     <label>Hasta</label>
                                     <input type="date" class="form-control" id="fecha-hasta">
@@ -66,31 +64,37 @@
                                 </select>
                             </div>
 
+                            <div class="form-group" style="width: 50%">
+                                <label>Lugar de Llenado</label>
+                                <select class="form-control" id="select-lugarllenado">
+                                    <option value="0">TODOS</option>
+                                    @foreach($arrayLugarLLenado as $dato)
+                                        <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+
                         </div>
 
-
                         <div class="card-footer" style="float: right;">
-                            <button type="button" onclick="reportePdf()" class="btn" style="margin-left: 15px; border-color: black; border-radius: 0.1px;">
+                            <button type="button" onclick="reportePdf()" class="btn"
+                                    style="margin-left: 15px; border-color: black; border-radius: 0.1px;">
                                 <img src="{{ asset('images/logopdf.png') }}" width="55px" height="55px">
                                 Generar PDF
                             </button>
                         </div>
                     </form>
                 </div>
-
             </div>
-
         </div>
     </div>
 </section>
-
 
 @extends('backend.menus.footerjs')
 @section('archivos-js')
 
     <script src="{{ asset('js/jquery.dataTables.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/dataTables.bootstrap4.js') }}" type="text/javascript"></script>
-
     <script src="{{ asset('js/toastr.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
@@ -98,52 +102,45 @@
     <script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
 
     <script>
-        $(document).ready(function() {
-
+        $(document).ready(function () {
             $('#select-equipos').select2({
                 theme: "bootstrap-5",
                 "language": {
-                    "noResults": function(){
+                    "noResults": function () {
                         return "Búsqueda no encontrada";
                     }
                 },
             });
         });
-
     </script>
 
     <script>
+        function reportePdf() {
+            var fechadesde   = document.getElementById('fecha-desde').value;
+            var fechahasta   = document.getElementById('fecha-hasta').value;
+            var equipo       = document.getElementById('select-equipos').value;
+            var distrito     = document.getElementById('select-distrito').value;
+            var fondos       = document.getElementById('select-fondos').value;
+            var lugarllenado = document.getElementById('select-lugarllenado').value;
 
-        function reportePdf(){
-
-            var fechadesde = document.getElementById('fecha-desde').value;
-            var fechahasta = document.getElementById('fecha-hasta').value;
-            var equipo = document.getElementById('select-equipos').value;
-            var distrito = document.getElementById('select-distrito').value;
-            var fondos = document.getElementById('select-fondos').value;
-
-            if(fechadesde === ''){
+            if (fechadesde === '') {
                 toastr.error('Fecha desde es requerido');
                 return;
             }
 
-            if(fechahasta === ''){
+            if (fechahasta === '') {
                 toastr.error('Fecha hasta es requerido');
                 return;
             }
 
-            window.open("{{ URL::to('admin/reportev2/generar/equipos') }}/" +
-                fechadesde + "/" + fechahasta + "/" + equipo + "/" + distrito + "/" + fondos);
+            window.open("{{ URL::to('admin/reportev2/generar/equipos') }}"
+                + "/" + fechadesde
+                + "/" + fechahasta
+                + "/" + equipo
+                + "/" + distrito
+                + "/" + fondos
+                + "/" + lugarllenado);
         }
-
-
-
-
-
-
-
     </script>
-
-
 
 @stop

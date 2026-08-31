@@ -9,8 +9,7 @@
 @stop
 
 <section class="content-header">
-    <div class="container-fluid">
-    </div>
+    <div class="container-fluid"></div>
 </section>
 
 <section class="content">
@@ -19,7 +18,7 @@
             <div class="col-md-6">
                 <div class="card card-gray-dark">
                     <div class="card-header">
-                        <h3 class="card-title">Reporte por Equipo</h3>
+                        <h3 class="card-title">Reporte por Factura</h3>
                     </div>
                     <form id="formulario-nuevo">
                         <div class="card-body">
@@ -29,16 +28,15 @@
                                 <select class="form-control" id="select-anio">
                                     <option value="1">2025</option>
                                     <option value="2">2026</option>
+                                    <option value="3">2027</option>
                                 </select>
                             </div>
 
                             <hr>
 
-                            <div class="row">
-                                <div class="form-group">
-                                    <label>Número de Factura</label>
-                                    <input type="text" class="form-control" id="numfactura" autocomplete="off" maxlength="100">
-                                </div>
+                            <div class="form-group">
+                                <label>Número de Factura</label>
+                                <input type="text" class="form-control" id="numfactura" autocomplete="off" maxlength="100">
                             </div>
 
                             <div class="form-group" style="width: 50%">
@@ -61,10 +59,17 @@
                                 </select>
                             </div>
 
-
+                            <div class="form-group" style="width: 50%">
+                                <label>Lugar de Llenado</label>
+                                <select class="form-control" id="select-lugarllenado">
+                                    <option value="0">TODOS</option>
+                                    @foreach($arrayLugarLlenado as $dato)
+                                        <option value="{{ $dato->id }}">{{ $dato->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
 
                         </div>
-
 
                         <div class="card-footer" style="float: right;">
                             <button type="button" onclick="reportePdf()" class="btn" style="margin-left: 15px; border-color: black; border-radius: 0.1px;">
@@ -72,23 +77,18 @@
                                 Generar PDF
                             </button>
                         </div>
-
                     </form>
                 </div>
-
             </div>
-
         </div>
     </div>
 </section>
-
 
 @extends('backend.menus.footerjs')
 @section('archivos-js')
 
     <script src="{{ asset('js/jquery.dataTables.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/dataTables.bootstrap4.js') }}" type="text/javascript"></script>
-
     <script src="{{ asset('js/toastr.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/axios.min.js') }}" type="text/javascript"></script>
     <script src="{{ asset('js/sweetalert2.all.min.js') }}"></script>
@@ -96,42 +96,25 @@
     <script src="{{ asset('js/select2.min.js') }}" type="text/javascript"></script>
 
     <script>
-        $(document).ready(function() {
+        function reportePdf() {
+            var numfactura    = document.getElementById('numfactura').value;
+            var distrito      = document.getElementById('select-distrito').value;
+            var fondos        = document.getElementById('select-fondos').value;
+            var anio          = document.getElementById('select-anio').value;
+            var lugarllenado  = document.getElementById('select-lugarllenado').value;
 
-            $('#select-equipos').select2({
-                theme: "bootstrap-5",
-                "language": {
-                    "noResults": function(){
-                        return "Búsqueda no encontrada";
-                    }
-                },
-            });
-        });
-
-    </script>
-
-    <script>
-
-        function reportePdf(){
-
-            var numfactura = document.getElementById('numfactura').value;
-            var distrito = document.getElementById('select-distrito').value;
-            var fondos = document.getElementById('select-fondos').value;
-            var anio = document.getElementById('select-anio').value;
-
-            if(numfactura === ''){
-                toastr.error('Factura es requerido')
+            if (numfactura === '') {
+                toastr.error('Factura es requerido');
                 return;
             }
 
-            window.open("{{ URL::to('admin/reportev2/pdf/factura') }}/" + numfactura
-                + "/" + distrito + "/" + fondos + "/" + anio);
+            window.open("{{ URL::to('admin/reportev2/pdf/factura') }}"
+                + "/" + numfactura
+                + "/" + distrito
+                + "/" + fondos
+                + "/" + anio
+                + "/" + lugarllenado);
         }
-
-
-
     </script>
-
-
 
 @stop

@@ -89,12 +89,17 @@ Route::get('/admin/reportev2/generar/equipos/consolidado/{desde}/{hasta}/{equipo
 
 //Para no consolidado
 Route::get('/admin/reportev2/fechas/index', [ReporteV2Controller::class,'vistaReporteFechas'])->name('admin.reporte.facturacion.equipos');
-Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}/{distrito}/{fondo}',
-    [ReporteV2Controller::class,'reporteEquipoFechaPDF']);
+Route::get('/admin/reportev2/generar/equipos/{desde}/{hasta}/{equipo}/{distrito}/{fondo}/{lugarllenado}',
+    [ReporteV2Controller::class, 'reporteEquipoFechaPDF']);
+
+
 
 // REPORTE FACTURA
 Route::get('/admin/reportev2/factura/index', [ReporteV2Controller::class,'vistaReporteFactura'])->name('admin.reporte.facturacion.factura');
-Route::get('/admin/reportev2/pdf/factura/{numfactura}/{distrito}/{fondo}/{anio}', [ReporteV2Controller::class,'reporteFacturaPDF']);
+Route::get('/admin/reportev2/pdf/factura/{numfactura}/{iddistrito}/{idfondo}/{anio}/{idlugarllenado}',
+    [ReporteV2Controller::class, 'reporteFacturaPDF']);
+
+
 
 // REPORTE DE CONTRATO
 Route::get('/admin/reportev2/contrato/index', [ReporteV2Controller::class,'vistaReporteContrato'])->name('admin.reporte.contrato');

@@ -145,7 +145,7 @@
                                     <div class="col-md-6">
 
                                         <div class="form-group">
-                                            <label>Descripción</label>
+                                            <label>Descripción (Opcional)</label>
                                             <input type="text" id="descripcion-nuevo" maxlength="800" placeholder="Descripción" class="form-control">
                                         </div>
 
