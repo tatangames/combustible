@@ -175,7 +175,7 @@ class ReporteV2Controller extends Controller
         $totalLinea    = number_format((float) $totalLinea,    2, '.', ',');
 
         $infoExtra    = Extras::where('id', 1)->first();
-        $logoalcaldia = 'images/logo.png';
+        $logoalcaldia = 'images/logoj.jpg';
 
         if ($infoExtra->reporte == 1) {
             $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
@@ -608,7 +608,7 @@ class ReporteV2Controller extends Controller
         $totalDineroMixto   = number_format((float) $totalDineroMixto,  2, '.', ',');
 
         $infoExtra   = Extras::where('id', 1)->first();
-        $logoalcaldia = 'images/logo.png';
+        $logoalcaldia = 'images/logoj.jpg';
 
         if ($infoExtra->reporte == 1) {
             $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
