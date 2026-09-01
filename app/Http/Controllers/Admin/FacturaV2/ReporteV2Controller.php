@@ -61,8 +61,6 @@ class ReporteV2Controller extends Controller
 
 
 
-
-
     public function reporteEquipoFechaPDF($desde, $hasta, $idequipo, $iddistrito, $idfondo, $idlugarllenado){
 
         $start = Carbon::parse($desde)->startOfDay();
@@ -136,6 +134,9 @@ class ReporteV2Controller extends Controller
             ->orderBy('fecha', 'ASC')
             ->get();
 
+        // Columna Lugar de Llenado: visible solo cuando se elige TODOS
+        $mostrarColumnaLugar = !$boolLugarTodos;
+
         foreach ($arrayFactura as $dato) {
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
@@ -162,6 +163,13 @@ class ReporteV2Controller extends Controller
             }
 
             $dato->producto = $producto;
+
+            // Nombre del Lugar de Llenado por fila
+            $nombreLugar = "";
+            if ($dato->id_lugarllenado && $infoL = LugarLLenado::where('id', $dato->id_lugarllenado)->first()) {
+                $nombreLugar = $infoL->nombre;
+            }
+            $dato->nombrelugarllenado = $nombreLugar;
 
             $infoEquipo   = Equipo::where('id', $dato->id_equipo)->first();
             $dato->placa  = $infoEquipo->placa;
@@ -190,87 +198,104 @@ class ReporteV2Controller extends Controller
 
         // ── ENCABEZADO INSTITUCIONAL ──────────────────────────────────────────────
         $tabla = "
-    <table width='100%' style='border-collapse:collapse; font-family:Arial,sans-serif; margin-bottom:10px;'>
-        <tr>
-            <td style='width:30%; border:0.8px solid #000; padding:6px 8px; vertical-align:middle;'>
-                <table width='100%'>
-                    <tr>
-                        <td style='width:35%; text-align:left;'>
-                            <img src='{$logoalcaldia}' style='height:40px;'>
-                        </td>
-                        <td style='width:65%; text-align:left; color:#104e8c;
-                                    font-size:11px; font-weight:bold; line-height:1.4;'>
-                            SANTA ANA NORTE<br>EL SALVADOR
-                        </td>
-                    </tr>
-                </table>
-            </td>
-            <td style='width:70%; border-top:0.8px solid #000; border-right:0.8px solid #000;
-                        border-bottom:0.8px solid #000; padding:8px;
-                        text-align:center; vertical-align:middle;'>
-                <div style='font-size:15px; font-weight:bold; color:#000; letter-spacing:.5px;'>
-                    REPORTE DE COMBUSTIBLE
-                </div>
-                <div style='font-size:13px; color:#000000; margin-top:4px;'>
-                    Gasolinera PUMA Metapán
-                </div>
-                <div style='font-size:13px; color:#000000; margin-top:2px;'>
-                    {$textoDistrito} &nbsp;|&nbsp; {$textoFondos}
-                </div>
-                <div style='font-size:13px; color:#000000; margin-top:2px;'>
-                    {$textoLugar}
-                </div>
-                <div style='font-size:13px; color:#000000; margin-top:2px;'>
-                    Del: <strong>{$desdeFormat}</strong> &nbsp;al&nbsp; <strong>{$hastaFormat}</strong>
-                </div>
-            </td>
-        </tr>
-    </table>";
+<table width='100%' style='border-collapse:collapse; font-family:Arial,sans-serif; margin-bottom:10px;'>
+    <tr>
+        <td style='width:30%; border:0.8px solid #000; padding:6px 8px; vertical-align:middle;'>
+            <table width='100%'>
+                <tr>
+                    <td style='width:35%; text-align:left;'>
+                        <img src='{$logoalcaldia}' style='height:40px;'>
+                    </td>
+                    <td style='width:65%; text-align:left; color:#104e8c;
+                                font-size:11px; font-weight:bold; line-height:1.4;'>
+                        SANTA ANA NORTE<br>EL SALVADOR
+                    </td>
+                </tr>
+            </table>
+        </td>
+        <td style='width:70%; border-top:0.8px solid #000; border-right:0.8px solid #000;
+                    border-bottom:0.8px solid #000; padding:8px;
+                    text-align:center; vertical-align:middle;'>
+            <div style='font-size:15px; font-weight:bold; color:#000; letter-spacing:.5px;'>
+                REPORTE DE COMBUSTIBLE
+            </div>
+            <div style='font-size:13px; color:#000000; margin-top:4px;'>
+                Gasolinera PUMA Metapán
+            </div>
+            <div style='font-size:13px; color:#000000; margin-top:2px;'>
+                {$textoDistrito} &nbsp;|&nbsp; {$textoFondos}
+            </div>
+            <div style='font-size:13px; color:#000000; margin-top:2px;'>
+                {$textoLugar}
+            </div>
+            <div style='font-size:13px; color:#000000; margin-top:2px;'>
+                Del: <strong>{$desdeFormat}</strong> &nbsp;al&nbsp; <strong>{$hastaFormat}</strong>
+            </div>
+        </td>
+    </tr>
+</table>";
 
         $tabla .= "<div style='margin-top:10px;'></div>";
 
+        // ── COLUMNAS CONDICIONALES ────────────────────────────────────────────────
+        $thLugar = $mostrarColumnaLugar
+            ? "<th style='text-align:center; font-size:10px; width:11%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Lugar Llenado</th>"
+            : "";
+
+        $tdLugarTotal = $mostrarColumnaLugar
+            ? "<td style='border:0.5px solid #aaa; padding:3px;'></td>"
+            : "";
+
         // ── TABLA DE DATOS ────────────────────────────────────────────────────────
         $tabla .= "
-    <table id='tablaFor' style='width:100%; border-collapse:collapse;'>
-        <tbody>
-        <tr style='background-color:#e1e1e1;'>
-            <th style='text-align:center; font-size:10px; width:10%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Fecha</th>
-            <th style='text-align:center; font-size:10px; width:14%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Equipo</th>
-            <th style='text-align:center; font-size:10px; width:8%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Placa</th>
-            <th style='text-align:center; font-size:10px; width:12%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Factura</th>
-            <th style='text-align:center; font-size:10px; width:6%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Prod.</th>
-            <th style='text-align:center; font-size:10px; width:14%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Descripción</th>
-            <th style='text-align:center; font-size:10px; width:9%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Galones</th>
-            <th style='text-align:center; font-size:10px; width:9%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>KM</th>
-            <th style='text-align:center; font-size:10px; width:9%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Precio U.</th>
-            <th style='text-align:center; font-size:10px; width:12%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Valor</th>
-        </tr>";
+<table id='tablaFor' style='width:100%; border-collapse:collapse;'>
+    <tbody>
+    <tr style='background-color:#e1e1e1;'>
+        <th style='text-align:center; font-size:10px; width:10%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Fecha</th>
+        <th style='text-align:center; font-size:10px; width:14%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Equipo</th>
+        <th style='text-align:center; font-size:10px; width:8%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Placa</th>
+        <th style='text-align:center; font-size:10px; width:12%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Factura</th>
+        <th style='text-align:center; font-size:10px; width:6%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Prod.</th>
+        <th style='text-align:center; font-size:10px; width:14%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Descripción</th>
+        {$thLugar}
+        <th style='text-align:center; font-size:10px; width:9%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Galones</th>
+        <th style='text-align:center; font-size:10px; width:9%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>KM</th>
+        <th style='text-align:center; font-size:10px; width:9%;  font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Precio U.</th>
+        <th style='text-align:center; font-size:10px; width:12%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Valor</th>
+    </tr>";
 
         foreach ($arrayFactura as $data) {
+
+            $tdLugar = $mostrarColumnaLugar
+                ? "<td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->nombrelugarllenado}</td>"
+                : "";
+
             $tabla .= "
-        <tr>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->fechaFormat}</td>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->equipo}</td>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->placa}</td>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->numero_factura}</td>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->producto}</td>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->descripcion}</td>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->cantidad}</td>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->km}</td>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>\${$data->unitario}</td>
-            <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>\${$data->multi}</td>
-        </tr>";
+    <tr>
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->fechaFormat}</td>
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->equipo}</td>
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->placa}</td>
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->numero_factura}</td>
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->producto}</td>
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->descripcion}</td>
+        {$tdLugar}
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->cantidad}</td>
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>{$data->km}</td>
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>\${$data->unitario}</td>
+        <td style='font-size:10px; text-align:center; border:0.5px solid #aaa; padding:3px;'>\${$data->multi}</td>
+    </tr>";
         }
 
         $tabla .= "
-        <tr style='background-color:#e1e1e1;'>
-            <td colspan='6' style='font-size:11px; text-align:center; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>TOTAL</td>
-            <td style='font-size:11px; text-align:center; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>{$totalGalonesMixtos}</td>
-            <td style='border:0.5px solid #aaa; padding:3px;'></td>
-            <td style='border:0.5px solid #aaa; padding:3px;'></td>
-            <td style='font-size:10px; text-align:center; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>\${$totalLinea}</td>
-        </tr>
-    </tbody></table>";
+    <tr style='background-color:#e1e1e1;'>
+        <td colspan='6' style='font-size:11px; text-align:center; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>TOTAL</td>
+        {$tdLugarTotal}
+        <td style='font-size:11px; text-align:center; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>{$totalGalonesMixtos}</td>
+        <td style='border:0.5px solid #aaa; padding:3px;'></td>
+        <td style='border:0.5px solid #aaa; padding:3px;'></td>
+        <td style='font-size:10px; text-align:center; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>\${$totalLinea}</td>
+    </tr>
+</tbody></table>";
 
         // ── TOTALES ───────────────────────────────────────────────────────────────
         $tabla .= "<br>";
@@ -286,34 +311,32 @@ class ReporteV2Controller extends Controller
 
         // ── FOOTER ────────────────────────────────────────────────────────────────
         $footer = "<table width='100%' id='tablaForTranspa' style='margin-top:35px;'>
-        <tbody>
-        <tr>
-            <td width='25%' style='font-weight:normal; font-size:14px;'>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ______________________________
-                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre1}
-                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre2}
-            </td>
-            <td width='25%' style='font-weight:normal; font-size:14px;'>
-                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _________________________________________
-                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre3}
-                <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre4}
-            </td>
-        </tr>
-        <tr>
-            <td colspan='2' style='font-weight:bold; text-align:center; font-size:12px;'>
-                Página {PAGENO}/{nb}
-            </td>
-        </tr>
-        </tbody>
-    </table>";
+    <tbody>
+    <tr>
+        <td width='25%' style='font-weight:normal; font-size:14px;'>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ______________________________
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre1}
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre2}
+        </td>
+        <td width='25%' style='font-weight:normal; font-size:14px;'>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _________________________________________
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre3}
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre4}
+        </td>
+    </tr>
+    <tr>
+        <td colspan='2' style='font-weight:bold; text-align:center; font-size:12px;'>
+            Página {PAGENO}/{nb}
+        </td>
+    </tr>
+    </tbody>
+</table>";
 
         $mpdf->SetHTMLFooter($footer);
         $mpdf->SetAutoPageBreak(true, 45);
         $mpdf->WriteHTML($tabla, 2);
         $mpdf->Output();
     }
-
-
 
 
 
