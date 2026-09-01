@@ -70,10 +70,12 @@ Route::post('/admin/facturav2/nuevo', [FacturaV2Controller::class, 'nuevoFactura
 
 // TABLA FACTURACION
 Route::get('/admin/facturav2/listado/index', [FacturaV2Controller::class,'indexFacturacion'])->name('admin.facturav2.listado.index');
-Route::get('/admin/facturav2/listado/tabla', [FacturaV2Controller::class, 'tablaFacturacionTabla']);
-Route::get('/admin/facturav2/listado/tabla/{idfiltro}', [FacturaV2Controller::class, 'tablaFacturacionTablaFiltro']);
+
+Route::get('/admin/facturav2/listado/tabla', [FacturaV2Controller::class, 'tablaFacturacion']);
+
 
 Route::post('/admin/facturav2/informacion', [FacturaV2Controller::class, 'informacionFactura']);
+
 Route::post('/admin/facturav2/actualizar', [FacturaV2Controller::class, 'actualizarFactura']);
 Route::post('/admin/facturav2/borrar', [FacturaV2Controller::class, 'borrarFactura']);
 

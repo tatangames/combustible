@@ -20,10 +20,9 @@
 
 <section class="content-header">
     <div class="container-fluid">
+        <div class="form-group d-flex flex-wrap align-items-end gap-3" style="gap: 12px;">
 
-        <div class="form-group">
-
-            <div class="form-group" style="width: 30%">
+            <div style="width: 250px;">
                 <label>Filtro por Equipo</label>
                 <select class="form-control" id="select-equipo">
                     <option value="0" selected>TODOS</option>
@@ -33,10 +32,22 @@
                 </select>
             </div>
 
-            <button type="button" class="btn btn-primary" onclick="filtrarDatos()">Filtrar</button>
+            <div style="width: 180px;">
+                <label>Fecha Desde</label>
+                <input type="date" class="form-control" id="fecha-desde">
+            </div>
+
+            <div style="width: 180px;">
+                <label>Fecha Hasta</label>
+                <input type="date" class="form-control" id="fecha-hasta">
+            </div>
+
+            <div>
+                <button type="button" class="btn btn-primary" onclick="filtrarDatos()">Filtrar</button>
+                <button type="button" class="btn btn-secondary ml-2" onclick="limpiarFiltros()">Limpiar</button>
+            </div>
 
         </div>
-
     </div>
 </section>
 
@@ -209,16 +220,6 @@
     </script>
 
     <script>
-
-        function recargar(){
-
-            openLoading()
-            $('#select-equipo').val(0).trigger('change');
-
-            var ruta = "{{ URL::to('/admin/facturav2/listado/tabla') }}";
-            $('#tablaDatatable').load(ruta);
-        }
-
 
         function informacion(id){
             openLoading();
@@ -424,12 +425,37 @@
         }
 
 
-        function filtrarDatos(){
-            var id = document.getElementById('select-equipo').value;
+        var filtrosActivos = '';
+
+        function filtrarDatos() {
+            var equipo     = document.getElementById('select-equipo').value;
+            var fechaDesde = document.getElementById('fecha-desde').value;
+            var fechaHasta = document.getElementById('fecha-hasta').value;
+
+            var params = '?equipo=' + equipo;
+            if (fechaDesde) params += '&desde=' + fechaDesde;
+            if (fechaHasta) params += '&hasta=' + fechaHasta;
+
+            // Guardar filtros activos
+            filtrosActivos = params;
 
             openLoading();
+            var ruta = "{{ URL::to('/admin/facturav2/listado/tabla') }}" + filtrosActivos;
+            $('#tablaDatatable').load(ruta);
+        }
 
-            var ruta = "{{ URL::to('/admin/facturav2/listado/tabla') }}/" + id;
+
+        function limpiarFiltros() {
+            $('#select-equipo').val(0).trigger('change');
+            document.getElementById('fecha-desde').value = '';
+            document.getElementById('fecha-hasta').value = '';
+            filtrosActivos = '';
+            recargar();
+        }
+
+        function recargar() {
+            openLoading();
+            var ruta = "{{ URL::to('/admin/facturav2/listado/tabla') }}" + filtrosActivos;
             $('#tablaDatatable').load(ruta);
         }
 

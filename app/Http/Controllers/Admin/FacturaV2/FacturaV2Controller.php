@@ -110,6 +110,62 @@ class FacturaV2Controller extends Controller
         return view('backend.admin.facturav2.vistafacturav2', compact('arrayEquipos', 'arrayLlenado'));
     }
 
+
+    public function tablaFacturacion(Request $request)
+    {
+        $equipo     = $request->query('equipo', '0');
+        $fechaDesde = $request->query('desde');
+        $fechaHasta = $request->query('hasta');
+
+        $query = Facturacion::orderBy('fecha', 'DESC');
+
+        if ($equipo && $equipo !== '0') {
+            $query->where('id_equipo', $equipo);
+        }
+
+        if ($fechaDesde) {
+            $query->whereDate('fecha', '>=', $fechaDesde);
+        }
+
+        if ($fechaHasta) {
+            $query->whereDate('fecha', '<=', $fechaHasta);
+        }
+
+        $listado = $query->limit(5000)->get();
+
+        foreach ($listado as $dato) {
+            $dato->fechaFormat  = date("d-m-Y", strtotime($dato->fecha));
+            $dato->precioFormat = '$ ' . number_format((float)$dato->unitario, 2, '.', ',');
+
+            $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
+            $dato->nombreEquipo = $infoEquipo->nombre;
+            $dato->placaEquipo  = $infoEquipo->placa;
+
+            $infoCombustible = TipoCombustible::where('id', $dato->id_tipocombustible)->first();
+            $dato->tipoCombustible = $infoCombustible->nombre;
+
+            $dato->distrito = "";
+            $dato->fondos   = "";
+            if ($infoDistrito = Distritos::where('id', $dato->id_distrito)->first()) {
+                $dato->distrito = $infoDistrito->nombre;
+            }
+            if ($infoFondo = TipoFondos::where('id', $dato->id_fondos)->first()) {
+                $dato->fondos = $infoFondo->nombre;
+            }
+
+            $dato->nombreLugarLlenado = "";
+            if ($dato->id_lugarllenado && $infoLugar = LugarLLenado::where('id', $dato->id_lugarllenado)->first()) {
+                $dato->nombreLugarLlenado = $infoLugar->nombre;
+            }
+        }
+
+        return view('backend.admin.facturav2.tablafacturav2', compact('listado'));
+    }
+
+
+
+
+
     public function tablaFacturacionTabla()
     {
         $listado = Facturacion::orderBy('fecha', 'DESC')
@@ -177,6 +233,12 @@ class FacturaV2Controller extends Controller
 
         return view('backend.admin.facturav2.tablafacturav2', compact('listado'));
     }
+
+
+
+
+
+
 
     public function informacionFactura(Request $request)
     {
