@@ -13,7 +13,7 @@
                                 <th>Producto</th>
                                 <th>Precio</th>
                                 <th>Cantidad</th>
-
+                                <th>Lugar Llenado</th>
                                 <th>Opciones</th>
                             </tr>
                             </thead>
@@ -27,18 +27,15 @@
                                     <td>{{ $dato->tipoCombustible }}</td>
                                     <td>{{ $dato->precioFormat }}</td>
                                     <td>{{ $dato->cantidad }}</td>
+                                    <td>{{ $dato->nombreLugarLlenado }}</td>
                                     <td>
-
                                         <button type="button" class="btn btn-success btn-xs" onclick="informacion({{ $dato->id }})">
                                             <i class="fas fa-eye" title="Editar"></i>&nbsp; Editar
                                         </button>
-
                                         <button type="button" style="margin-left: 5px" class="btn btn-danger btn-xs" onclick="modalBorrar({{ $dato->id }})">
                                             <i class="fas fa-trash" title="Borrar"></i>&nbsp; Borrar
                                         </button>
-
                                     </td>
-
                                 </tr>
                             @endforeach
 
@@ -57,31 +54,21 @@
     </div>
 </section>
 
-
 <script>
     $(document).ready(function() {
 
-        // Añadir la función de ordenación personalizada
         jQuery.extend(jQuery.fn.dataTableExt.oSort, {
             "date-dmy-pre": function(a) {
                 var ukDatea = a.split('-');
-
-                // Convierte la fecha al formato YYYYMMDD para que pueda ser comparada fácilmente
                 return (ukDatea[2] + ukDatea[1] + ukDatea[0]) * 1;
             },
-
-            "date-dmy-asc": function(a, b) {
-                return a - b;
-            },
-
-            "date-dmy-desc": function(a, b) {
-                return b - a;
-            }
+            "date-dmy-asc": function(a, b) { return a - b; },
+            "date-dmy-desc": function(a, b) { return b - a; }
         });
 
         $("#tabla").DataTable({
             "columnDefs": [
-                { "type": "date-dmy", "targets": 0 } // Cambia el índice según la columna de fecha
+                { "type": "date-dmy", "targets": 0 }
             ],
             "order": [[0, "desc"]],
             "paging": true,
@@ -93,34 +80,30 @@
             "pagingType": "full_numbers",
             "lengthMenu": [[100, 150, -1], [100, 150, "Todo"]],
             "language": {
-
-                "sProcessing": "Procesando...",
-                "sLengthMenu": "Mostrar _MENU_ registros",
-                "sZeroRecords": "No se encontraron resultados",
-                "sEmptyTable": "Ningún dato disponible en esta tabla",
-                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-                "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-                "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-                "sInfoPostFix": "",
-                "sSearch": "Buscar:",
-                "sUrl": "",
-                "sInfoThousands": ",",
+                "sProcessing":     "Procesando...",
+                "sLengthMenu":     "Mostrar _MENU_ registros",
+                "sZeroRecords":    "No se encontraron resultados",
+                "sEmptyTable":     "Ningún dato disponible en esta tabla",
+                "sInfo":           "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+                "sInfoEmpty":      "Mostrando registros del 0 al 0 de un total de 0 registros",
+                "sInfoFiltered":   "(filtrado de un total de _MAX_ registros)",
+                "sInfoPostFix":    "",
+                "sSearch":         "Buscar:",
+                "sUrl":            "",
+                "sInfoThousands":  ",",
                 "sLoadingRecords": "Cargando...",
                 "oPaginate": {
-                    "sFirst": "Primero",
-                    "sLast": "Último",
-                    "sNext": "Siguiente",
+                    "sFirst":    "Primero",
+                    "sLast":     "Último",
+                    "sNext":     "Siguiente",
                     "sPrevious": "Anterior"
                 },
                 "oAria": {
-                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
+                    "sSortAscending":  ": Activar para ordenar la columna de manera ascendente",
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
-
             },
             "responsive": true, "lengthChange": true, "autoWidth": false,
         });
     });
-
-
 </script>

@@ -105,138 +105,148 @@ class FacturaV2Controller extends Controller
     public function indexFacturacion()
     {
         $arrayEquipos = Equipo::orderBy('nombre', 'ASC')->get();
-        return view('backend.admin.facturav2.vistafacturav2', compact('arrayEquipos'));
+        $arrayLlenado = LugarLLenado::orderBy('nombre', 'ASC')->get();
+
+        return view('backend.admin.facturav2.vistafacturav2', compact('arrayEquipos', 'arrayLlenado'));
     }
 
     public function tablaFacturacionTabla()
     {
-
         $listado = Facturacion::orderBy('fecha', 'DESC')
             ->limit(5000)
             ->get();
 
-        foreach ($listado as $dato){
-            $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
+        foreach ($listado as $dato) {
+            $dato->fechaFormat  = date("d-m-Y", strtotime($dato->fecha));
             $dato->precioFormat = '$ ' . number_format((float)$dato->unitario, 2, '.', ',');
 
             $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
             $dato->nombreEquipo = $infoEquipo->nombre;
-            $dato->placaEquipo = $infoEquipo->placa;
+            $dato->placaEquipo  = $infoEquipo->placa;
 
             $infoCombustible = TipoCombustible::where('id', $dato->id_tipocombustible)->first();
             $dato->tipoCombustible = $infoCombustible->nombre;
 
             $nombreDistrito = "";
-            $nombreFondo = "";
-            if($infoDistrito = Distritos::where('id', $dato->id_distrito)->first()){
+            $nombreFondo    = "";
+            if ($infoDistrito = Distritos::where('id', $dato->id_distrito)->first()) {
                 $nombreDistrito = $infoDistrito->nombre;
             }
-
-            if($infoFondo = TipoFondos::where('id', $dato->id_fondos)->first()){
+            if ($infoFondo = TipoFondos::where('id', $dato->id_fondos)->first()) {
                 $nombreFondo = $infoFondo->nombre;
             }
 
             $dato->distrito = $nombreDistrito;
-            $dato->fondos = $nombreFondo;
+            $dato->fondos   = $nombreFondo;
+
+            // Lugar de llenado
+            $dato->nombreLugarLlenado = "";
+            if ($dato->id_lugarllenado && $infoLugar = LugarLLenado::where('id', $dato->id_lugarllenado)->first()) {
+                $dato->nombreLugarLlenado = $infoLugar->nombre;
+            }
         }
 
         return view('backend.admin.facturav2.tablafacturav2', compact('listado'));
     }
 
-    public function tablaFacturacionTablaFiltro($filtro){
-
-        if($filtro == '0'){
-            // TODOS
+    public function tablaFacturacionTablaFiltro($filtro)
+    {
+        if ($filtro == '0') {
             $listado = Facturacion::orderBy('fecha', 'DESC')->get();
-        }else{
+        } else {
             $listado = Facturacion::where('id_equipo', $filtro)->orderBy('fecha', 'DESC')->get();
         }
 
-
-        foreach ($listado as $dato){
-            $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
+        foreach ($listado as $dato) {
+            $dato->fechaFormat  = date("d-m-Y", strtotime($dato->fecha));
             $dato->precioFormat = '$ ' . number_format((float)$dato->unitario, 2, '.', ',');
 
             $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
             $dato->nombreEquipo = $infoEquipo->nombre;
-            $dato->placaEquipo = $infoEquipo->placa;
+            $dato->placaEquipo  = $infoEquipo->placa;
 
             $infoCombustible = TipoCombustible::where('id', $dato->id_tipocombustible)->first();
             $dato->tipoCombustible = $infoCombustible->nombre;
+
+            // Lugar de llenado
+            $dato->nombreLugarLlenado = "";
+            if ($dato->id_lugarllenado && $infoLugar = LugarLLenado::where('id', $dato->id_lugarllenado)->first()) {
+                $dato->nombreLugarLlenado = $infoLugar->nombre;
+            }
         }
 
         return view('backend.admin.facturav2.tablafacturav2', compact('listado'));
     }
 
-
-    public function informacionFactura(Request $request){
-
-        $regla = array(
-            'id' => 'required',
-        );
-
+    public function informacionFactura(Request $request)
+    {
+        $regla = ['id' => 'required'];
         $validar = Validator::make($request->all(), $regla);
+        if ($validar->fails()) { return ['success' => 0]; }
 
-        if ($validar->fails()){ return ['success' => 0];}
+        if ($info = Facturacion::where('id', $request->id)->first()) {
 
-        if($info = Facturacion::where('id', $request->id)->first()){
+            $arrayPro       = TipoCombustible::orderBy('nombre', 'ASC')->get();
+            $arrayEquipo    = Equipo::orderBy('nombre', 'ASC')->get();
+            $arrayFondos    = TipoFondos::orderBy('nombre', 'ASC')->get();
+            $arrayDistrito  = Distritos::orderBy('nombre', 'ASC')->get();
+            $arrayLugar     = LugarLLenado::orderBy('nombre', 'ASC')->get();
 
-            $arrayPro = TipoCombustible::orderBy('nombre', 'ASC')->get();
-            $arrayEquipo = Equipo::orderBy('nombre', 'ASC')->get();
-            $arrayFondos = TipoFondos::orderBy('nombre', 'ASC')->get();
-            $arrayDistrito = Distritos::orderBy('nombre', 'ASC')->get();
-
-            return ['success' => 1, 'info' => $info, 'arrayproducto' => $arrayPro,
-                'arrayequipo' => $arrayEquipo, 'arrayfondos' => $arrayFondos,
-                'arraydistrito' => $arrayDistrito];
-        }else{
+            return [
+                'success'          => 1,
+                'info'             => $info,
+                'arrayproducto'    => $arrayPro,
+                'arrayequipo'      => $arrayEquipo,
+                'arrayfondos'      => $arrayFondos,
+                'arraydistrito'    => $arrayDistrito,
+                'arraylugarllenado'=> $arrayLugar,
+            ];
+        } else {
             return ['success' => 2];
         }
     }
 
+    public function actualizarFactura(Request $request)
+    {
 
-    public function actualizarFactura(Request $request){
+        Log::info($request->all());
 
-        $regla = array(
-            'id' => 'required',
-            'numfactura' => 'required',
-            'fecha' => 'required',
-            'producto' => 'required',
-            'equipo' => 'required',
-            'galones' => 'required',
-            'unitario' => 'required',
-            'fondo' => 'required',
-            'distrito' => 'required',
-        );
-
-        // equipo, km, descripcion
+        $regla = [
+            'id'          => 'required',
+            'numfactura'  => 'required',
+            'fecha'       => 'required',
+            'producto'    => 'required',
+            'equipo'      => 'required',
+            'galones'     => 'required',
+            'unitario'    => 'required',
+            'fondo'       => 'required',
+            'distrito'    => 'required',
+        ];
 
         $validar = Validator::make($request->all(), $regla);
-
-        if ($validar->fails()){ return ['success' => 0];}
-
+        if ($validar->fails()) { return ['success' => 0]; }
 
         DB::beginTransaction();
         try {
-
             Facturacion::where('id', $request->id)
                 ->update([
-                    'id_equipo' => $request->equipo,
+                    'id_equipo'          => $request->equipo,
                     'id_tipocombustible' => $request->producto,
-                    'numero_factura' => $request->numfactura,
-                    'fecha' => $request->fecha,
-                    'cantidad' => $request->galones,
-                    'unitario' => $request->unitario,
-                    'km' => $request->km,
-                    'descripcion' => $request->descripcion,
-                    'id_fondos' => $request->fondo,
-                    'id_distrito' => $request->distrito,
+                    'numero_factura'     => $request->numfactura,
+                    'fecha'              => $request->fecha,
+                    'cantidad'           => $request->galones,
+                    'unitario'           => $request->unitario,
+                    'km'                 => $request->km,
+                    'descripcion'        => $request->descripcion,
+                    'id_fondos'          => $request->fondo,
+                    'id_distrito'        => $request->distrito,
+                    'id_lugarllenado'    => $request->lugarllenado,
                 ]);
 
             DB::commit();
             return ['success' => 1];
 
-        }catch(\Throwable $e){
+        } catch (\Throwable $e) {
             Log::info('error: ' . $e);
             DB::rollback();
             return ['success' => 99];

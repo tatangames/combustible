@@ -115,6 +115,13 @@
                                             <input type="text" id="km-editar" maxlength="15" class="form-control">
                                         </div>
 
+                                        <div class="form-group">
+                                            <label>Lugar de Llenado</label>
+                                            <select class="form-control" id="lugarllenado-editar">
+                                            </select>
+                                        </div>
+
+
                                     </div>
 
 
@@ -204,6 +211,8 @@
     <script>
 
         function recargar(){
+
+            openLoading()
             $('#select-equipo').val(0).trigger('change');
 
             var ruta = "{{ URL::to('/admin/facturav2/listado/tabla') }}";
@@ -235,6 +244,7 @@
                         document.getElementById("equipo-editar").options.length = 0;
                         document.getElementById("fondo-editar").options.length = 0;
                         document.getElementById("distrito-editar").options.length = 0;
+                        document.getElementById("lugarllenado-editar").options.length = 0;
 
                         $.each(response.data.arrayproducto, function( key, val ){
                             if(response.data.info.id_tipocombustible == val.id){
@@ -244,7 +254,6 @@
                             }
                         });
 
-
                         $.each(response.data.arrayequipo, function( key, val ){
                             if(response.data.info.id_equipo == val.id){
                                 $('#equipo-editar').append('<option value="' +val.id +'" selected="selected">'+ val.nombre +'</option>');
@@ -252,12 +261,25 @@
                                 $('#equipo-editar').append('<option value="' +val.id +'">'+ val.nombre +'</option>');
                             }
                         });
+
                         if(response.data.info.producto == 'D'){
                             document.getElementById('producto-editar').options.selectedIndex = 0;
                         }
 
-                        //**********************************
+                        // Lugar de Llenado — opción vacía (null) primero
+                        $('#lugarllenado-editar').append('<option value="">-- Sin lugar de llenado --</option>');
+                        $.each(response.data.arraylugarllenado, function( key, val ){
+                            if(response.data.info.id_lugarllenado == val.id){
+                                $('#lugarllenado-editar').append('<option value="' + val.id + '" selected="selected">' + val.nombre + '</option>');
+                            } else {
+                                $('#lugarllenado-editar').append('<option value="' + val.id + '">' + val.nombre + '</option>');
+                            }
+                        });
 
+                        // Si no tiene lugar asignado, selecciona la opción vacía (null)
+                        if(!response.data.info.id_lugarllenado){
+                            $('#lugarllenado-editar').val('');
+                        }
 
                         $.each(response.data.arrayfondos, function( key, val ){
                             if(response.data.info.id_fondos == val.id){
@@ -300,6 +322,8 @@
 
             var fondos = document.getElementById('fondo-editar').value;
             var distrito = document.getElementById('distrito-editar').value;
+            var lugarllenado = document.getElementById('lugarllenado-editar').value;
+
 
             if(numfactura === ''){
                 toastr.error('# Factura es requerido');
@@ -334,6 +358,7 @@
             formData.append('descripcion', descripcion);
             formData.append('fondo', fondos);
             formData.append('distrito', distrito);
+            formData.append('lugarllenado', lugarllenado);
 
             axios.post(url+'/facturav2/actualizar', formData, {
             })
