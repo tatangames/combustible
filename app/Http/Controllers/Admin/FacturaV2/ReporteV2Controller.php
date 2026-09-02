@@ -340,175 +340,182 @@ class ReporteV2Controller extends Controller
 
 
 
-    //Agregue para reporte consolidado de equipos
     public function reporteEquipoConsolidado($desde, $hasta, $idequipo, $iddistrito, $idfondo){
 
         $start = Carbon::parse($desde)->startOfDay();
-        $end = Carbon::parse($hasta)->endOfDay();
+        $end   = Carbon::parse($hasta)->endOfDay();
 
         $desdeFormat = date("d-m-Y", strtotime($desde));
         $hastaFormat = date("d-m-Y", strtotime($hasta));
 
         $nombreDistrito = "TODOS";
-        if($infoDistrito = Distritos::where('id', $iddistrito)->first()){
+        if ($infoDistrito = Distritos::where('id', $iddistrito)->first()) {
             $nombreDistrito = $infoDistrito->nombre;
         }
 
         $nombreFondo = "TODOS";
-        if($infoFondo = TipoFondos::where('id', $idfondo)->first()){
+        if ($infoFondo = TipoFondos::where('id', $idfondo)->first()) {
             $nombreFondo = $infoFondo->nombre;
         }
 
-        $boolEquipoTodos = true; // defecto buscar por algun equipo
-        $boolDistritoTodos = true; // defecto buscar por algun distrito
-        $boolFondosTodos = true; // defecto buscar por algun fondos
+        $boolEquipoTodos   = true;
+        $boolDistritoTodos = true;
+        $boolFondosTodos   = true;
 
-        if($idequipo == '0'){
-            $boolEquipoTodos = false; // defecto seran todos los equipos
+        if ($idequipo == '0') {
+            $boolEquipoTodos = false;
         }
 
-        if($iddistrito == '0'){
-            $boolDistritoTodos = false; // defecto seran todos los distrito
+        if ($iddistrito == '0') {
+            $boolDistritoTodos = false;
         }
 
-        if($idfondo == '0'){
-            $boolFondosTodos = false; // defecto seran todos los fondos
+        if ($idfondo == '0') {
+            $boolFondosTodos = false;
         }
 
-         $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
+        $arrayFactura = Facturacion::whereBetween('fecha', [$start, $end])
             ->select('id_equipo',
                 DB::raw('SUM(cantidad) as total_galones'),
-                DB::raw('SUM(ROUND(cantidad, 2) * unitario)  as total_dolares')
+                DB::raw('SUM(ROUND(cantidad, 2) * unitario) as total_dolares')
             )
-            ->when($boolEquipoTodos, function($query) use ($idequipo) {
+            ->when($boolEquipoTodos, function ($query) use ($idequipo) {
                 return $query->where('id_equipo', $idequipo);
             })
-            ->when($boolDistritoTodos, function($query) use ($iddistrito) {
+            ->when($boolDistritoTodos, function ($query) use ($iddistrito) {
                 return $query->where('id_distrito', $iddistrito);
             })
-            ->when($boolFondosTodos, function($query) use ($idfondo) {
+            ->when($boolFondosTodos, function ($query) use ($idfondo) {
                 return $query->where('id_fondos', $idfondo);
             })
             ->groupBy('id_equipo')
             ->orderBy('id_equipo', 'ASC')
             ->get();
 
-        foreach ($arrayFactura as $dato){
+        foreach ($arrayFactura as $dato) {
             $dato->fechaFormat = date("d-m-Y", strtotime($dato->fecha));
 
             $multi = $dato->cantidad * $dato->unitario;
 
             $producto = '';
-
-            if($dato->id_tipocombustible == 2){ // REGULAR
+            if ($dato->id_tipocombustible == 2) {
                 $producto = "R";
-            }
-            else if($dato->id_tipocombustible == 1){ // DIESEL
+            } elseif ($dato->id_tipocombustible == 1) {
                 $producto = "D";
-            }
-            else if($dato->id_tipocombustible == 3){ // ESPECIAL
+            } elseif ($dato->id_tipocombustible == 3) {
                 $producto = "E";
             }
 
             $dato->producto = $producto;
-            $infoEquipo = Equipo::where('id', $dato->id_equipo)->first();
 
+            $infoEquipo   = Equipo::where('id', $dato->id_equipo)->first();
             $dato->equipo = $infoEquipo->nombre;
-
-            $dato->multi = number_format((float)$multi, 2, '.', ',');
+            $dato->multi  = number_format((float) $multi, 2, '.', ',');
         }
 
-        $infoExtra = Extras::where('id', 1)->first();
+        $infoExtra    = Extras::where('id', 1)->first();
+        $logoalcaldia = 'images/logoj.jpg';
 
-        if($infoExtra->reporte == 1){
+        if ($infoExtra->reporte == 1) {
             $mpdf = new \Mpdf\Mpdf(['tempDir' => sys_get_temp_dir(), 'format' => 'LETTER']);
-        }else{
-            $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER', ]);
+        } else {
+            $mpdf = new \Mpdf\Mpdf(['format' => 'LETTER']);
         }
 
         $mpdf->SetTitle('Combustible');
         $mpdf->showImageErrors = false;
-
         $stylesheet = file_get_contents('css/cssreporte.css');
+        $mpdf->WriteHTML($stylesheet, 1);
 
-        $mpdf->WriteHTML($stylesheet,1);
-
-
-        $logoalcaldia = 'images/logo.png';
-
+        // ── ENCABEZADO INSTITUCIONAL ──────────────────────────────────────────────
         $tabla = "
-            <table style='width: 100%;'>
+<table width='100%' style='border-collapse:collapse; font-family:Arial,sans-serif; margin-bottom:10px;'>
+    <tr>
+        <td style='width:30%; border:0.8px solid #000; padding:6px 8px; vertical-align:middle;'>
+            <table width='100%'>
                 <tr>
-                    <td style='text-align: center;'>
-                        <p id='titulo' style='margin: 0;'>REPORTE DE COMBUSTIBLE <br>
-                        Gasolinera PUMA Metapán <br>
-                        Distrito de: $nombreDistrito <br>
-                        Tipo Fondo: $nombreFondo <br>
-                        De: $desdeFormat hasta: $hastaFormat <br>
-                        </p>
+                    <td style='width:35%; text-align:left;'>
+                        <img src='{$logoalcaldia}' style='height:40px;'>
                     </td>
-                    <td style='width: 66px; text-align: right;'>
-                        <img id='logo' src='$logoalcaldia' style='width: 66px; height: 73px;' />
+                    <td style='width:65%; text-align:left; color:#104e8c;
+                                font-size:11px; font-weight:bold; line-height:1.4;'>
+                        SANTA ANA NORTE<br>EL SALVADOR
                     </td>
                 </tr>
-            </table>";
+            </table>
+        </td>
+        <td style='width:70%; border-top:0.8px solid #000; border-right:0.8px solid #000;
+                    border-bottom:0.8px solid #000; padding:8px;
+                    text-align:center; vertical-align:middle;'>
+            <div style='font-size:15px; font-weight:bold; color:#000; letter-spacing:.5px;'>
+                REPORTE DE COMBUSTIBLE
+            </div>
+            <div style='font-size:13px; color:#000000; margin-top:4px;'>
+                Gasolinera PUMA Metapán
+            </div>
+            <div style='font-size:13px; color:#000000; margin-top:2px;'>
+                Distrito: {$nombreDistrito} &nbsp;|&nbsp; Fondo: {$nombreFondo}
+            </div>
+            <div style='font-size:13px; color:#000000; margin-top:2px;'>
+                Del: <strong>{$desdeFormat}</strong> &nbsp;al&nbsp; <strong>{$hastaFormat}</strong>
+            </div>
+        </td>
+    </tr>
+</table>";
 
-        $tabla .= "<div style='margin-top: 45px'></div>";
+        $tabla .= "<div style='margin-top:10px;'></div>";
 
+        // ── TABLA DE DATOS ────────────────────────────────────────────────────────
+        $tabla .= "
+<table id='tablaFor' style='width:72%; border-collapse:collapse;'>
+    <tbody>
+    <tr style='background-color:#e1e1e1;'>
+        <th style='text-align:center; font-size:10px; width:14%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Equipo</th>
+        <th style='text-align:center; font-size:10px; width:12%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Galones</th>
+        <th style='text-align:center; font-size:10px; width:12%; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>Valor</th>
+    </tr>";
 
-        $tabla .= "<table id='tablaFor' style='width: 72%'>
-                <tbody>
-                <tr style='background-color: #e1e1e1;'>
-                    <th style='text-align: center; font-size:10px; width: 14%; font-weight: bold'>Equipo</th>
-                    <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Galones</th>
-                    <th style='text-align: center; font-size:10px; width: 12%; font-weight: bold'>Valor</th>
-                </tr>";
+        foreach ($arrayFactura as $data) {
+            $totalDolares = number_format((float) $data->total_dolares, 2, '.', ',');
 
-        foreach ($arrayFactura as $data){
-
-            $totalDolares = number_format((float)$data->total_dolares, 2, '.', ',');
-
-            $tabla .= "<tr>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->equipo</td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$data->total_galones</td>
-                <td style='font-size:10px; text-align: center; font-weight: bold'>$$totalDolares</td>
-
-            </tr>";
+            $tabla .= "
+    <tr>
+        <td style='font-size:10px; text-align:center; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>{$data->equipo}</td>
+        <td style='font-size:10px; text-align:center; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>{$data->total_galones}</td>
+        <td style='font-size:10px; text-align:center; font-weight:bold; border:0.5px solid #aaa; padding:3px;'>\${$totalDolares}</td>
+    </tr>";
         }
-
 
         $tabla .= "</tbody></table>";
 
-
-        //***********************************************
-
-        // ************* FOOTER ***************
-
-        $footer = "<table width='100%' id='tablaForTranspa'><tbody>";
-
-        $footer .= "</tbody></table>";
-
-        $footer .= "<table width='100%' id='tablaForTranspa' style='margin-top: 35px'>
-            <tbody>";
-
-        $footer .= "<tr>
-                    <td width='25%' style='font-weight: normal; font-size: 14px'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ______________________________ <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoExtra->nombre1 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoExtra->nombre2</td>
-                    <td width='25%' style='font-weight: normal; font-size: 14px'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _________________________________________<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;$infoExtra->nombre3 <br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; $infoExtra->nombre4
-                    </td>
-                    </tr>";
-
-        $footer .= "<tr>
-                    <td colspan=2 style='font-weight: bold; text-align: center; font-size: 12px'> Página {PAGENO}/{nb}</td>
-                    </tr>";
-
-        $footer .= "</tbody></table>";
+        // ── FOOTER ────────────────────────────────────────────────────────────────
+        $footer = "<table width='100%' id='tablaForTranspa' style='margin-top:35px;'>
+    <tbody>
+    <tr>
+        <td width='25%' style='font-weight:normal; font-size:14px;'>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ______________________________
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre1}
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre2}
+        </td>
+        <td width='25%' style='font-weight:normal; font-size:14px;'>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _________________________________________
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre3}
+            <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{$infoExtra->nombre4}
+        </td>
+    </tr>
+    <tr>
+        <td colspan='2' style='font-weight:bold; text-align:center; font-size:12px;'>
+            Página {PAGENO}/{nb}
+        </td>
+    </tr>
+    </tbody>
+</table>";
 
         $mpdf->SetHTMLFooter($footer);
         $mpdf->SetAutoPageBreak(true, 45);
         $mpdf->WriteHTML($tabla, 2);
         $mpdf->Output();
     }
-
 
 
     public function reporteFacturaPDF($numfactura, $iddistrito, $idfondo, $anio, $idlugarllenado){
