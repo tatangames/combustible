@@ -2555,6 +2555,8 @@ class ReporteV2Controller extends Controller
         setlocale(LC_TIME, 'es_ES.UTF-8');
         Carbon::setLocale('es');
 
+
+
         $fechaDesde     = Carbon::parse($desde)->startOfDay();
         $fechaHasta     = Carbon::parse($hasta)->endOfDay();
         $inicioContrato = Carbon::parse($infoContrato->fecha_desde)->startOfDay();
@@ -2682,7 +2684,7 @@ class ReporteV2Controller extends Controller
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Vigencia de la contratación: DOCE MESES
+                    Vigencia de la contratación: SEIS MESES
                 </td>
             </tr>
             <tr>
@@ -2940,8 +2942,7 @@ class ReporteV2Controller extends Controller
         $pilaIdDistritos = $arrayDistritos->pluck('id')->all();
 
         /* ==== Contrato y Fechas ==== */
-        $infoContrato   = Contratos::findOrFail(2); // contrato general
-
+        $infoContrato   = Contratos::findOrFail(3); // contrato general
 
         $fechaActual = Carbon::now('America/El_Salvador')->format('d-m-Y h:i A');
 
@@ -3072,7 +3073,7 @@ class ReporteV2Controller extends Controller
             </tr>
             <tr>
                 <td style='padding:6px 4px;'>
-                    Vigencia de la contratación: DOCE MESES
+                    Vigencia de la contratación: SEIS MESES
                 </td>
             </tr>
             <tr>
@@ -3161,13 +3162,13 @@ class ReporteV2Controller extends Controller
             ->first();
 
         // Totales de contrato (IDs fijos 11=Diésel, 12=Regular, 13=Especial)
-        $detalles = ContratosDetalle::where('id_contratos', 2)
-            ->whereIn('id', [11, 12, 13])
+        $detalles = ContratosDetalle::where('id_contratos', 3)
+            ->whereIn('id', [14, 15, 16])
             ->pluck('cantidad', 'id');
 
-        $contratoDiesel   = (float)($detalles[11] ?? 0);
-        $contratoRegular  = (float)($detalles[12] ?? 0);
-        $contratoEspecial = (float)($detalles[13] ?? 0);
+        $contratoDiesel   = (float)($detalles[14] ?? 0);
+        $contratoRegular  = (float)($detalles[15] ?? 0);
+        $contratoEspecial = (float)($detalles[16] ?? 0);
 
         /* ==== CÁLCULOS ==== */
 
