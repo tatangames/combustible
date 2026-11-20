@@ -188,7 +188,10 @@
 
             if(contrato === '1'){ // ID CONTRATO
                 reportePdfContratoID1()
-            }else if(contrato === '2'){ // ID CONTRATO
+            }else if(contrato === '2' || contrato === '3'){ // ID CONTRATO
+                reportePdfContratoID2()
+            }
+            else if(contrato === '2' || contrato === '3'){ // ID CONTRATO
                 reportePdfContratoID2()
             }
         }
