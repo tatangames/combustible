@@ -118,6 +118,10 @@ Route::get('/admin/reportev3/contrato/{desde}/{hasta}/{idcontrato}/{iddistrito}'
 Route::get('/admin/reportev3/contrato/actageneral/{desde}/{hasta}', [ReporteV2Controller::class,'reporteContratoDistritoTodosSantaAnaNorte']);
 
 
+// REPORTE DE CONTRATO PERO ALCALDIA SANTA ANA NORTE - modificado 17/03/26
+Route::get('/admin/reportev4/contrato/{desde}/{hasta}/{idcontrato}/{iddistrito}', [ReporteV2Controller::class,'reporteContratoDistritoSantaAnaNorteV4']);
+Route::get('/admin/reportev4/contrato/actageneral/{desde}/{hasta}', [ReporteV2Controller::class,'reporteContratoDistritoTodosSantaAnaNorteV4']);
+
 
 
 

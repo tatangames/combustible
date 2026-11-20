@@ -188,11 +188,11 @@
 
             if(contrato === '1'){ // ID CONTRATO
                 reportePdfContratoID1()
-            }else if(contrato === '2' || contrato === '3'){ // ID CONTRATO
+            }else if(contrato === '2'){ // ID CONTRATO
                 reportePdfContratoID2()
             }
-            else if(contrato === '2' || contrato === '3'){ // ID CONTRATO
-                reportePdfContratoID2()
+            else if( contrato === '3'){ // ID CONTRATO
+                reportePdfContratoID3()
             }
         }
 
@@ -311,6 +311,64 @@
             }else{
                 // POR SEPARADO
                 window.open("{{ URL::to('admin/reportev3/contrato') }}/" +
+                    fechadesde + "/" + fechahasta + "/" + contrato + "/" + distrito);
+            }
+        }
+
+
+        // CONTRATO ID 3
+        function reportePdfContratoID3(){
+            var contrato = document.getElementById('select-contrato').value;
+            var fechadesde = document.getElementById('fecha-desde').value;
+            var fechahasta = document.getElementById('fecha-hasta').value;
+            var distrito = document.getElementById('select-distrito').value; // metapan/masahuat/textis
+
+            var checkboxDistrito = document.getElementById('check-distritos');
+            var valorCheckboxDistrito = checkboxDistrito.checked ? 1 : 0;
+
+
+            if(fechadesde === ''){
+                toastr.error('Fecha desde es requerido');
+                return;
+            }
+
+            if(fechahasta === ''){
+                toastr.error('Fecha hasta es requerido');
+                return;
+            }
+
+            // Convertir a objetos Date para comparar
+            let dateDesde = new Date(fechadesde);
+            let dateHasta = new Date(fechahasta);
+
+            if (dateHasta < dateDesde) {
+                toastr.error('La Fecha Hasta no puede ser menor que la Fecha Desde');
+                return;
+            }
+
+            var fechadesdeContrato = document.getElementById('fecha-desde-contrato').value;
+            var fechahastaContrato = document.getElementById('fecha-hasta-contrato').value;
+            let fechadesdeContratoDate = new Date(fechadesdeContrato);
+            let fechahastaContratoDate = new Date(fechahastaContrato);
+            // LA FECHA DESDE NO PUEDE SER MENOR A LA DEL CONTRATO
+            if(dateDesde < fechadesdeContratoDate){
+                toastr.error('Fecha DESDE no puede ser menor a la del Contrato');
+                return
+            }
+
+            // LA FECHA HASTA NO PUEDE SER MAYOR A LA DEL CONTRATO
+            if(dateHasta > fechahastaContratoDate){
+                toastr.error('Fecha HASTA no puede ser menor a la del fecha HASTA del Contrato');
+                return
+            }
+
+
+            if(valorCheckboxDistrito === 1){
+                // ACTA GENERAL TODOS
+                window.open("{{ URL::to('admin/reportev4/contrato/actageneral') }}/" + fechadesde + "/" + fechahasta);
+            }else{
+                // POR SEPARADO
+                window.open("{{ URL::to('admin/reportev4/contrato') }}/" +
                     fechadesde + "/" + fechahasta + "/" + contrato + "/" + distrito);
             }
         }
