@@ -188,15 +188,9 @@
                 return;
             }
 
-            var reglaNumeroEntero = /^[0-9]\d*$/;
 
             if(cantidad === ''){
                 toastr.error('cantidad es requerido');
-                return;
-            }
-
-            if(!cantidad.match(reglaNumeroEntero)) {
-                toastr.error('Cantidad debe se debe ser número Entero y no Negativo.');
                 return;
             }
 
