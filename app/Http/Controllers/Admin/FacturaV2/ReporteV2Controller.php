@@ -2754,12 +2754,12 @@ class ReporteV2Controller extends Controller
 
         /* Totales del contrato por combustible (IDs fijos 11,12,13 en ContratosDetalle) */
         $detalles = ContratosDetalle::where('id_contratos', $idcontrato)
-            ->whereIn('id', [11, 12, 13])
+            ->whereIn('id', [14, 15, 16])
             ->pluck('cantidad', 'id');
 
-        $contratoDiesel   = (float)($detalles[11] ?? 0); // 11 = Diesel
-        $contratoRegular  = (float)($detalles[12] ?? 0); // 12 = Regular
-        $contratoEspecial = (float)($detalles[13] ?? 0); // 13 = Especial
+        $contratoDiesel   = (float)($detalles[14] ?? 0); // 11 = Diesel
+        $contratoRegular  = (float)($detalles[15] ?? 0); // 12 = Regular
+        $contratoEspecial = (float)($detalles[16] ?? 0); // 13 = Especial
 
         /** ==== CÁLCULOS Y FORMATEOS ==== */
         $galDiesel   = (float)($totPeriodo->gal_diesel ?? 0); // 10.000
