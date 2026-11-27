@@ -13,7 +13,7 @@
     <div class="container-fluid" style="margin-left: 15px">
 
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-8">
                 <div class="card card-gray-dark">
                     <div class="card-header">
                         <h3 class="card-title">Consumo de Contrato</h3>
@@ -29,6 +29,17 @@
                                 </option>
                             @endforeach
                         </select>
+
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <label>Desde (opcional)</label>
+                                <input type="date" class="form-control" id="fecha-desde" onchange="cargarContrato()">
+                            </div>
+                            <div class="col-md-6">
+                                <label>Hasta (opcional)</label>
+                                <input type="date" class="form-control" id="fecha-hasta" onchange="cargarContrato()">
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -44,24 +55,43 @@
                             <p><b>Proceso:</b> <span id="c-proceso"></span></p>
                             <p><b>Orden de compra:</b> <span id="c-orden"></span></p>
                             <p><b>Vigencia:</b> <span id="c-vigencia"></span> <span id="c-estado"></span></p>
+                            <p><b>Período consultado:</b> <span id="c-periodo"></span></p>
                         </div>
                     </div>
                 </div>
             </div>
 
             <div class="row">
-                <div class="col-md-3"><div class="info-box"><div class="info-box-content">
+                <div class="col-md">
+                    <div class="info-box"><div class="info-box-content">
                             <span class="info-box-text">Contratado (gal)</span>
-                            <span class="info-box-number" id="t-contratado"></span></div></div></div>
-                <div class="col-md-3"><div class="info-box"><div class="info-box-content">
-                            <span class="info-box-text">Consumido (gal)</span>
-                            <span class="info-box-number" id="t-consumido"></span></div></div></div>
-                <div class="col-md-3"><div class="info-box"><div class="info-box-content">
+                            <span class="info-box-number" id="t-contratado"></span>
+                        </div></div>
+                </div>
+                <div class="col-md">
+                    <div class="info-box"><div class="info-box-content">
+                            <span class="info-box-text">Consumo período (gal)</span>
+                            <span class="info-box-number" id="t-periodo"></span>
+                        </div></div>
+                </div>
+                <div class="col-md">
+                    <div class="info-box"><div class="info-box-content">
+                            <span class="info-box-text">Consumo acumulado (gal)</span>
+                            <span class="info-box-number" id="t-acumulado"></span>
+                        </div></div>
+                </div>
+                <div class="col-md">
+                    <div class="info-box"><div class="info-box-content">
                             <span class="info-box-text">Restante (gal)</span>
-                            <span class="info-box-number" id="t-restante"></span></div></div></div>
-                <div class="col-md-3"><div class="info-box"><div class="info-box-content">
-                            <span class="info-box-text">Dinero gastado</span>
-                            <span class="info-box-number" id="t-gastado"></span></div></div></div>
+                            <span class="info-box-number" id="t-restante"></span>
+                        </div></div>
+                </div>
+                <div class="col-md">
+                    <div class="info-box"><div class="info-box-content">
+                            <span class="info-box-text">Dinero gastado (acum.)</span>
+                            <span class="info-box-number" id="t-gastado"></span>
+                        </div></div>
+                </div>
             </div>
 
             <div class="row">
@@ -71,14 +101,14 @@
                             <table class="table table-bordered table-hover">
                                 <thead>
                                 <tr>
-                                    <th>Distrito</th>
                                     <th>Combustible</th>
-                                    <th>Código</th>
                                     <th>Contratado</th>
-                                    <th>Consumido</th>
+                                    <th>Consumo período</th>
+                                    <th>$ período</th>
+                                    <th>Consumo acumulado</th>
+                                    <th>$ acumulado</th>
                                     <th>Restante</th>
                                     <th>% Uso</th>
-                                    <th>Dinero gastado</th>
                                 </tr>
                                 </thead>
                                 <tbody id="tabla-detalle"></tbody>
@@ -120,6 +150,8 @@
             openLoading();
             var formData = new FormData();
             formData.append('id', id);
+            formData.append('desde', document.getElementById('fecha-desde').value);
+            formData.append('hasta', document.getElementById('fecha-hasta').value);
 
             axios.post(url+'/dashboard/info', formData)
                 .then((response) => {
@@ -137,29 +169,32 @@
                     document.getElementById('c-proceso').textContent   = (c.proceso_ref ?? '') + ' - ' + (c.nombre_proceso ?? '');
                     document.getElementById('c-orden').textContent     = c.orden_compra ?? '';
                     document.getElementById('c-vigencia').textContent  = c.fecha_desde + ' al ' + c.fecha_hasta;
+                    document.getElementById('c-periodo').textContent   = c.rango_ini + ' al ' + c.rango_fin;
                     document.getElementById('c-estado').innerHTML = c.vigente
                         ? '<span class="badge badge-success">Vigente</span>'
                         : '<span class="badge badge-danger">Vencido</span>';
 
                     document.getElementById('t-contratado').textContent = formato(t.contratado, 3);
-                    document.getElementById('t-consumido').textContent  = formato(t.consumido, 3);
+                    document.getElementById('t-periodo').textContent    = formato(t.periodo, 3);
+                    document.getElementById('t-acumulado').textContent  = formato(t.acumulado, 3);
                     document.getElementById('t-restante').textContent   = formato(t.restante, 3);
-                    document.getElementById('t-gastado').textContent    = '$' + formato(t.gastado, 2);
+                    document.getElementById('t-gastado').textContent    = '$' + formato(t.dinero_acumulado, 2);
 
                     var filas = '';
                     response.data.detalle.forEach(function(f){
                         var color = f.porcentaje >= 90 ? 'badge-danger'
                             : (f.porcentaje >= 70 ? 'badge-warning' : 'badge-success');
+                        var rojo = f.restante < 0 ? ' class="text-danger font-weight-bold"' : '';
 
                         filas += '<tr>' +
-                            '<td>' + f.distrito + '</td>' +
                             '<td>' + f.combustible + '</td>' +
-                            '<td>' + (f.codigo ?? '') + '</td>' +
-                            '<td>' + formato(f.cantidad, 3) + ' ' + f.unidad + '</td>' +
-                            '<td>' + formato(f.consumido, 3) + '</td>' +
-                            '<td>' + formato(f.restante, 3) + '</td>' +
+                            '<td>' + formato(f.contratado, 3) + ' ' + f.unidad + '</td>' +
+                            '<td>' + formato(f.consumo_periodo, 3) + '</td>' +
+                            '<td>$' + formato(f.dinero_periodo, 2) + '</td>' +
+                            '<td>' + formato(f.consumo_acum, 3) + '</td>' +
+                            '<td>$' + formato(f.dinero_acum, 2) + '</td>' +
+                            '<td' + rojo + '>' + formato(f.restante, 3) + '</td>' +
                             '<td><span class="badge ' + color + '">' + f.porcentaje + '%</span></td>' +
-                            '<td>$' + formato(f.gastado, 2) + '</td>' +
                             '</tr>';
                     });
 

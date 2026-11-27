@@ -30,77 +30,93 @@ class DashboarController extends Controller
 
     public function infoConsumoContrato(Request $request)
     {
-        $regla = array('id' => 'required');
-        $validar = Validator::make($request->all(), $regla);
-
+        $validar = Validator::make($request->all(), ['id' => 'required']);
         if ($validar->fails()) { return ['success' => 0]; }
 
         $contrato = DB::table('contratos')->where('id', $request->id)->first();
         if (!$contrato) { return ['success' => 0]; }
 
+        /* ==== Fechas: intersección contrato ∩ rango solicitado ==== */
+        $inicioContrato = Carbon::parse($contrato->fecha_desde)->startOfDay();
+        $finContrato    = Carbon::parse($contrato->fecha_hasta)->endOfDay();
+
+        $fechaDesde = $request->desde ? Carbon::parse($request->desde)->startOfDay() : $inicioContrato;
+        $fechaHasta = $request->hasta ? Carbon::parse($request->hasta)->endOfDay()   : $finContrato;
+
+        $rangoIni = $inicioContrato->greaterThan($fechaDesde) ? $inicioContrato : $fechaDesde;
+        $rangoFin = $finContrato->lessThan($fechaHasta) ? $finContrato : $fechaHasta;
+
+        /* ==== Contratado por combustible (todos los distritos del contrato) ==== */
         $detalle = DB::table('contratos_detalle as cd')
-            ->join('distritos as d', 'd.id', '=', 'cd.id_distrito')
             ->join('tipocombustible as tc', 'tc.id', '=', 'cd.id_combustible')
             ->join('unidad_medida as um', 'um.id', '=', 'cd.id_unidad')
             ->where('cd.id_contratos', $contrato->id)
-            ->select(
-                'cd.id_distrito', 'cd.id_combustible', 'cd.codigo', 'cd.cantidad',
-                'd.nombre as distrito',
-                'tc.nombre as combustible',
-                'um.nombre as unidad'
-            // , 'cd.precio_unitario'   // <-- si agregás esta columna
-            )
+            ->groupBy('cd.id_combustible', 'tc.nombre', 'um.nombre')
+            ->selectRaw('cd.id_combustible, tc.nombre as combustible, um.nombre as unidad, SUM(cd.cantidad) as contratado')
+            ->orderBy('cd.id_combustible')
             ->get();
 
-        $totalContratado = 0;
-        $totalConsumido  = 0;
-        $totalGastado    = 0;
+        /* ==== Consumo del PERÍODO por combustible ==== */
+        $periodo = DB::table('facturacion')
+            ->whereNotNull('id_distrito')            // igual que el acta: solo facturas con distrito
+            ->whereBetween('fecha', [$rangoIni, $rangoFin])
+            ->groupBy('id_tipocombustible')
+            ->selectRaw('id_tipocombustible,
+                     SUM(cantidad) as galones,
+                     CAST(SUM(ROUND(cantidad * unitario, 2)) AS DECIMAL(18,2)) as dinero')
+            ->get()->keyBy('id_tipocombustible');
 
-        foreach ($detalle as $fila) {
+        /* ==== Consumo ACUMULADO (inicio contrato -> fin del rango) ==== */
+        $acumulado = DB::table('facturacion')
+            ->whereNotNull('id_distrito')
+            ->whereBetween('fecha', [$inicioContrato, $rangoFin])
+            ->groupBy('id_tipocombustible')
+            ->selectRaw('id_tipocombustible,
+                     SUM(cantidad) as galones,
+                     CAST(SUM(ROUND(cantidad * unitario, 2)) AS DECIMAL(18,2)) as dinero')
+            ->get()->keyBy('id_tipocombustible');
 
-            $consumo = DB::table('facturacion')
-                ->where('id_distrito', $fila->id_distrito)
-                ->where('id_tipocombustible', $fila->id_combustible)
-                ->whereBetween('fecha', [$contrato->fecha_desde, $contrato->fecha_hasta])
-                ->selectRaw('COALESCE(SUM(cantidad), 0) as galones, COALESCE(SUM(cantidad * unitario), 0) as dinero')
-                ->first();
+        $tot = ['contratado' => 0, 'periodo' => 0, 'dinero_periodo' => 0,
+            'acumulado' => 0, 'dinero_acumulado' => 0, 'restante' => 0];
 
-            $fila->consumido   = round($consumo->galones, 3);
-            $fila->restante    = round($fila->cantidad - $consumo->galones, 3);
-            $fila->gastado     = round($consumo->dinero, 2);
-            $fila->porcentaje  = $fila->cantidad > 0
-                ? round(($consumo->galones / $fila->cantidad) * 100, 2)
-                : 0;
+        foreach ($detalle as $f) {
+            $p = $periodo[$f->id_combustible]   ?? null;
+            $a = $acumulado[$f->id_combustible] ?? null;
 
-            // Si agregás precio_unitario al detalle:
-            // $fila->dinero_contratado = round($fila->cantidad * $fila->precio_unitario, 2);
-            // $fila->dinero_disponible = round($fila->dinero_contratado - $consumo->dinero, 2);
+            $f->contratado       = (float) $f->contratado;
+            $f->consumo_periodo  = (float) ($p->galones ?? 0);
+            $f->dinero_periodo   = (float) ($p->dinero  ?? 0);
+            $f->consumo_acum     = (float) ($a->galones ?? 0);
+            $f->dinero_acum      = (float) ($a->dinero  ?? 0);
+            $f->restante         = $f->contratado - $f->consumo_acum;   // puede ser negativo (se pasó)
+            $f->porcentaje       = $f->contratado > 0
+                ? round(($f->consumo_acum / $f->contratado) * 100, 2) : 0;
 
-            $totalContratado += $fila->cantidad;
-            $totalConsumido  += $consumo->galones;
-            $totalGastado    += $consumo->dinero;
+            $tot['contratado']       += $f->contratado;
+            $tot['periodo']          += $f->consumo_periodo;
+            $tot['dinero_periodo']   += $f->dinero_periodo;
+            $tot['acumulado']        += $f->consumo_acum;
+            $tot['dinero_acumulado'] += $f->dinero_acum;
+            $tot['restante']         += $f->restante;
         }
 
         $hoy = Carbon::now('America/El_Salvador')->toDateString();
 
         return [
-            'success' => 1,
+            'success'  => 1,
             'contrato' => [
                 'proveedor'      => $contrato->proveedor,
                 'proceso_ref'    => $contrato->proceso_ref,
                 'nombre_proceso' => $contrato->nombre_proceso,
                 'orden_compra'   => $contrato->orden_compra,
-                'fecha_desde'    => date('d-m-Y', strtotime($contrato->fecha_desde)),
-                'fecha_hasta'    => date('d-m-Y', strtotime($contrato->fecha_hasta)),
+                'fecha_desde'    => $inicioContrato->format('d-m-Y'),
+                'fecha_hasta'    => $finContrato->format('d-m-Y'),
+                'rango_ini'      => $rangoIni->format('d-m-Y'),
+                'rango_fin'      => $rangoFin->format('d-m-Y'),
                 'vigente'        => ($hoy >= $contrato->fecha_desde && $hoy <= $contrato->fecha_hasta),
             ],
             'detalle' => $detalle,
-            'totales' => [
-                'contratado' => round($totalContratado, 3),
-                'consumido'  => round($totalConsumido, 3),
-                'restante'   => round($totalContratado - $totalConsumido, 3),
-                'gastado'    => round($totalGastado, 2),
-            ],
+            'totales' => $tot,
         ];
     }
 
