@@ -39,6 +39,19 @@
                 @endcan
 
 
+
+                    @can('sidebar.combustible')
+
+                        <li class="nav-item">
+                            <a href="{{ route('admin.dashboard.index') }}" target="frameprincipal" class="nav-link">
+                                <i class="far fa-circle nav-icon"></i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                    @endcan
+
+
                     @can('sidebar.combustible')
 
                         <li class="nav-item">

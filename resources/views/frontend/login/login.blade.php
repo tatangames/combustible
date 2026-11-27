@@ -146,7 +146,7 @@
         //combustible.com/
 
 
-        axios.post('/combustible.com/login', formData, {
+        axios.post('/login', formData, {
         })
             .then((response) => {
                 closeLoading();

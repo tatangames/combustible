@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\FacturaV2\FacturaV2Controller;
 use App\Http\Controllers\Admin\FacturaV2\ReporteV2Controller;
 use App\Http\Controllers\Admin\Fondos\FondosController;
 use App\Http\Controllers\Admin\Equipo\ContratoController;
+use App\Http\Controllers\Admin\Dashboard\DashboarController;
 
 
 Route::get('/', [LoginController::class,'index'])->name('login');
@@ -162,9 +163,9 @@ Route::post('/admin/contratos/detalle/borrar', [ContratoController::class, 'borr
 
 
 
-
-
-
+// * DASHBOARD
+Route::get('/admin/dashboard/index', [DashboarController::class, 'indexDashboard'])->name('admin.dashboard.index');
+Route::post('/admin/dashboard/info', [DashboarController::class, 'infoConsumoContrato']);
 
 
 

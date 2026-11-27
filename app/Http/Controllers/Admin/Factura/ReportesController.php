@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin\Factura;
 
 use App\Http\Controllers\Controller;
-use App\Models\Anteriores;
-use App\Models\Configuracion;
 use App\Models\Equipo;
 use App\Models\Extras;
 use App\Models\Factura;
